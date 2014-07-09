@@ -1,6 +1,6 @@
 Recurve
 =======
 
-Core classes of Recurve toolbox
+Javascript core of Recurve toolbox
 
 WIP :)
