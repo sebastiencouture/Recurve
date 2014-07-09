@@ -111,6 +111,8 @@
 
     Product.mixin( EventMixin );
 
+    console.log("Test Recurve.Proto - START");
+
     console.log( Book.typeId() );
 
     var prod = new Product( "HB1 Pencil", 0.1 );
@@ -130,4 +132,6 @@
 
     book.addEventListener();
     book.removeEventListener();
+
+    console.log("Test Recurve.Proto - START");
 })();
