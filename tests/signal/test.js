@@ -73,7 +73,7 @@
         signal.trigger();
         signal.trigger();
 
-        assert.equal(1, triggerCount, "one should be triggered");
+        assert.equal(1, triggerCount, "should only be triggered once");
     });
 
     QUnit.test("add - multiple", function(assert) {
@@ -100,6 +100,21 @@
         assert.ok(firstTriggered, "first should be triggered");
         assert.ok(secondTriggered, "second should be triggered");
         assert.equal(2, triggerCount, "two should be triggered");
+    });
+
+    QUnit.test("add - duplicate callback", function(assert) {
+        var signal = new Signal();
+        var triggerCount = 0;
+
+        function onTrigger() {
+            triggerCount++;
+        }
+
+        signal.add(onTrigger, this);
+        signal.add(onTrigger, this);
+        signal.trigger();
+
+        assert.equal(1, triggerCount, "should only be triggered once");
     });
 
     QUnit.test("add - no callback", function(assert) {
