@@ -73,7 +73,7 @@
         signal.trigger();
         signal.trigger();
 
-        assert.equal(1, triggerCount, "1 should be triggered");
+        assert.equal(1, triggerCount, "one should be triggered");
     });
 
     QUnit.test("add - multiple", function(assert) {
@@ -83,23 +83,23 @@
         var firstTriggered;
         var secondTriggered;
 
-        function onTriggerOne() {
+        function onTriggerFirst() {
             triggerCount++;
             firstTriggered = true;
         }
 
-        function onTriggerTwo() {
+        function onTriggerSecond() {
             secondTriggered = true;
             triggerCount++;
         }
 
-        signal.add(onTriggerOne, this);
-        signal.add(onTriggerTwo, this);
+        signal.add(onTriggerFirst, this);
+        signal.add(onTriggerSecond, this);
         signal.trigger();
 
         assert.ok(firstTriggered, "first should be triggered");
         assert.ok(secondTriggered, "second should be triggered");
-        assert.equal(2, triggerCount, "2 should be triggered");
+        assert.equal(2, triggerCount, "two should be triggered");
     });
 
     QUnit.test("add - no callback", function(assert) {
@@ -136,16 +136,16 @@
         var signal = new Signal();
         var triggerCount = 0;
 
-        function onTriggerOne() {
+        function onTriggerFirst() {
             triggerCount++;
         }
 
-        function onTriggerTwo() {
+        function onTriggerSecond() {
             triggerCount++;
         }
 
-        signal.add(onTriggerOne, this);
-        signal.add(onTriggerTwo, this);
+        signal.add(onTriggerFirst, this);
+        signal.add(onTriggerSecond, this);
         signal.removeAll();
         signal.trigger();
 
@@ -156,17 +156,17 @@
         var signal = new Signal();
         var triggerCount = 0;
 
-        function onTriggerOne() {
+        function onTriggerFirst() {
             triggerCount++;
         }
 
-        function onTriggerTwo() {
+        function onTriggerSecond() {
             triggerCount++;
         }
 
-        signal.add(onTriggerOne, this);
-        signal.add(onTriggerTwo, this);
-        signal.remove(onTriggerTwo);
+        signal.add(onTriggerFirst, this);
+        signal.add(onTriggerSecond, this);
+        signal.remove(onTriggerSecond);
         signal.trigger();
 
         assert.equal(1, triggerCount, "one should be triggered");
