@@ -43,23 +43,23 @@
     };
 
     var testDisabled = function() {
-        log.disabled()
+        log.disable();
         log.debug("[DEBUG] should not be logged");
         log.info("[INFO] should not be logged");
         log.warn("[WARN] should not be logged");
         log.error("[ERROR] should not be logged");
 
-        log.disabled(false);
-        log.debugDisabled();
+        log.disable(false);
+        log.debugDisable();
         log.debug("[DEBUG] should not be logged");
-        log.info("... but [INFO] should still be logged");
+        log.info("... [DEBUG] should not be logged, but [INFO] should still be logged");
     };
 
-    console.log("Test Recurve.Log - START");
+    console.log("Example Recurve.Log - START");
 
     testBasic();
     testArguments();
     testDisabled();
 
-    console.log("Test Recurve.Log - END");
+    console.log("Example Recurve.Log - END");
 })();

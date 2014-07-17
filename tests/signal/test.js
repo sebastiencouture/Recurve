@@ -187,6 +187,31 @@
         assert.equal(1, triggerCount, "one should be triggered");
     });
 
+    QUnit.test("remove - all same context context", function(assert) {
+        var signal = new Signal();
+        var triggerCount = 0;
+
+        function onTriggerFirst() {
+            triggerCount++;
+        }
+
+        function onTriggerSecond() {
+            triggerCount++;
+        }
+
+        function onTriggerThird() {
+            triggerCount++;
+        }
+
+        signal.add(onTriggerFirst, this);
+        signal.add(onTriggerSecond, this);
+        signal.add(onTriggerThird, {});
+        signal.remove(null, this);
+        signal.trigger();
+
+        assert.equal(1, triggerCount, "only third should be triggered");
+    });
+
     QUnit.test("remove - no callback", function(assert) {
         var signal = new Signal();
         var triggered;
