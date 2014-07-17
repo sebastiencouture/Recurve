@@ -28,75 +28,64 @@
 {
     var assert = Recurve.assert;
 
-    var testObject = function() {
+    QUnit.test("objects", function(assert) {
         var object = {};
-        assert(Recurve.ObjectUtils.isObject(object), "{0} is an object", object);
+        assert.ok(Recurve.ObjectUtils.isObject(object), "{} should be an object");
 
         object = new Object();
-        assert(Recurve.ObjectUtils.isObject(object), "{0} is an object", object);
+        assert.ok(Recurve.ObjectUtils.isObject(object), "new Object() should be an object");
 
         object = {name: "Sebastien"};
-        assert(Recurve.ObjectUtils.isObject(object), "{0} is an object", object);
+        assert.ok(Recurve.ObjectUtils.isObject(object), "'Sebastien' should be an object");
 
         var number = 123;
-        assert(!Recurve.ObjectUtils.isObject(number), "{0} is NOT an object", number);
-    };
+        assert.ok(!Recurve.ObjectUtils.isObject(number), "123 should not be an object");
+    });
 
-    var testError = function() {
+    QUnit.test("errors", function(assert) {
         var error = new Error("test error");
-        assert(Recurve.ObjectUtils.isError(error), "{0} is an error", error);
+        assert.ok(Recurve.ObjectUtils.isError(error), "new Error() should be an error");
 
         var number = 123;
-        assert(!Recurve.ObjectUtils.isError(number), "{0} is NOT an error", number);
-    };
+        assert.ok(!Recurve.ObjectUtils.isError(number), "123 should not be an error");
+    });
 
-    var testString = function() {
+    QUnit.test("strings", function(assert) {
         var string = "";
-        assert(Recurve.ObjectUtils.isString(string), "{0} is a string", string);
+        assert.ok(Recurve.ObjectUtils.isString(string), "'' should be a string");
 
         string = "test string";
-        assert(Recurve.ObjectUtils.isString(string), "{0} is a string", string);
+        assert.ok(Recurve.ObjectUtils.isString(string), "'test string'should be a string");
 
         string = new String("test string");
-        assert(Recurve.ObjectUtils.isString(string), "{0} is a string", string);
+        assert.ok(Recurve.ObjectUtils.isString(string), "new String('test string') should be a string");
 
         var number = 123;
-        assert(!Recurve.ObjectUtils.isString(number), "{0} is NOT a string", number);
-    };
+        assert.ok(!Recurve.ObjectUtils.isString(number), "123 should not be a string");
+    });
 
-    var testArray = function() {
+    QUnit.test("arrays", function(assert) {
         var array = [];
-        assert(Recurve.ObjectUtils.isArray(array), "{0} is an array", array);
+        assert.ok(Recurve.ObjectUtils.isArray(array), "[] should be an array");
 
         array = [1, 2];
-        assert(Recurve.ObjectUtils.isArray(array), "{0} is an array", array);
+        assert.ok(Recurve.ObjectUtils.isArray(array), "[1, 2] should be an array");
 
         array = new Array();
-        assert(Recurve.ObjectUtils.isArray(array), "{0} is an array", array);
+        assert.ok(Recurve.ObjectUtils.isArray(array), "new Array() should be an array");
 
         array = new Array(1, 2);
-        assert(Recurve.ObjectUtils.isArray(array), "{0} is an array", array);
+        assert.ok(Recurve.ObjectUtils.isArray(array), "new Array(1, 2) should be an array");
 
         var number = 123;
-        assert(!Recurve.ObjectUtils.isArray(number), "{0} is NOT an array", number);
-    };
+        assert.ok(!Recurve.ObjectUtils.isArray(number), "123 should not be an array");
+    });
 
-    var testFunction = function() {
-        var func = function(){};
-        assert(Recurve.ObjectUtils.isFunction(func), "{0} is a function", func);
+    QUnit.test("functions", function(assert) {
+        var test = function(){};
+        assert.ok(Recurve.ObjectUtils.isFunction(test), "function(){} should be a function");
 
         var number = 123;
-        assert(!Recurve.ObjectUtils.isFunction(number), "{0} is NOT a function", number);
-    }
-
-
-    console.log("Test Recurve.Object - START");
-
-    testObject();
-    testError();
-    testString();
-    testArray();
-    testFunction();
-
-    console.log("Test Recurve.Object - END");
+        assert.ok(!Recurve.ObjectUtils.isFunction(number), "123 should not be a function");
+    });
 })();
