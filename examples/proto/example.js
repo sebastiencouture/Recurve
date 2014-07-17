@@ -111,7 +111,7 @@
 
     Product.mixin( EventMixin );
 
-    console.log("Test Recurve.Proto - START");
+    console.log("Example Recurve.Proto - START");
 
     console.log( Book.typeId() );
 
@@ -133,5 +133,5 @@
     book.addEventListener();
     book.removeEventListener();
 
-    console.log("Test Recurve.Proto - START");
+    console.log("Example Recurve.Proto - START");
 })();
