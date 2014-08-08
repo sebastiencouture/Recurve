@@ -1,30 +1,6 @@
-/**
- *  Created by Sebastien Couture on 2014-7-11.
- *  Copyright (c) 2014 Sebastien Couture. All rights reserved.
- *
- *  Permission is hereby granted, free of charge, to any person
- *  obtaining a copy of this software and associated documentation
- *  files (the "Software"), to deal in the Software without
- *  restriction, including without limitation the rights to use,
- *  copy, modify, merge, publish, distribute, sublicense, and/or sell
- *  copies of the Software, and to permit persons to whom the
- *  Software is furnished to do so, subject to the following
- *  conditions:
- *
- *  The above copyright notice and this permission notice shall be
- *  included in all copies or substantial portions of the Software.
- *
- *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- *  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
- *  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- *  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
- *  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
- *  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- *  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- *  OTHER DEALINGS IN THE SOFTWARE.
- */
-
+/*
 (function() {
+
     "use strict";
 
     var Recurve = window.Recurve = window.Recurve || {};
@@ -157,3 +133,136 @@
     ]);
 
 })();
+*/
+
+"use strict";
+
+var Proto = require("./recurve-proto.js");
+var ArrayUtils = require("./recurve-array.js");
+
+module.exports = Proto.define([
+    function ctor() {
+        this._listeners = [];
+    },
+
+    {
+        add: function(callback, context) {
+            if (!callback) {
+                return;
+            }
+
+            if (this._listenerExists(callback, context)) {
+                return;
+            }
+
+            this._listeners.push(new SignalListener(callback, context));
+        },
+
+        addOnce: function(callback, context) {
+            if (!callback) {
+                return;
+            }
+
+            if (this._listenerExists(callback, context)) {
+                return;
+            }
+
+            this._listeners.push(new SignalListener(callback, context, true));
+        },
+
+        remove: function(callback, context) {
+            for (var index = 0; index < this._listeners.length; index++) {
+                var possibleListener = this._listeners[index];
+                var match;
+
+                if (!callback) {
+                    if (possibleListener.isSameContext(context)) {
+                        match = true;
+                    }
+                }
+                else if (possibleListener.isSame(callback, context)) {
+                    match = true;
+                }
+                else {
+                    // do nothing - no match
+                }
+
+                if (match) {
+                    ArrayUtils.removeAt(this._listeners, index);
+
+                    // can only be one match if callback specified
+                    if (callback) {
+                        return;
+                    }
+                }
+            }
+        },
+
+        removeAll: function() {
+            this._listeners = [];
+        },
+
+        trigger: function() {
+            if (this._disabled) {
+                return;
+            }
+
+            for (var index = this._listeners.length - 1; 0 <= index; index--) {
+                var listener = this._listeners[index];
+
+                listener.trigger(arguments);
+
+                if (listener.onlyOnce) {
+                    ArrayUtils.removeAt(this._listeners, index);
+                }
+            }
+
+        },
+
+        disable: function(value) {
+            if (undefined === value) {
+                value = true;
+            }
+
+            this._disabled = value;
+        },
+
+        _listenerExists: function(callback, context) {
+            for (var index = this._listeners.length - 1; 0 <= index; index--) {
+                var listener = this._listeners[index];
+
+                if (listener.isSame(callback, context)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+]);
+
+var SignalListener = Proto.define([
+    function ctor(callback, context, onlyOnce) {
+        this._callback = callback;
+        this._context = context;
+        this.onlyOnce = onlyOnce;
+    },
+
+    {
+        isSame: function(callback, context) {
+            if (!context) {
+                return this._callback === callback;
+            }
+
+            return this._callback === callback && this._context === context;
+        },
+
+        isSameContext: function(context) {
+            return this._context === context;
+        },
+
+        trigger: function(args) {
+            this._callback.apply(this._context, args);
+        }
+    }
+]);
