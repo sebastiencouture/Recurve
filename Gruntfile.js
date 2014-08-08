@@ -118,9 +118,24 @@ module.exports = function(grunt) {
                 tasks: ["browserify"]
             },
 
+            browserifyKarma: {
+                files: ["src/**/*.*", "tests/**/*.*"],
+                tasks: ["browserify:karma"]
+            },
+
             karma: {
                 files: ["dist/tests.js", "karma.conf.js"],
                 tasks: ["karma:unit:run"]
+            }
+        },
+
+        concurrent: {
+            options: {
+                logConcurrentOutput: true
+            },
+
+            dev: {
+                tasks: ["watch:browserifyKarma", "watch:karma"]
             }
         },
 
@@ -137,8 +152,9 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks("grunt-contrib-connect");
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-concat');
+    grunt.loadNpmTasks('grunt-concurrent');
 
-    grunt.registerTask("default", ["browserify:karma", "connect", "karma", "watch"]);
-    grunt.registerTask("dist", ["browserify", "concat", "uglify", "connect", "karma", "watch"]);
+    grunt.registerTask("default", ["browserify", "concat", "uglify", "connect", "karma", "watch"]);
+    grunt.registerTask("dev", ["browserify:karma", "connect", "karma", "concurrent:dev"]);
     grunt.registerTask("test", ["karma:unit:run"]);
 };
