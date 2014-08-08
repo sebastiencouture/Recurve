@@ -48,6 +48,84 @@ module.exports = {
         return keys;
     },
 
+    // both values pass strict equality (===)
+    // both objects are same type and all properties pass strict equality
+    // both are NaN
+    areEqual: function(value, other) {
+        if (value === other) {
+            return true;
+        }
+
+        if (null === value || null === other) {
+            return false;
+        }
+
+        // NaN is NaN!
+        if (this.isNaN(value) && this.isNaN(other)) {
+            return true;
+        }
+
+        if (!this.isSameType(value, other)) {
+            return false;
+        }
+
+        if (!this.isObject(value)) {
+            return false;
+        }
+
+        if (this.isArray(value)) {
+            if (value.length == other.length) {
+                for (var index = 0; index < value.length; index++) {
+                    if (!this.areEqual(value[index], other[index])) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+        }
+        else if(this.isDate(value)) {
+            return value.getTime() == other.getTime();
+        }
+        else {
+            var keysOfValue = {};
+            for (var key in value) {
+                if (this.isFunction(value[key])) {
+                    continue;
+                }
+
+                if (!this.areEqual(value[key], other[key])) {
+                    return false;
+                }
+
+                keysOfValue[key] = true;
+            }
+
+            for (var key in other) {
+                if (this.isFunction(other[key])) {
+                    continue;
+                }
+
+                if (!keysOfValue.hasOwnProperty(key)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        return false;
+    },
+
+    isNaN: function(value) {
+        // NaN is never equal to itself, interesting :)
+        return value !== value;
+    },
+
+    isSameType: function(value, other) {
+        return typeof value == typeof other;
+    },
+
     isString: function(value) {
         return (value instanceof String || "string" == typeof value);
     },
@@ -114,7 +192,7 @@ module.exports = {
             return;
         }
 
-        for (key in src) {
+        for (var key in src) {
             dest[key] = src[key];
         }
 

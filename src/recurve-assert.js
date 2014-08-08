@@ -1,9 +1,10 @@
 "use strict";
 
 var StringUtils = require("./recurve-string.js");
+var ObjectUtils = require("./recurve-object.js");
+var ArrayUtils = require("./recurve-array.js");
 
-// TODO TBD add methods such as: ok, equal, equalStrict, etc.
-module.exports = function(condition, message) {
+var assert = function(condition, message) {
     if (condition) {
         return;
     }
@@ -13,3 +14,41 @@ module.exports = function(condition, message) {
 
     throw new Error(message);
 };
+
+assert = ObjectUtils.extend(assert, {
+    ok: function(condition, message) {
+        assert.apply(this, arguments);
+    },
+
+    equal: function(actual, expected, message) {
+        var args = ArrayUtils.argumentsToArray(arguments, 2);
+        assert.apply(this, [actual == expected].concat(args));
+    },
+
+    notEqual: function(actual, expected, message) {
+        var args = ArrayUtils.argumentsToArray(arguments, 2);
+        assert.apply(this, [actual != expected].concat(args));
+    },
+
+    strictEqual: function(actual, expected, message) {
+        var args = ArrayUtils.argumentsToArray(arguments, 2);
+        assert.apply(this, [actual === expected].concat(args));
+    },
+
+    strictNotEqual: function(actual, expected, message) {
+        var args = ArrayUtils.argumentsToArray(arguments, 2);
+        assert.apply(this, [actual !== expected].concat(args));
+    },
+
+    deepEqual: function(actual, expected, message) {
+        var args = ArrayUtils.argumentsToArray(arguments, 2);
+        assert.apply(this, [ObjectUtils.areEqual(actual, expected)].concat(args));
+    },
+
+    deepNotEqual: function(actual, expected, message) {
+        var args = ArrayUtils.argumentsToArray(arguments, 2);
+        assert.apply(this, [!ObjectUtils.areEqual(actual, expected)].concat(args));
+    }
+});
+
+module.exports = assert;
