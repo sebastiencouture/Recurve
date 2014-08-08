@@ -15,7 +15,7 @@ module.exports = Proto.define([
      * @param enabled, default true
      * @param preventBrowserHandle, default true
      */
-        function ctor(onError, enabled, preventBrowserHandle) {
+     function ctor(onError, enabled, preventBrowserHandle) {
         if (undefined === enabled) {
             enabled = true;
         }

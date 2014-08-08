@@ -13,7 +13,7 @@ module.exports = Proto.define([
      * Defaults to Recurve.LogConsoleTarget
      * @param enabled, default true
      */
-        function ctor(enabled, targets) {
+     function ctor(enabled, targets) {
         if (undefined === enabled) {
             enabled = true;
         }

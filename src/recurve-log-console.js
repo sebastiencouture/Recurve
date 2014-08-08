@@ -3,6 +3,9 @@
 var Proto = require("./recurve-proto.js");
 
 module.exports = Proto.define([
+    function ctor() {
+    },
+
     {
         /**
          *
