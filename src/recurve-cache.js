@@ -4,9 +4,6 @@ var Proto = require("./recurve-proto.js");
 var ObjectUtils = require("./recurve-object.js");
 var DateUtils = require("./recurve-date.js");
 
-// Any performance should take into consideration?
-// http://jsperf.com/array-vs-object-performance/71
-
 module.exports = Proto.define([
     function ctor(countLimit, totalCostLimit) {
         if (undefined === countLimit) {
@@ -45,7 +42,7 @@ module.exports = Proto.define([
             delete this._cache[key];
         },
 
-        removeAll: function() {
+        clear: function() {
             this._cache = {};
         },
 
