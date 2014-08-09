@@ -12,6 +12,7 @@
     Recurve.assert = require("./recurve-assert.js");
 
     Recurve.Proto = require("./recurve-proto.js");
+    Recurve.Cache = require("./recurve-cache.js");
     Recurve.Log = require("./recurve-log.js");
     Recurve.LogConsoleTarget = require("./recurve-log-console.js");
     Recurve.Signal = require("./recurve-signal.js");

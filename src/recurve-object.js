@@ -48,6 +48,22 @@ module.exports = {
         return keys;
     },
 
+    keyCount: function(obj) {
+        if (!this.isObject(obj)) {
+            return 0;
+        }
+
+        var count = 0;
+
+        for (var key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                count++;
+            }
+        }
+
+        return count;
+    },
+
     // both values pass strict equality (===)
     // both objects are same type and all properties pass strict equality
     // both are NaN

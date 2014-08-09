@@ -225,7 +225,7 @@ function mergeHeaders(method, options, defaultHeaders) {
 
 function updateUrl(options) {
     if (!options.cache) {
-        options.params.cache = DateUtils.now().getTime();
+        options.params.cache = DateUtils.now();
     }
 
     options.url =
