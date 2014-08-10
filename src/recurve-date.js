@@ -5,6 +5,10 @@ module.exports = {
         return new Date().getTime();
     },
 
+    performanceNow: function() {
+        return performance && performance.now ? performance.now() : this.now();
+    },
+
     startYearFromRange: function(range) {
         if (!range) {
             return "";

@@ -104,7 +104,7 @@ module.exports = Proto.define([
             if (!iterator) {
                 return;
             }
-            
+
             for (var key in this._storage) {
                 var value = this.get(key);
                 iterator(key, value);
