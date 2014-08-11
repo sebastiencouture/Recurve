@@ -592,6 +592,8 @@ var JsonpRequest = Proto.define([
                 }
             }
 
+            // TODO TBD if going to support IE8 then need to check "onreadystatechange" as well
+            // http://pieisgood.org/test/script-link-events/
             script.addEventListener("load", loadErrorHandler);
             script.addEventListener("error", loadErrorHandler);
 
@@ -653,6 +655,8 @@ var CrossDomainScriptRequest = Proto.define([
                 }
             }
 
+            // TODO TBD if going to support IE8 then need to check "onreadystatechange" as well
+            // http://pieisgood.org/test/script-link-events/
             script.addEventListener("load", loadErrorHandler);
             script.addEventListener("error", loadErrorHandler);
 

@@ -18,6 +18,10 @@
     Recurve.Signal = require("./recurve-signal.js");
     Recurve.Http = require("./recurve-http.js");
     Recurve.GlobalErrorHandler = require("./recurve-global-error-handler.js");
+    Recurve.LocalStorage = require("./recurve-local-storage.js");
+    Recurve.SessionStorage = require("./recurve-session-storage.js");
+    Recurve.PerformanceMonitor = require("./recurve-performance-monitor.js");
+    Recurve.LazyLoad = require("./recurve-lazy-load.js");
 
     window.Recurve = Recurve;
 })();
