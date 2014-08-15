@@ -3,12 +3,15 @@
 var DateUtils = require("./recurve-date.js");
 var ObjectUtils = require("./recurve-object.js");
 var Cache = require("./recurve-cache.js");
+var assert = require("./recurve-assert.js");
 
 module.exports = Proto.define([
-    function ctor(useCache, cache) {
+    function ctor(storage, useCache, cache) {
         if (undefined === useCache) {
             useCache = false;
         }
+
+        this._storage = storage;
 
         if (useCache) {
             if (undefined === cache) {
@@ -21,9 +24,7 @@ module.exports = Proto.define([
 
     {
         get: function(key) {
-            if (!key) {
-                return null;
-            }
+            assert(key, "key must be set");
 
             var value;
 
@@ -46,9 +47,7 @@ module.exports = Proto.define([
         },
 
         set: function(key, value) {
-            if (!key) {
-                return;
-            }
+            assert(key, "key must be set");
 
             if (undefined === value) {
                 this.remove(key);
@@ -63,9 +62,7 @@ module.exports = Proto.define([
         },
 
         remove: function(key) {
-            if (!key) {
-                return;
-            }
+            assert(key, "key must be set");
 
             this._storage.removeItem(key);
 
@@ -101,14 +98,16 @@ module.exports = Proto.define([
         },
 
         forEach: function(iterator) {
-            if (!iterator) {
-                return;
-            }
+            assert(iterator, "iterator must be set");
 
             for (var key in this._storage) {
                 var value = this.get(key);
                 iterator(key, value);
             }
+        },
+
+        setCache: function(value) {
+            this._cache = value;
         }
     }
 ]);

@@ -3,6 +3,7 @@
 var Proto = require("./recurve-proto.js");
 var ObjectUtils = require("./recurve-object.js");
 var DateUtils = require("./recurve-date.js");
+var assert = require("./recurve-assert.js");
 
 module.exports = Proto.define([
     function ctor(countLimit, totalCostLimit) {
@@ -21,17 +22,21 @@ module.exports = Proto.define([
 
     {
         get: function(key) {
+            assert(key, "key must be set");
+
             var value = this._cache[key];
 
-            return value ? value.object : null;
+            return value ? value.value : null;
         },
 
-        set: function(object, key, cost) {
+        set: function(key, value, cost) {
+            assert(key, "key must be set");
+
             if (undefined === cost) {
                 cost = 0;
             }
 
-            this._cache[key] = {object: object, cost: cost};
+            this._cache[key] = {value: value, cost: cost};
 
             if (this._countLimit || (this._totalCostLimit && cost)) {
                 this._evict();
@@ -39,6 +44,8 @@ module.exports = Proto.define([
         },
 
         remove: function(key) {
+            assert(key, "key must be set");
+
             delete this._cache[key];
         },
 
