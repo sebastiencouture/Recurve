@@ -26,6 +26,34 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE. 
 */(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(){
+    "use strict";
+
+    var Recurve = window.Recurve || {};
+
+    Recurve.StringUtils = require("./utils/string.js");
+    Recurve.WindowUtils = require("./utils/window.js");
+    Recurve.ArrayUtils = require("./utils/array.js");
+    Recurve.DateUtils = require("./utils/date.js");
+    Recurve.ObjectUtils = require("./utils/object.js");
+
+    Recurve.assert = require("./assert.js");
+
+    Recurve.Proto = require("./proto.js");
+    Recurve.Cache = require("./cache.js");
+    Recurve.Log = require("./log/log.js");
+    Recurve.LogConsoleTarget = require("./log/log-console.js");
+    Recurve.Signal = require("./signal.js");
+    Recurve.Http = require("./http/http.js");
+    Recurve.GlobalErrorHandler = require("./global-error-handler.js");
+    Recurve.LocalStorage = require("./storage/local-storage.js");
+    Recurve.SessionStorage = require("./storage/session-storage.js");
+    Recurve.PerformanceMonitor = require("./performance-monitor.js");
+    Recurve.LazyLoad = require("./lazy-load.js");
+
+    window.Recurve = Recurve;
+})();
+},{"./assert.js":2,"./cache.js":3,"./global-error-handler.js":4,"./http/http.js":9,"./lazy-load.js":10,"./log/log-console.js":11,"./log/log.js":12,"./performance-monitor.js":13,"./proto.js":14,"./signal.js":15,"./storage/local-storage.js":16,"./storage/session-storage.js":17,"./utils/array.js":19,"./utils/date.js":20,"./utils/object.js":22,"./utils/string.js":23,"./utils/window.js":24}],2:[function(require,module,exports){
 "use strict";
 
 var StringUtils = require("./utils/string.js");
@@ -80,7 +108,7 @@ assert = ObjectUtils.extend(assert, {
 });
 
 module.exports = assert;
-},{"./utils/array.js":19,"./utils/object.js":22,"./utils/string.js":23}],2:[function(require,module,exports){
+},{"./utils/array.js":19,"./utils/object.js":22,"./utils/string.js":23}],3:[function(require,module,exports){
 "use strict";
 
 var Proto = require("./proto.js");
@@ -217,35 +245,7 @@ module.exports = Proto.define([
     }
 ]);
 
-},{"./assert.js":1,"./proto.js":14,"./utils/date.js":20,"./utils/object.js":22}],3:[function(require,module,exports){
-(function(){
-    "use strict";
-
-    var Recurve = window.Recurve || {};
-
-    Recurve.StringUtils = require("./utils/string.js");
-    Recurve.WindowUtils = require("./utils/window.js");
-    Recurve.ArrayUtils = require("./utils/array.js");
-    Recurve.DateUtils = require("./utils/date.js");
-    Recurve.ObjectUtils = require("./utils/object.js");
-
-    Recurve.assert = require("./assert.js");
-
-    Recurve.Proto = require("./proto.js");
-    Recurve.Cache = require("./cache.js");
-    Recurve.Log = require("./log/log.js");
-    Recurve.LogConsoleTarget = require("./log/log-console.js");
-    Recurve.Signal = require("./signal.js");
-    Recurve.Http = require("./http/http.js");
-    Recurve.GlobalErrorHandler = require("./global-error-handler.js");
-    Recurve.LocalStorage = require("./storage/local-storage.js");
-    Recurve.SessionStorage = require("./storage/session-storage.js");
-    Recurve.PerformanceMonitor = require("./performance-monitor.js");
-    Recurve.LazyLoad = require("./lazy-load.js");
-
-    window.Recurve = Recurve;
-})();
-},{"./assert.js":1,"./cache.js":2,"./global-error-handler.js":4,"./http/http.js":9,"./lazy-load.js":10,"./log/log-console.js":11,"./log/log.js":12,"./performance-monitor.js":13,"./proto.js":14,"./signal.js":15,"./storage/local-storage.js":16,"./storage/session-storage.js":17,"./utils/array.js":19,"./utils/date.js":20,"./utils/object.js":22,"./utils/string.js":23,"./utils/window.js":24}],4:[function(require,module,exports){
+},{"./assert.js":2,"./proto.js":14,"./utils/date.js":20,"./utils/object.js":22}],4:[function(require,module,exports){
 "use strict";
 
 var Proto = require("./proto.js");
@@ -1833,7 +1833,7 @@ function deSerialize(value) {
         return value || undefined;
     }
 }
-},{"../assert.js":1,"../cache.js":2,"../proto.js":14,"../utils/date.js":20,"../utils/object.js":22}],19:[function(require,module,exports){
+},{"../assert.js":2,"../cache.js":3,"../proto.js":14,"../utils/date.js":20,"../utils/object.js":22}],19:[function(require,module,exports){
 "use strict";
 
 module.exports = {
