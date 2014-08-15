@@ -1,7 +1,7 @@
 "use strict";
 
-var DomUtils = require("./recurve-dom.js");
-var StringUtils = require("./recurve-string.js");
+var DomUtils = require("./utils/dom.js");
+var StringUtils = require("./utils/string.js");
 
 module.exports = {
     js: function(url, onComplete, onError) {

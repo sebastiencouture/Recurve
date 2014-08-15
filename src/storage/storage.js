@@ -1,14 +1,15 @@
 "use strict";
 
-var DateUtils = require("./recurve-date.js");
-var ObjectUtils = require("./recurve-object.js");
-var Cache = require("./recurve-cache.js");
-var assert = require("./recurve-assert.js");
+var DateUtils = require("../utils/date.js");
+var ObjectUtils = require("../utils/object.js");
+var Proto = require("../proto.js");
+var Cache = require("../cache.js");
+var assert = require("../assert.js");
 
 module.exports = Proto.define([
     function ctor(storage, useCache, cache) {
         if (undefined === useCache) {
-            useCache = false;
+            useCache = true;
         }
 
         this._storage = storage;
@@ -54,7 +55,7 @@ module.exports = Proto.define([
             }
 
             var serialized = serialize(value);
-            this._storage.setItem(serialized);
+            this._storage.setItem(key, serialized);
 
             if (this._cache) {
                 this._cache.set(key, value);
@@ -64,11 +65,11 @@ module.exports = Proto.define([
         remove: function(key) {
             assert(key, "key must be set");
 
-            this._storage.removeItem(key);
-
             if (this._cache) {
                 this._cache.remove(key);
             }
+
+            return this._storage.removeItem(key);
         },
 
         clear: function() {

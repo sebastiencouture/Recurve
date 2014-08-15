@@ -1,8 +1,8 @@
 "use strict";
 
-var Proto = require("./recurve-proto.js");
-var DateUtils = require("./recurve-date.js");
-var Log = require("./recurve-log.js");
+var Proto = require("./proto.js");
+var DateUtils = require("./utils/date.js");
+var Log = require("./log/log.js");
 
 module.exports = Proto.define([
     function ctor(log, enabled) {

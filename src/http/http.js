@@ -1,11 +1,11 @@
 "use strict";
 
-var ObjectUtils = require("./recurve-object.js");
-var StringUtils = require("./recurve-string.js");
-var DateUtils = require("./recurve-window.js");
-var WindowUtils = require("./recurve-window.js");
-var Signal = require("./recurve-signal.js");
-var Proto = require("./recurve-proto.js");
+var ObjectUtils = require("../utils/object.js");
+var StringUtils = require("../utils/string.js");
+var DateUtils = require("../utils/date.js");
+var WindowUtils = require("../utils/window.js");
+var Signal = require("../signal.js");
+var Proto = require("../proto.js");
 
 var Http = {
     defaults: {

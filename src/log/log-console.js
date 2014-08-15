@@ -1,6 +1,6 @@
 "use strict";
 
-var Proto = require("./recurve-proto.js");
+var Proto = require("../proto.js");
 
 module.exports = Proto.define([
     function ctor() {

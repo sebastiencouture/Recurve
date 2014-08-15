@@ -1,6 +1,6 @@
 "use strict";
 
-var ObjectUtils = require("./recurve-object.js");
+var ObjectUtils = require("./object.js");
 
 module.exports = {
     format: function(value) {

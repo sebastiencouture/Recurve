@@ -1,4 +1,4 @@
-var ObjectUtils = require("../src/recurve-object.js");
+var ObjectUtils = require("../src/utils/object.js");
 
 describe("Recurve.Object", function() {
 

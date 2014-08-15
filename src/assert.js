@@ -1,8 +1,8 @@
 "use strict";
 
-var StringUtils = require("./recurve-string.js");
-var ObjectUtils = require("./recurve-object.js");
-var ArrayUtils = require("./recurve-array.js");
+var StringUtils = require("./utils/string.js");
+var ObjectUtils = require("./utils/object.js");
+var ArrayUtils = require("./utils/array.js");
 
 var assert = function(condition, message) {
     if (condition) {

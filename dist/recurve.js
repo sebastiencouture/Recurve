@@ -1,98 +1,38 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-(function(){
-    "use strict";
+/*!
+Recurve.js - v0.1.0
+Created by Sebastien Couture on 2014-08-14.
 
-    var Recurve = window.Recurve || {};
+git://github.com/sebastiencouture/Recurve.git
 
-    Recurve.StringUtils = require("./recurve-string.js");
-    Recurve.WindowUtils = require("./recurve-window.js");
-    Recurve.ArrayUtils = require("./recurve-array.js");
-    Recurve.DateUtils = require("./recurve-date.js");
-    Recurve.ObjectUtils = require("./recurve-object.js");
+The MIT License (MIT)
 
-    Recurve.assert = require("./recurve-assert.js");
+Copyright (c) 2014 Sebastien Couture
 
-    Recurve.Proto = require("./recurve-proto.js");
-    Recurve.Log = require("./recurve-log.js");
-    Recurve.LogConsoleTarget = require("./recurve-log-console.js");
-    Recurve.Signal = require("./recurve-signal.js");
-    Recurve.Http = require("./recurve-http.js");
-    Recurve.GlobalErrorHandler = require("./recurve-global-error-handler.js");
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-    window.Recurve = Recurve;
-})();
-},{"./recurve-array.js":2,"./recurve-assert.js":3,"./recurve-date.js":4,"./recurve-global-error-handler.js":5,"./recurve-http.js":6,"./recurve-log-console.js":7,"./recurve-log.js":8,"./recurve-object.js":9,"./recurve-proto.js":10,"./recurve-signal.js":11,"./recurve-string.js":12,"./recurve-window.js":13}],2:[function(require,module,exports){
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE. 
+*/(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict";
 
-module.exports = {
-    removeItem: function(array, item) {
-        if (!array) {
-            return;
-        }
+var StringUtils = require("./utils/string.js");
+var ObjectUtils = require("./utils/object.js");
+var ArrayUtils = require("./utils/array.js");
 
-        var index = array.indexOf(item);
-
-        if (-1 < index) {
-            array.splice(index, 1);
-        }
-    },
-
-    removeAt: function(array, index) {
-        if (!array) {
-            return;
-        }
-
-        if (0 <= index && array.length > index) {
-            array.splice(index, 1);
-        }
-    },
-
-    replaceItem: function(array, item) {
-        if (!array) {
-            return;
-        }
-
-        var index = array.indexOf(item);
-
-        if (-1 < index) {
-            array[index] = item;
-        }
-    },
-
-    isEmpty: function(value) {
-        return !value || 0 === value.length;
-    },
-
-    argumentsToArray: function(args, sliceCount) {
-        return sliceCount < args.length ? Array.prototype.slice.call(args, sliceCount) : [];
-    }
-};
-},{}],3:[function(require,module,exports){
-/*
-(function() {
-    "use strict";
-
-    var Recurve = window.Recurve = window.Recurve || {};
-
-    Recurve.assert = function(condition, message) {
-        if (condition) {
-            return;
-        }
-
-        Array.prototype.shift.apply(arguments);
-        message = Recurve.StringUtils.format.apply(this, arguments);
-
-        throw new Error(message);
-    };
-})();
-*/
-
-"use strict";
-
-var StringUtils = require("./recurve-string.js");
-
-// TODO TBD add methods such as: ok, equal, equalStrict, etc.
-module.exports = function(condition, message) {
+var assert = function(condition, message) {
     if (condition) {
         return;
     }
@@ -102,183 +42,216 @@ module.exports = function(condition, message) {
 
     throw new Error(message);
 };
-},{"./recurve-string.js":12}],4:[function(require,module,exports){
-/*(function() {
+
+assert = ObjectUtils.extend(assert, {
+    ok: function(condition, message) {
+        assert.apply(this, arguments);
+    },
+
+    equal: function(actual, expected, message) {
+        var args = ArrayUtils.argumentsToArray(arguments, 2);
+        assert.apply(this, [actual == expected].concat(args));
+    },
+
+    notEqual: function(actual, expected, message) {
+        var args = ArrayUtils.argumentsToArray(arguments, 2);
+        assert.apply(this, [actual != expected].concat(args));
+    },
+
+    strictEqual: function(actual, expected, message) {
+        var args = ArrayUtils.argumentsToArray(arguments, 2);
+        assert.apply(this, [actual === expected].concat(args));
+    },
+
+    strictNotEqual: function(actual, expected, message) {
+        var args = ArrayUtils.argumentsToArray(arguments, 2);
+        assert.apply(this, [actual !== expected].concat(args));
+    },
+
+    deepEqual: function(actual, expected, message) {
+        var args = ArrayUtils.argumentsToArray(arguments, 2);
+        assert.apply(this, [ObjectUtils.areEqual(actual, expected)].concat(args));
+    },
+
+    deepNotEqual: function(actual, expected, message) {
+        var args = ArrayUtils.argumentsToArray(arguments, 2);
+        assert.apply(this, [!ObjectUtils.areEqual(actual, expected)].concat(args));
+    }
+});
+
+module.exports = assert;
+},{"./utils/array.js":15,"./utils/object.js":18,"./utils/string.js":19}],2:[function(require,module,exports){
+"use strict";
+
+var Proto = require("./proto.js");
+var ObjectUtils = require("./utils/object.js");
+var DateUtils = require("./utils/date.js");
+var assert = require("./assert.js");
+
+module.exports = Proto.define([
+    function ctor(countLimit, totalCostLimit) {
+        if (undefined === countLimit) {
+            countLimit = 0;
+        }
+        if (undefined === totalCostLimit) {
+            totalCostLimit = 0;
+        }
+
+        this._countLimit = countLimit;
+        this._totalCostLimit = totalCostLimit;
+
+        this._cache = {};
+    },
+
+    {
+        get: function(key) {
+            assert(key, "key must be set");
+
+            var value = this._cache[key];
+
+            return value ? value.value : null;
+        },
+
+        set: function(key, value, cost) {
+            assert(key, "key must be set");
+
+            if (undefined === cost) {
+                cost = 0;
+            }
+
+            this._cache[key] = {value: value, cost: cost};
+
+            if (this._countLimit || (this._totalCostLimit && cost)) {
+                this._evict();
+            }
+        },
+
+        remove: function(key) {
+            assert(key, "key must be set");
+
+            delete this._cache[key];
+        },
+
+        clear: function() {
+            this._cache = {};
+        },
+
+        setCountLimit: function(value) {
+            this._countLimit = value;
+            this._evict();
+        },
+
+        countLimit: function() {
+            return this._countLimit;
+        },
+
+        setTotalCostLimit: function(value) {
+            this._totalCostLimit = value;
+            this._evict();
+        },
+
+        totalCostLimit: function() {
+            return this._totalCostLimit;
+        },
+
+        _currentTotalCost: function() {
+            // TODO TBD should we cache total cost and current count?
+            // ... any performance worries for potentially huge caches??
+            var totalCost = 0;
+
+            ObjectUtils.forEach(this._cache, function(value, key) {
+                totalCost += value.cost;
+            });
+
+            return totalCost;
+        },
+
+        _currentCount: function() {
+            return ObjectUtils.keyCount(this._cache);
+        },
+
+        _evict: function() {
+            if (!this._shouldEvict()) {
+                return;
+            }
+
+            this._evictMostCostly();
+            this._evict();
+        },
+
+        _shouldEvict: function() {
+            return this._countLimit < this._currentCount() ||
+                this._totalCostLimit < this._currentTotalCost();
+        },
+
+        _evictMostCostly: function() {
+            var maxCost = 0;
+            var maxKey;
+
+            ObjectUtils.forEach(this._cache, function(value, key) {
+                if (!maxKey) {
+                    maxKey = key;
+                }
+                else if (maxCost < value.cost) {
+                    maxKey = key;
+                }
+                else {
+                    // do nothing - continue
+                }
+            });
+
+            this.remove(maxKey);
+        }
+    },
+
+    {
+        // Smaller the cost for newer
+        inverseCurrentTimeCost: function() {
+            return 1 / DateUtils.now();
+        },
+
+        // Smaller the cost for older
+        currentTimeCost: function() {
+            return DateUtils.now();
+        }
+    }
+]);
+
+},{"./assert.js":1,"./proto.js":10,"./utils/date.js":16,"./utils/object.js":18}],3:[function(require,module,exports){
+(function(){
     "use strict";
 
-    var Recurve = window.Recurve = window.Recurve || {};
+    var Recurve = window.Recurve || {};
 
-    Recurve.DateUtils =
-    {
-        now: function() {
-            return new Date();
-        },
+    Recurve.StringUtils = require("./utils/string.js");
+    Recurve.WindowUtils = require("./utils/window.js");
+    Recurve.ArrayUtils = require("./utils/array.js");
+    Recurve.DateUtils = require("./utils/date.js");
+    Recurve.ObjectUtils = require("./utils/object.js");
 
-        startYearFromRange: function(range) {
-            if (!range) {
-                return "";
-            }
+    Recurve.assert = require("./assert.js");
 
-            var split = range.split("-");
-            return 0 < split.length ? split[0] : "";
-        },
+    Recurve.Proto = require("./proto.js");
+    Recurve.Cache = require("./cache.js");
+    Recurve.Log = require("./log/log.js");
+    Recurve.LogConsoleTarget = require("./log/log-console.js");
+    Recurve.Signal = require("./signal.js");
+    Recurve.Http = require("./http/http.js");
+    Recurve.GlobalErrorHandler = require("./global-error-handler.js");
+    Recurve.LocalStorage = require("./storage/local-storage.js");
+    Recurve.SessionStorage = require("./storage/session-storage.js");
+    Recurve.PerformanceMonitor = require("./performance-monitor.js");
+    Recurve.LazyLoad = require("./lazy-load.js");
 
-        endYearFromRange: function(range) {
-            if (!range) {
-                return "";
-            }
-
-            var split = range.split("-");
-            return 2 < split.length ? split[2] : "";
-        }
-    };
-})();*/
-
+    window.Recurve = Recurve;
+})();
+},{"./assert.js":1,"./cache.js":2,"./global-error-handler.js":4,"./http/http.js":5,"./lazy-load.js":6,"./log/log-console.js":7,"./log/log.js":8,"./performance-monitor.js":9,"./proto.js":10,"./signal.js":11,"./storage/local-storage.js":12,"./storage/session-storage.js":13,"./utils/array.js":15,"./utils/date.js":16,"./utils/object.js":18,"./utils/string.js":19,"./utils/window.js":20}],4:[function(require,module,exports){
 "use strict";
 
-module.exports = {
-    now: function() {
-        return new Date();
-    },
-
-    startYearFromRange: function(range) {
-        if (!range) {
-            return "";
-        }
-
-        var split = range.split("-");
-        return 0 < split.length ? split[0] : "";
-    },
-
-    endYearFromRange: function(range) {
-        if (!range) {
-            return "";
-        }
-
-        var split = range.split("-");
-        return 2 < split.length ? split[2] : "";
-    }
-};
-},{}],5:[function(require,module,exports){
-//(function() {
-//    "use strict";
-//
-//    var Recurve = window.Recurve = window.Recurve || {};
-//
-//    Recurve.GlobalErrorHandler = Recurve.Proto.define([
-//
-//        /**
-//         * NOTE, If your JS is hosted on a CDN then the browser will sanitize and exclude all error output
-//         * unless explicitly enabled. See TODO TBD tutorial link
-//         *
-//         * @param onError, callback declaration: onError(description, error), error will be undefined if not supported by browser
-//         * @param enabled, default true
-//         * @param preventBrowserHandle, default true
-//         */
-//        function ctor(onError, enabled, preventBrowserHandle) {
-//            if (undefined === enabled) {
-//                enabled = true;
-//            }
-//
-//            if (undefined === preventBrowserHandle) {
-//                preventBrowserHandle = true;
-//            }
-//
-//            this._enabled = enabled;
-//            this._preventBrowserHandle = preventBrowserHandle;
-//            this._onError = onError;
-//
-//            window.onerror = this._errorHandler.bind(this);
-//        },
-//
-//        {
-//            /**
-//             * Wrap method in try..catch and handle error without raising uncaught error
-//             *
-//             * @param method
-//             * @param [, arg2, ..., argN], list of arguments for method
-//             */
-//            protectedInvoke: function(method) {
-//                try {
-//                    var args = Recurve.ArrayUtils.argumentsToArray(arguments, 1);
-//                    method.apply(null, args);
-//                }
-//                catch (error) {
-//                    var description = this.describeError(error);
-//                    this.handleError(error, description);
-//                }
-//            },
-//
-//            /**
-//             * Handle error as would be done for uncaught global error
-//             *
-//             * @param error, any type of error (string, object, Error)
-//             * @param description
-//             */
-//            handleError: function(error, description) {
-//                if (this._onError)
-//                {
-//                    this._onError(error, description);
-//                }
-//
-//                return this._preventBrowserHandle;
-//            },
-//
-//
-//            describeError: function(error) {
-//                if (!error) {
-//                    return null;
-//                }
-//
-//                var description;
-//
-//                if (Recurve.ObjectUtils.isString(error)) {
-//                    description = error;
-//                }
-//                else if (Recurve.ObjectUtils.isError(error)) {
-//                    description = error.message + "\n" + error.stack;
-//                }
-//                else if (Recurve.ObjectUtils.isObject(error)) {
-//                    description = JSON.stringify(error);
-//                }
-//                else
-//                {
-//                    description = error.toString();
-//                }
-//
-//                return description;
-//            },
-//
-//            _errorHandler: function(message, filename, line, column, error) {
-//                if (!this._enabled) {
-//                    return;
-//                }
-//
-//                var description = Recurve.StringUtils.format(
-//                    "message: {0}, file: {1}, line: {2}", message, filename, line);
-//
-//                if (error)
-//                {
-//                    description += Recurve.StringUtils.format(", stack: {0}", error.stack);
-//                }
-//
-//                if (this._onError)
-//                {
-//                    this._onError(error, description);
-//                }
-//
-//                return this._preventBrowserHandle;
-//            }
-//        }
-//    ]);
-//})();
-
-"use strict";
-
-var Proto = require("./recurve-proto.js");
-var StringUtils = require("./recurve-string.js");
-var ObjectUtils = require("./recurve-object.js");
-var ArrayUtils = require("./recurve-array.js");
+var Proto = require("./proto.js");
+var StringUtils = require("./utils/string.js");
+var ObjectUtils = require("./utils/object.js");
+var ArrayUtils = require("./utils/array.js");
 
 module.exports = Proto.define([
 
@@ -290,7 +263,7 @@ module.exports = Proto.define([
      * @param enabled, default true
      * @param preventBrowserHandle, default true
      */
-        function ctor(onError, enabled, preventBrowserHandle) {
+     function ctor(onError, enabled, preventBrowserHandle) {
         if (undefined === enabled) {
             enabled = true;
         }
@@ -386,15 +359,15 @@ module.exports = Proto.define([
         }
     }
 ]);
-},{"./recurve-array.js":2,"./recurve-object.js":9,"./recurve-proto.js":10,"./recurve-string.js":12}],6:[function(require,module,exports){
+},{"./proto.js":10,"./utils/array.js":15,"./utils/object.js":18,"./utils/string.js":19}],5:[function(require,module,exports){
 "use strict";
 
-var ObjectUtils = require("./recurve-object.js");
-var StringUtils = require("./recurve-string.js");
-var DateUtils = require("./recurve-window.js");
-var WindowUtils = require("./recurve-window.js");
-var Signal = require("./recurve-signal.js");
-var Proto = require("./recurve-proto.js");
+var ObjectUtils = require("../utils/object.js");
+var StringUtils = require("../utils/string.js");
+var DateUtils = require("../utils/date.js");
+var WindowUtils = require("../utils/window.js");
+var Signal = require("../signal.js");
+var Proto = require("../proto.js");
 
 var Http = {
     defaults: {
@@ -614,7 +587,7 @@ function mergeHeaders(method, options, defaultHeaders) {
 
 function updateUrl(options) {
     if (!options.cache) {
-        options.params.cache = DateUtils.now().getTime();
+        options.params.cache = DateUtils.now();
     }
 
     options.url =
@@ -981,6 +954,8 @@ var JsonpRequest = Proto.define([
                 }
             }
 
+            // TODO TBD if going to support IE8 then need to check "onreadystatechange" as well
+            // http://pieisgood.org/test/script-link-events/
             script.addEventListener("load", loadErrorHandler);
             script.addEventListener("error", loadErrorHandler);
 
@@ -1042,6 +1017,8 @@ var CrossDomainScriptRequest = Proto.define([
                 }
             }
 
+            // TODO TBD if going to support IE8 then need to check "onreadystatechange" as well
+            // http://pieisgood.org/test/script-link-events/
             script.addEventListener("load", loadErrorHandler);
             script.addEventListener("error", loadErrorHandler);
 
@@ -1053,12 +1030,77 @@ var CrossDomainScriptRequest = Proto.define([
         }
     }
 ]);
-},{"./recurve-object.js":9,"./recurve-proto.js":10,"./recurve-signal.js":11,"./recurve-string.js":12,"./recurve-window.js":13}],7:[function(require,module,exports){
+},{"../proto.js":10,"../signal.js":11,"../utils/date.js":16,"../utils/object.js":18,"../utils/string.js":19,"../utils/window.js":20}],6:[function(require,module,exports){
 "use strict";
 
-var Proto = require("./recurve-proto.js");
+var DomUtils = require("./utils/dom.js");
+var StringUtils = require("./utils/string.js");
+
+module.exports = {
+    js: function(url, onComplete, onError) {
+        var element = DomUtils.createElement("link", {type: "text/css", rel: "stylesheet", href: url});
+        load(element, onComplete, onError);
+    },
+
+    css: function(url, onComplete, onError) {
+        var element = DomUtils.createElement("script", {type: "text/javascript", src: url});
+        load(element, onComplete, onError);
+    }
+};
+
+function load(element, onComplete, onError) {
+    function readyStateHandler() {
+        if (StringUtils.isEqualIgnoreCase("loaded", element.readyState) ||
+            StringUtils.isEqualIgnoreCase("complete", element.readyState)) {
+            loadedHandler();
+        }
+    }
+
+    function loadedHandler() {
+        clearCallbacks();
+        onComplete();
+    }
+
+    function errorHandler(event) {
+        clearCallbacks();
+        onError(event);
+    }
+
+    function clearCallbacks() {
+        element.onload = null;
+        element.onreadystatechange = null;
+        element.onerror = null;
+    }
+
+    // Maintain execution order
+    // http://wiki.whatwg.org/wiki/Dynamic_Script_Execution_Order
+    // http://www.nczonline.net/blog/2010/12/21/thoughts-on-script-loaders/
+    element.async = false;
+    element.defer = false;
+
+    // http://pieisgood.org/test/script-link-events/
+    // TODO TBD link tags don't support any type of load callback on old WebKit (Safari 5)
+    // TODO TBD if not going to support IE8 then don't need to worry about onreadystatechange
+    if (DomUtils.elementSupportsOnEvent(element, "onreadystatechange")) {
+        element.onreadystatechange = readyStateHandler
+    }
+    else {
+        element.onload = loadedHandler;
+    }
+
+    element.onerror = errorHandler;
+
+    document.head.appendChild(element);
+}
+},{"./utils/dom.js":17,"./utils/string.js":19}],7:[function(require,module,exports){
+"use strict";
+
+var Proto = require("../proto.js");
 
 module.exports = Proto.define([
+    function ctor() {
+    },
+
     {
         /**
          *
@@ -1121,259 +1163,13 @@ module.exports = Proto.define([
     }
 ]);
 
-},{"./recurve-proto.js":10}],8:[function(require,module,exports){
-//(function() {
-//    "use strict";
-//
-//    var Recurve = window.Recurve = window.Recurve || {};
-//
-//    Recurve.Log = Recurve.Proto.define([
-//
-//        /**
-//         *
-//         * @param targets, array of targets to log to (see Recurve.LogConsoleTarget as example).
-//         * Defaults to Recurve.LogConsoleTarget
-//         * @param enabled, default true
-//         */
-//        function ctor(enabled, targets) {
-//            if (undefined === enabled) {
-//                enabled = true;
-//            }
-//
-//            if (undefined === targets) {
-//                targets = [new Recurve.LogConsoleTarget()];
-//            }
-//
-//            this.targets = targets;
-//            this.disable(!enabled);
-//        },
-//
-//        {
-//            /**
-//             * Log info to all targets
-//             *
-//             * @param message
-//             * @param [, obj2, ..., objN], list of objects to output. The string representations of
-//             * each of these objects are appended together in the order listed and output (same as console.log)
-//             */
-//            info: function(message) {
-//                if (this._infoDisabled) {
-//                    return;
-//                }
-//
-//                this._log("info", message, arguments);
-//            },
-//
-//            /**
-//             * Log debug to all targets
-//             *
-//             * @param message
-//             * @param [, obj2, ..., objN], list of objects to output. The string representations of
-//             * each of these objects are appended together in the order listed and output (same as console.log)
-//             */
-//            debug: function(message) {
-//                if (this._debugDisabled) {
-//                    return;
-//                }
-//
-//                this._log("debug", message, arguments);
-//            },
-//
-//            /**
-//             * Log warning to all targets
-//             *
-//             * @param message
-//             * @param [, obj2, ..., objN], list of objects to output. The string representations of
-//             * each of these objects are appended together in the order listed and output (same as console.log)
-//             */
-//            warn: function(message) {
-//                if (this._warnDisabled) {
-//                    return;
-//                }
-//
-//                this._log("warn", message, arguments);
-//            },
-//
-//            /**
-//             * Log error to all targets
-//             *
-//             * @param message
-//             * @param [, obj2, ..., objN], list of objects to output. The string representations of
-//             * each of these objects are appended together in the order listed and output (same as console.log)
-//             */
-//            error: function(message) {
-//                if (this._errorDisabled) {
-//                    return;
-//                }
-//
-//                this._log("error", message, arguments);
-//            },
-//
-//            /**
-//             * Clear log for all targets
-//             */
-//            clear: function() {
-//                for (var index = 0; index < this.targets.length; index++) {
-//                    this.targets[index].clear();
-//                }
-//            },
-//
-//            /**
-//             *
-//             * @param value, defaults to true
-//             */
-//            disable: function(value) {
-//                if (undefined === value) {
-//                    value = true;
-//                }
-//
-//                this._debugDisabled = value;
-//                this._infoDisabled = value;
-//                this._warnDisabled = value;
-//                this._errorDisabled = value;
-//            },
-//
-//            /**
-//             *
-//             * @param value, defaults to true
-//             */
-//            debugDisable: function(value) {
-//                if (undefined === value) {
-//                    value = true;
-//                }
-//
-//                this._debugDisabled = value;
-//            },
-//
-//            /**
-//             *
-//             * @param value, defaults to true
-//             */
-//            infoDisable: function(value) {
-//                if (undefined === value) {
-//                    value = true;
-//                }
-//
-//                this._infoDisabled = value;
-//            },
-//
-//            /**
-//             *
-//             * @param value, defaults to true
-//             */
-//            warnDisable: function(value) {
-//                if (undefined === value) {
-//                    value = true;
-//                }
-//
-//                this._warnDisabled = value;
-//            },
-//
-//            /**
-//             *
-//             * @param value, defaults to true
-//             */
-//            errorDisable: function(value) {
-//                if (undefined === value) {
-//                    value = true;
-//                }
-//
-//                this._errorDisabled = value;
-//            },
-//
-//            _log: function(type, message, args) {
-//                args = Recurve.ArrayUtils.argumentsToArray(args, 1);
-//                var description = this._description(type.toUpperCase());
-//
-//                for (var index = 0; index < this.targets.length; index++) {
-//                    this.targets[index][type].apply(this.targets[index], [description, message].concat(args));
-//                }
-//            },
-//
-//            _description: function(type) {
-//                var time = Recurve.StringUtils.formatTime(new Date());
-//                return "[" + type + "] " + time;
-//            }
-//        }
-//
-//    ]);
-//
-//    /**
-//     * Log target for Recurve.Log
-//     * Handles browsers that do not support console or have limited console support (i.e. only support console.log)
-//     *
-//     */
-//    Recurve.LogConsoleTarget = Recurve.Proto.define([
-//        {
-//            /**
-//             *
-//             * @param message
-//             * @param [, obj2, ..., objN], list of objects to output. The string representations of
-//             * each of these objects are appended together in the order listed and output (same as console.log)
-//             */
-//            info: function() {
-//                console && console.log.apply(console, arguments);
-//            },
-//
-//            /**
-//             *
-//             * @param message
-//             * @param [, obj2, ..., objN], list of objects to output. The string representations of
-//             * each of these objects are appended together in the order listed and output (same as console.log)
-//             */
-//            debug: function() {
-//                if (!console || !console.debug) {
-//                    this.info.apply(this, arguments);
-//                    return;
-//                }
-//
-//                console.debug.apply(console, arguments);
-//            },
-//
-//            /**
-//             *
-//             * @param message
-//             * @param [, obj2, ..., objN], list of objects to output. The string representations of
-//             * each of these objects are appended together in the order listed and output (same as console.log)
-//             */
-//            warn: function() {
-//                if (!console || !console.warn) {
-//                    this.info.apply(this, arguments);
-//                    return;
-//                }
-//
-//                console.warn.apply(console, arguments);
-//            },
-//
-//            /**
-//             *
-//             * @param message
-//             * @param [, obj2, ..., objN], list of objects to output. The string representations of
-//             * each of these objects are appended together in the order listed and output (same as console.log)
-//             */
-//            error: function() {
-//                if (!console || !console.error) {
-//                    this.info.apply(this, arguments);
-//                    return;
-//                }
-//
-//                console.error.apply(console, arguments);
-//            },
-//
-//            clear: function() {
-//                console && console.clear();
-//            }
-//        }
-//    ]);
-//
-//})();
-
+},{"../proto.js":10}],8:[function(require,module,exports){
 "use strict";
 
-var Proto = require("./recurve-proto.js");
-var ArrayUtils = require("./recurve-array.js");
-var StringUtils = require("./recurve-string.js");
-var LogTarget = require("./recurve-log-console.js");
+var Proto = require("../proto.js");
+var ArrayUtils = require("../utils/array.js");
+var StringUtils = require("../utils/string.js");
+var LogTarget = require("./log-console.js");
 
 module.exports = Proto.define([
 
@@ -1383,7 +1179,7 @@ module.exports = Proto.define([
      * Defaults to Recurve.LogConsoleTarget
      * @param enabled, default true
      */
-        function ctor(enabled, targets) {
+     function ctor(enabled, targets) {
         if (undefined === enabled) {
             enabled = true;
         }
@@ -1544,438 +1340,91 @@ module.exports = Proto.define([
         }
     }
 ]);
-},{"./recurve-array.js":2,"./recurve-log-console.js":7,"./recurve-proto.js":10,"./recurve-string.js":12}],9:[function(require,module,exports){
-/*
-(function() {
-    "use strict";
-
-    var Recurve = window.Recurve = window.Recurve || {};
-
-    var bindCtor = function() {};
-
-    Recurve.ObjectUtils =
-    {
-        forEach: function(obj, iterator, context) {
-            if (!obj) {
-                return;
-            }
-
-            if (obj.forEach && obj.forEach === Object.forEach) {
-                obj.forEach(iterator, context);
-            }
-            else if (Recurve.ObjectUtils.isArray(obj) && obj.length) {
-                for (var index = 0; index < obj.length; index++) {
-                    if (false === iterator.call(context, obj[index], index, obj)) {
-                        return;
-                    }
-                }
-            }
-            else {
-                var keys = Recurve.ObjectUtils.keys(obj);
-                for (var index = 0; index < keys.length; index++) {
-                    if (false === iterator.call(context, obj[keys[index]], keys[index], obj)) {
-                        return;
-                    }
-                }
-            }
-
-            return keys;
-        },
-
-        keys: function(obj) {
-            if (!Recurve.ObjectUtils.isObject(obj)) {
-                return [];
-            }
-
-            if (Object.keys) {
-                return Object.keys(obj);
-            }
-
-            var keys = [];
-
-            for (var key in obj) {
-                if (obj.hasOwnProperty(key)) {
-                    keys.push(key);
-                }
-            }
-
-            return keys;
-        }
-
-        isString: function(value) {
-            return (value instanceof String || "string" == typeof value);
-        },
-
-        isError: function(value) {
-            return value instanceof Error;
-        },
-
-        isObject: function(value) {
-            return value === Object(value);
-        },
-
-        isArray: function(value) {
-            return value instanceof Array;
-        },
-
-        isFunction: function(value) {
-            return "function" == typeof value;
-        },
-
-        isDate: function(value) {
-            return value instanceof Date;
-        },
-
-        isFile: function(value) {
-            return "[object File]" === String(data);
-        },
-
-        bind: function(func, context) {
-            // Based heavily on underscore/firefox implementation. TODO TBD make underscore.js dependency of
-            // this library instead?
-
-            if (!Recurve.ObjectUtils.isFunction(func)) {
-                throw new TypeError("not a function");
-            }
-
-            if (Function.prototype.bind) {
-                return Function.prototype.bind.apply(func, Array.prototype.slice.call(arguments, 1));
-            }
-
-            var args = Array.prototype.slice.call(arguments, 2);
-
-            var bound = function() {
-                if (!(this instanceof bound)) {
-                    return func.apply(context, args.concat(Array.prototype.slice.call(arguments)));
-                }
-
-                bindCtor.prototype = func.prototype;
-                var that = new bindCtor();
-                bindCtor.prototype = null;
-
-                var result = func.apply(that, args.concat(Array.prototype.slice.call(arguments)));
-                if (Object(result) === result) {
-                    return result;
-                }
-
-                return that;
-            };
-
-            return bound;
-        },
-
-        extend: function(dest, src) {
-            if (!src) {
-                return;
-            }
-
-            for (key in src) {
-                dest[key] = src[key];
-            }
-
-            return dest;
-        },
-
-        toJson: function(obj) {
-            if (!Recurve.ObjectUtils.isObject(obj)) {
-                throw new Error("not an object to convert to JSON");
-            }
-
-            return JSON.stringify(obj);
-        },
-
-        fromJson: function(str) {
-            if (!str) {
-                return null;
-            }
-
-            return JSON.parse(str);
-        },
-
-        toFormData: function(obj) {
-            if (!obj) {
-                return null;
-            }
-
-            var values = [];
-
-            Recurve.ObjectUtils.forEach(obj, function(value, key) {
-                values.push(encodeURIComponent(key) + "=" + encodeURIComponent(value));
-            });
-
-            return values.join("&");
-        }
-    };
-
-
-})();
-*/
-
+},{"../proto.js":10,"../utils/array.js":15,"../utils/string.js":19,"./log-console.js":7}],9:[function(require,module,exports){
 "use strict";
 
-module.exports = {
-    forEach: function(obj, iterator, context) {
-        if (!obj) {
-            return;
+var Proto = require("./proto.js");
+var DateUtils = require("./utils/date.js");
+var Log = require("./log/log.js");
+
+module.exports = Proto.define([
+    function ctor(log, enabled) {
+        if (undefined === log) {
+            this._log = new Log();
         }
 
-        if (obj.forEach && obj.forEach === Object.forEach) {
-            obj.forEach(iterator, context);
-        }
-        else if (this.isArray(obj) && obj.length) {
-            for (var index = 0; index < obj.length; index++) {
-                if (false === iterator.call(context, obj[index], index, obj)) {
-                    return;
-                }
-            }
-        }
-        else {
-            var keys = this.keys(obj);
-            for (var index = 0; index < keys.length; index++) {
-                if (false === iterator.call(context, obj[keys[index]], keys[index], obj)) {
-                    return;
-                }
-            }
+        if (undefined === enabled) {
+            enabled = true;
         }
 
-        return keys;
+        this.disable(!enabled);
     },
 
-    keys: function(obj) {
-        if (!this.isObject(obj)) {
-            return [];
-        }
-
-        if (Object.keys) {
-            return Object.keys(obj);
-        }
-
-        var keys = [];
-
-        for (var key in obj) {
-            if (obj.hasOwnProperty(key)) {
-                keys.push(key);
-            }
-        }
-
-        return keys;
-    },
-
-    isString: function(value) {
-        return (value instanceof String || "string" == typeof value);
-    },
-
-    isError: function(value) {
-        return value instanceof Error;
-    },
-
-    isObject: function(value) {
-        return value === Object(value);
-    },
-
-    isArray: function(value) {
-        return value instanceof Array;
-    },
-
-    isFunction: function(value) {
-        return "function" == typeof value;
-    },
-
-    isDate: function(value) {
-        return value instanceof Date;
-    },
-
-    isFile: function(value) {
-        return "[object File]" === String(data);
-    },
-
-    bind: function(func, context) {
-        // Based heavily on underscore/firefox implementation.
-
-        if (!this.isFunction(func)) {
-            throw new TypeError("not a function");
-        }
-
-        if (Function.prototype.bind) {
-            return Function.prototype.bind.apply(func, Array.prototype.slice.call(arguments, 1));
-        }
-
-        var args = Array.prototype.slice.call(arguments, 2);
-
-        var bound = function() {
-            if (!(this instanceof bound)) {
-                return func.apply(context, args.concat(Array.prototype.slice.call(arguments)));
+    {
+        start: function(message) {
+            if (this._disabled) {
+                return;
             }
 
-            bindCtor.prototype = func.prototype;
-            var that = new bindCtor();
-            bindCtor.prototype = null;
+            return new Timer(this._log, message);
+        },
 
-            var result = func.apply(that, args.concat(Array.prototype.slice.call(arguments)));
-            if (Object(result) === result) {
-                return result;
+        end: function(timer, description) {
+            if (this._disabled || !timer) {
+                return;
             }
 
-            return that;
-        };
+            timer.end(description);
+        },
 
-        return bound;
-    },
+        disable: function(value) {
+            if (undefined === value) {
+                value = true;
+            }
 
-    extend: function(dest, src) {
-        if (!src) {
-            return;
+            this._disabled = value;
         }
-
-        for (key in src) {
-            dest[key] = src[key];
-        }
-
-        return dest;
-    },
-
-    toJson: function(obj) {
-        if (!this.isObject(obj)) {
-            throw new Error("not an object to convert to JSON");
-        }
-
-        return JSON.stringify(obj);
-    },
-
-    fromJson: function(str) {
-        if (!str) {
-            return null;
-        }
-
-        return JSON.parse(str);
-    },
-
-    toFormData: function(obj) {
-        if (!obj) {
-            return null;
-        }
-
-        var values = [];
-
-        this.forEach(obj, function(value, key) {
-            values.push(encodeURIComponent(key) + "=" + encodeURIComponent(value));
-        });
-
-        return values.join("&");
     }
-};
+]);
 
 
-},{}],10:[function(require,module,exports){
-//(function() {
-//    var Recurve = window.Recurve = window.Recurve || {};
-//
-//    var dontInvokeConstructor = {};
-//
-//    function isFunction(value) {
-//        return value && "function" == typeof value;
-//    }
-//
-//    Recurve.Proto = function() {
-//        // do nothing
-//    };
-//
-//    /**
-//     * Create object that inherits from this object
-//     *
-//     * @param options   array consisting of constructor, prototype/"member" variables/functions,
-//     *                  and namespace/"static" variables/function
-//     */
-//    Recurve.Proto.define = function(options) {
-//        if (!options || 0 === options.length) {
-//            return this;
-//        }
-//
-//        var possibleConstructor = options[0];
-//
-//        var properties;
-//        var staticProperties;
-//
-//        if (isFunction(possibleConstructor)) {
-//            properties = 1 < options.length ? options[1] : {};
-//            properties[ "$ctor" ] = possibleConstructor;
-//
-//            staticProperties = options[2];
-//        }
-//        else {
-//            properties = options[0];
-//            staticProperties = options[1];
-//        }
-//
-//        function ProtoObj(param)
-//        {
-//            if (dontInvokeConstructor != param &&
-//                isFunction(this.$ctor)) {
-//                this.$ctor.apply( this, arguments );
-//            }
-//        };
-//
-//        ProtoObj.prototype = new this(dontInvokeConstructor);
-//
-//        // Prototype/"member" properties
-//        for (key in properties) {
-//            addProtoProperty(key, properties[key], ProtoObj.prototype[key]);
-//        }
-//
-//        function addProtoProperty(key, property, superProperty)
-//        {
-//            if (!isFunction(property) ||
-//                !isFunction(superProperty)) {
-//                ProtoObj.prototype[key] = property;
-//            }
-//            else
-//            {
-//                // Create function with ref to base method
-//                ProtoObj.prototype[key] = function()
-//                {
-//                    this._super = superProperty;
-//                    return property.apply(this, arguments);
-//                };
-//            }
-//        }
-//
-//        ProtoObj.prototype.constructor = ProtoObj;
-//
-//        // Namespaced/"Static" properties
-//        ProtoObj.extend = this.extend || this.define;
-//        ProtoObj.mixin = this.mixin;
-//
-//        for (key in staticProperties)
-//        {
-//            ProtoObj[key] = staticProperties[key];
-//        }
-//
-//        return ProtoObj;
-//    };
-//
-//    /**
-//     * Mixin a set of variables/functions as prototypes for this object. Any variables/functions
-//     * that already exist with the same name will be overridden.
-//     *
-//     * @param properties    variables/functions to mixin with this object
-//     */
-//    Recurve.Proto.mixin = function(properties) {
-//        Recurve.Proto.mixinWith(this, properties);
-//    };
-//
-//    /**
-//     * Mixin a set of variables/functions as prototypes for the object. Any variables/functions
-//     * that already exist with the same name will be overridden.
-//     *
-//     * @param properties    variables/functions to mixin with this object
-//     */
-//    Recurve.Proto.mixinWith = function(obj, properties) {
-//        for (key in properties) {
-//            obj.prototype[key] = properties[key];
-//        }
-//    };
-//})();
+var Timer = Proto.define([
+    function ctor() {
+    },
 
+    {
+        start: function(log, message) {
+            this._log = log;
+
+            if (supportsConsoleTime()) {
+                console.time(message);
+            }
+            else {
+                this._startTime = DateUtils.performanceNow();
+            }
+
+            this._message = message;
+        },
+
+        end: function(description) {
+            if (supportsConsoleTime()) {
+                console.timeEnd(this._message);
+            }
+            else {
+                this._log.info(this._message + ": " + (DateUtils.performanceNow() - this._startTime) + " ms");
+            }
+
+            if (description) {
+                this._log.info(description);
+            }
+        }
+    }
+]);
+
+function supportsConsoleTime() {
+    return console && console.time && console.timeEnd;
+}
+},{"./log/log.js":8,"./proto.js":10,"./utils/date.js":16}],10:[function(require,module,exports){
 var dontInvokeConstructor = {};
 
 function isFunction(value) {
@@ -2083,147 +1532,10 @@ Proto.mixinWith = function(obj, properties) {
 
 module.exports = Proto;
 },{}],11:[function(require,module,exports){
-/*
-(function() {
-
-    "use strict";
-
-    var Recurve = window.Recurve = window.Recurve || {};
-
-    Recurve.Signal = Recurve.Proto.define([
-        function ctor() {
-            this._listeners = [];
-        },
-
-        {
-            add: function(callback, context) {
-                if (!callback) {
-                    return;
-                }
-
-                if (this._listenerExists(callback, context)) {
-                    return;
-                }
-
-                this._listeners.push(new SignalListener(callback, context));
-            },
-
-            addOnce: function(callback, context) {
-                if (!callback) {
-                    return;
-                }
-
-                if (this._listenerExists(callback, context)) {
-                    return;
-                }
-
-                this._listeners.push(new SignalListener(callback, context, true));
-            },
-
-            remove: function(callback, context) {
-                for (var index = 0; index < this._listeners.length; index++) {
-                    var possibleListener = this._listeners[index];
-                    var match;
-
-                    if (!callback) {
-                        if (possibleListener.isSameContext(context)) {
-                            match = true;
-                        }
-                    }
-                    else if (possibleListener.isSame(callback, context)) {
-                        match = true;
-                    }
-                    else {
-                        // do nothing - no match
-                    }
-
-                    if (match) {
-                        Recurve.ArrayUtils.removeAt(this._listeners, index);
-
-                        // can only be one match if callback specified
-                        if (callback) {
-                            return;
-                        }
-                    }
-                }
-            },
-
-            removeAll: function() {
-                this._listeners = [];
-            },
-
-            trigger: function() {
-                if (this._disabled) {
-                    return;
-                }
-
-                for (var index = this._listeners.length - 1; 0 <= index; index--) {
-                    var listener = this._listeners[index];
-
-                    listener.trigger(arguments);
-
-                    if (listener.onlyOnce) {
-                        Recurve.ArrayUtils.removeAt(this._listeners, index);
-                    }
-                }
-
-            },
-
-            disable: function(value) {
-                if (undefined === value) {
-                    value = true;
-                }
-
-                this._disabled = value;
-            },
-
-            _listenerExists: function(callback, context) {
-                for (var index = this._listeners.length - 1; 0 <= index; index--) {
-                    var listener = this._listeners[index];
-
-                    if (listener.isSame(callback, context)) {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-        }
-    ]);
-
-    var SignalListener = Recurve.Proto.define([
-        function ctor(callback, context, onlyOnce) {
-           this._callback = callback;
-           this._context = context;
-           this.onlyOnce = onlyOnce;
-        },
-
-        {
-            isSame: function(callback, context) {
-                if (!context) {
-                    return this._callback === callback;
-                }
-
-                return this._callback === callback && this._context === context;
-            },
-
-            isSameContext: function(context) {
-                return this._context === context;
-            },
-
-            trigger: function(args) {
-                this._callback.apply(this._context, args);
-            }
-        }
-    ]);
-
-})();
-*/
-
 "use strict";
 
-var Proto = require("./recurve-proto.js");
-var ArrayUtils = require("./recurve-array.js");
+var Proto = require("./proto.js");
+var ArrayUtils = require("./utils/array.js");
 
 module.exports = Proto.define([
     function ctor() {
@@ -2351,221 +1663,481 @@ var SignalListener = Proto.define([
         }
     }
 ]);
-},{"./recurve-array.js":2,"./recurve-proto.js":10}],12:[function(require,module,exports){
-/*(function() {
-    "use strict";
-
-    var Recurve = window.Recurve = window.Recurve || {};
-
-    Recurve.StringUtils =
-    {
-        format: function(value) {
-            if (!value) {
-                return null;
-            }
-
-            Array.prototype.shift.apply(arguments);
-
-            for (var index = 0; index < arguments.length; index++) {
-                var search = "{" + index + "}";
-                value = value.replace(search, arguments[index]);
-            }
-
-            return value;
-        },
-
-        formatWithProperties: function(value, formatProperties) {
-            if (!value) {
-                return null;
-            }
-
-            for (var property in formatProperties) {
-                if (formatProperties.hasOwnProperty(property)) {
-                    var search = "{" + property + "}";
-                    value = value.replace(search, formatProperties[property]);
-                }
-            }
-
-            return value;
-        },
-
-        pad: function( value, padCount, padValue ) {
-            if (undefined === padValue) {
-                padValue = "0";
-            }
-
-            value = String( value );
-
-            while (value.length < padCount) {
-                value = padValue + value;
-            }
-
-            return value;
-        },
-
-        formatTime: function(date) {
-            if (undefined === date) {
-                date = new Date();
-            }
-
-            var hours = this.pad(date.getHours(), 2);
-            var minutes = this.pad(date.getMinutes(), 2);
-            var seconds = this.pad(date.getSeconds(), 2);
-            var milliseconds = this.pad(date.getMilliseconds(), 2);
-
-            return this.format(
-                "{0}:{1}:{2}:{3}", hours, minutes, seconds, milliseconds);
-        },
-
-        formatMonthDayYear: function(date) {
-            if (!date) {
-                return "";
-            }
-
-            var pad = Recurve.StringUtils.pad;
-
-            var month = pad(date.getMonth() + 1);
-            var day = pad(date.getDate());
-            var year = date.getFullYear();
-
-            return this.format(
-                "{0}/{1}/{2}", month, day, year);
-        },
-
-        formatYearRange: function(start, end) {
-            var value = "";
-
-            if (start && end) {
-                value = start + " - " + end;
-            }
-            else if (start) {
-                value = start;
-            }
-            else {
-                value = end;
-            }
-
-            return value;
-        },
-
-        capitalizeFirstCharacter: function(value) {
-            if (!value) {
-                return null;
-            }
-
-            return value.charAt(0).toUpperCase()  + value.slice(1);
-        },
-
-        urlLastPath: function(value) {
-            if (!value) {
-                return;
-            }
-
-            var split = value.split("/");
-            return 0 < split.length ? split[split.length-1] : null;
-        },
-
-        hasValue: function(value) {
-            return value && 0 < value.length;
-        },
-
-        linesOf: function(value) {
-            var lines;
-
-            if (value) {
-                lines = value.split("\n");
-            }
-
-            return lines;
-        },
-
-        isEqual: function(str, value, ignoreCase) {
-            if (!str || !value) {
-                return str == value;
-            }
-
-            if (ignoreCase) {
-                str = str.toLowerCase();
-                value = value.toLowerCase();
-            }
-
-            return str == value;
-        },
-
-        isEqualIgnoreCase: function(str, value) {
-            return Recurve.StringUtils.isEqual(str, value, true);
-        },
-
-        contains: function(str, value, ignoreCase) {
-            if (!str || !value) {
-                return str == value;
-            }
-
-            if (ignoreCase) {
-                str = str.toLowerCase();
-                value = value.toLowerCase();
-            }
-
-            return 0 <= str.indexOf(value);
-        },
-
-        addParametersToUrl: function(url, parameters) {
-            if (!url || !parameters) {
-                return;
-            }
-
-            var seperator = Recurve.StringUtils.contains(url, "?") ? "&" : "?";
-
-            for (var key in parameters) {
-                var value = parameters[key];
-
-                if (Recurve.ObjectUtils.isObject(value)) {
-                    if (Recurve.ObjectUtils.isDate(value)) {
-                        value = value.toISOString();
-                    }
-                    else {
-                        value = Recurve.ObjectUtils.toJson(value);
-                    }
-                }
-
-                url += seperator +  encodeURIComponent(key) + encodeURIComponent(parameters[key]);
-                seperator = "?";
-            }
-
-            return url;
-        },
-
-        removeParameterFromUrl: function(url, parameter) {
-            if (!url || !parameter) {
-                return;
-            }
-
-            var search = parameter + "=";
-            var startIndex = url.indexOf(search);
-
-            if (-1 === index) {
-                return;
-            }
-
-            var endIndex = url.indexOf("&", startIndex);
-
-            if (-1 < endIndex) {
-                url = url.substr(0, Math.max(startIndex - 1, 0)) + url.substr(endIndex);
-            }
-            else {
-                url = url.substr(0, Math.max(startIndex - 1, 0));
-            }
-
-            return url;
-        }
-    };
-})();
-
-*/
-
+},{"./proto.js":10,"./utils/array.js":15}],12:[function(require,module,exports){
 "use strict";
 
-var ObjectUtils = require("./recurve-object.js");
+var Storage = require("./storage.js")
+
+module.exports = new Storage(window.localStorage);
+},{"./storage.js":14}],13:[function(require,module,exports){
+var Storage = require("./storage.js")
+
+module.exports = new Storage(window.sessionStorage);
+},{"./storage.js":14}],14:[function(require,module,exports){
+"use strict";
+
+var DateUtils = require("../utils/date.js");
+var ObjectUtils = require("../utils/object.js");
+var Proto = require("../proto.js");
+var Cache = require("../cache.js");
+var assert = require("../assert.js");
+
+module.exports = Proto.define([
+    function ctor(storage, useCache, cache) {
+        if (undefined === useCache) {
+            useCache = true;
+        }
+
+        this._storage = storage;
+
+        if (useCache) {
+            if (undefined === cache) {
+                cache = new Cache();
+            }
+
+            this._cache = cache;
+        }
+    },
+
+    {
+        get: function(key) {
+            assert(key, "key must be set");
+
+            var value;
+
+            if (this._cache) {
+                value = this._cache.get(key);
+
+                if (value) {
+                    return value;
+                }
+            }
+
+            value = this._storage.getItem(key);
+            value = deSerialize(value);
+
+            if (this._cache) {
+                this._cache.set(key, value);
+            }
+
+            return value;
+        },
+
+        set: function(key, value) {
+            assert(key, "key must be set");
+
+            if (undefined === value) {
+                this.remove(key);
+            }
+
+            var serialized = serialize(value);
+            this._storage.setItem(key, serialized);
+
+            if (this._cache) {
+                this._cache.set(key, value);
+            }
+        },
+
+        remove: function(key) {
+            assert(key, "key must be set");
+
+            if (this._cache) {
+                this._cache.remove(key);
+            }
+
+            return this._storage.removeItem(key);
+        },
+
+        clear: function() {
+            this._storage.clear();
+
+            if (this._cache) {
+                this._cache.clear();
+            }
+        },
+
+        getWithExpiration: function(key) {
+            var item = this.get(key);
+            if (!item) {
+                return null;
+            }
+
+            var elapsed = DateUtils.now() - item.time;
+            if (item.expiry < elapsed) {
+                return null;
+            }
+
+            return item.value;
+        },
+
+        setWithExpiration: function(key, value, expiry) {
+            this.set(key, {value: value, expiry: expiry, time: DateUtils.now()});
+        },
+
+        forEach: function(iterator) {
+            assert(iterator, "iterator must be set");
+
+            for (var key in this._storage) {
+                var value = this.get(key);
+                iterator(key, value);
+            }
+        },
+
+        setCache: function(value) {
+            this._cache = value;
+        }
+    }
+]);
+
+
+function serialize(value) {
+    return JSON.stringify(value);
+}
+
+function deSerialize(value) {
+    if (!ObjectUtils.isString(value)) {
+        return undefined;
+    }
+
+    try {
+        return JSON.parse(value);
+    }
+    catch(e) {
+        return value || undefined;
+    }
+}
+},{"../assert.js":1,"../cache.js":2,"../proto.js":10,"../utils/date.js":16,"../utils/object.js":18}],15:[function(require,module,exports){
+"use strict";
+
+module.exports = {
+    removeItem: function(array, item) {
+        if (!array) {
+            return;
+        }
+
+        var index = array.indexOf(item);
+
+        if (-1 < index) {
+            array.splice(index, 1);
+        }
+    },
+
+    removeAt: function(array, index) {
+        if (!array) {
+            return;
+        }
+
+        if (0 <= index && array.length > index) {
+            array.splice(index, 1);
+        }
+    },
+
+    replaceItem: function(array, item) {
+        if (!array) {
+            return;
+        }
+
+        var index = array.indexOf(item);
+
+        if (-1 < index) {
+            array[index] = item;
+        }
+    },
+
+    isEmpty: function(value) {
+        return !value || 0 === value.length;
+    },
+
+    argumentsToArray: function(args, sliceCount) {
+        return sliceCount < args.length ? Array.prototype.slice.call(args, sliceCount) : [];
+    }
+};
+},{}],16:[function(require,module,exports){
+"use strict";
+
+module.exports = {
+    now: function() {
+        return new Date().getTime();
+    },
+
+    performanceNow: function() {
+        return performance && performance.now ? performance.now() : this.now();
+    }
+};
+},{}],17:[function(require,module,exports){
+"use strict";
+
+var ObjectUtils = require("./object.js");
+
+module.exports = {
+    createElement: function(name, attributes) {
+        var element = document.createElement(name);
+
+        ObjectUtils.forEach(attributes, function(value, key) {
+            element.setAttribute(key, value);
+        });
+
+        return element;
+    },
+
+    elementSupportsOnEvent: function(element, name) {
+        return name in element;
+    }
+};
+},{"./object.js":18}],18:[function(require,module,exports){
+"use strict";
+
+module.exports = {
+    forEach: function(obj, iterator, context) {
+        if (!obj) {
+            return;
+        }
+
+        if (obj.forEach && obj.forEach === Object.forEach) {
+            obj.forEach(iterator, context);
+        }
+        else if (this.isArray(obj) && obj.length) {
+            for (var index = 0; index < obj.length; index++) {
+                if (false === iterator.call(context, obj[index], index, obj)) {
+                    return;
+                }
+            }
+        }
+        else {
+            var keys = this.keys(obj);
+            for (var index = 0; index < keys.length; index++) {
+                if (false === iterator.call(context, obj[keys[index]], keys[index], obj)) {
+                    return;
+                }
+            }
+        }
+
+        return keys;
+    },
+
+    keys: function(obj) {
+        if (!this.isObject(obj)) {
+            return [];
+        }
+
+        if (Object.keys) {
+            return Object.keys(obj);
+        }
+
+        var keys = [];
+
+        for (var key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                keys.push(key);
+            }
+        }
+
+        return keys;
+    },
+
+    keyCount: function(obj) {
+        if (!this.isObject(obj)) {
+            return 0;
+        }
+
+        var count = 0;
+
+        for (var key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                count++;
+            }
+        }
+
+        return count;
+    },
+
+    // both values pass strict equality (===)
+    // both objects are same type and all properties pass strict equality
+    // both are NaN
+    areEqual: function(value, other) {
+        if (value === other) {
+            return true;
+        }
+
+        if (null === value || null === other) {
+            return false;
+        }
+
+        // NaN is NaN!
+        if (this.isNaN(value) && this.isNaN(other)) {
+            return true;
+        }
+
+        if (!this.isSameType(value, other)) {
+            return false;
+        }
+
+        if (!this.isObject(value)) {
+            return false;
+        }
+
+        if (this.isArray(value)) {
+            if (value.length == other.length) {
+                for (var index = 0; index < value.length; index++) {
+                    if (!this.areEqual(value[index], other[index])) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+        }
+        else if(this.isDate(value)) {
+            return value.getTime() == other.getTime();
+        }
+        else {
+            var keysOfValue = {};
+            for (var key in value) {
+                if (this.isFunction(value[key])) {
+                    continue;
+                }
+
+                if (!this.areEqual(value[key], other[key])) {
+                    return false;
+                }
+
+                keysOfValue[key] = true;
+            }
+
+            for (var key in other) {
+                if (this.isFunction(other[key])) {
+                    continue;
+                }
+
+                if (!keysOfValue.hasOwnProperty(key)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        return false;
+    },
+
+    isNaN: function(value) {
+        // NaN is never equal to itself, interesting :)
+        return value !== value;
+    },
+
+    isSameType: function(value, other) {
+        return typeof value == typeof other;
+    },
+
+    isString: function(value) {
+        return (value instanceof String || "string" == typeof value);
+    },
+
+    isError: function(value) {
+        return value instanceof Error;
+    },
+
+    isObject: function(value) {
+        return value === Object(value);
+    },
+
+    isArray: function(value) {
+        return value instanceof Array;
+    },
+
+    isFunction: function(value) {
+        return "function" == typeof value;
+    },
+
+    isDate: function(value) {
+        return value instanceof Date;
+    },
+
+    isFile: function(value) {
+        return "[object File]" === String(data);
+    },
+
+    bind: function(func, context) {
+        // Based heavily on underscore/firefox implementation.
+
+        if (!this.isFunction(func)) {
+            throw new TypeError("not a function");
+        }
+
+        if (Function.prototype.bind) {
+            return Function.prototype.bind.apply(func, Array.prototype.slice.call(arguments, 1));
+        }
+
+        var args = Array.prototype.slice.call(arguments, 2);
+
+        var bound = function() {
+            if (!(this instanceof bound)) {
+                return func.apply(context, args.concat(Array.prototype.slice.call(arguments)));
+            }
+
+            bindCtor.prototype = func.prototype;
+            var that = new bindCtor();
+            bindCtor.prototype = null;
+
+            var result = func.apply(that, args.concat(Array.prototype.slice.call(arguments)));
+            if (Object(result) === result) {
+                return result;
+            }
+
+            return that;
+        };
+
+        return bound;
+    },
+
+    extend: function(dest, src) {
+        if (!src) {
+            return;
+        }
+
+        for (var key in src) {
+            dest[key] = src[key];
+        }
+
+        return dest;
+    },
+
+    toJson: function(obj) {
+        if (!this.isObject(obj)) {
+            throw new Error("not an object to convert to JSON");
+        }
+
+        return JSON.stringify(obj);
+    },
+
+    fromJson: function(str) {
+        if (!str) {
+            return null;
+        }
+
+        return JSON.parse(str);
+    },
+
+    toFormData: function(obj) {
+        if (!obj) {
+            return null;
+        }
+
+        var values = [];
+
+        this.forEach(obj, function(value, key) {
+            values.push(encodeURIComponent(key) + "=" + encodeURIComponent(value));
+        });
+
+        return values.join("&");
+    }
+};
+
+
+},{}],19:[function(require,module,exports){
+"use strict";
+
+var ObjectUtils = require("./object.js");
 
 module.exports = {
     format: function(value) {
@@ -2768,37 +2340,7 @@ module.exports = {
 };
 
 
-},{"./recurve-object.js":9}],13:[function(require,module,exports){
-/*(function() {
-    "use strict";
-
-    var Recurve = window.Recurve = window.Recurve || {};
-
-    Recurve.WindowUtils =
-    {
-        isFileProtocol: function() {
-            return "file:" === window.location.protocol;
-        },
-
-        globalEval: function(src) {
-            if (!src) {
-                return;
-            }
-
-            // https://weblogs.java.net/blog/driscoll/archive/2009/09/08/eval-javascript-global-context
-            if (window.execScript) {
-                window.execScript(src);
-            }
-
-            var func = function() {
-                window.eval.call(window.src);
-            };
-
-            func();
-        }
-    };
-})(); */
-
+},{"./object.js":18}],20:[function(require,module,exports){
 "use strict";
 
 module.exports  = {
@@ -2823,4 +2365,4 @@ module.exports  = {
         func();
     }
 }
-},{}]},{},[1,2,3,4,5,6,7,8,9,10,11,12,13]);
+},{}]},{},[1,2,3,4,6,9,10,11]);

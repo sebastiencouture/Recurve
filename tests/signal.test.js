@@ -1,4 +1,4 @@
-var Signal = require("../src/recurve-signal.js");
+var Signal = require("../src/signal.js");
 
 describe("Recurve.Signal", function() {
     var signal;

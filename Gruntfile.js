@@ -20,26 +20,13 @@ module.exports = function(grunt) {
                 dest: "dist/recurve.js"
             },
 
-            distBrowserify: {
-                src: ["src/recurve-*.js"],
-                dest: "dist/recurve-browserify.js"
-            },
-
-            distMap: {
+            distSourceMap: {
                 src: ["src/*.js"],
                 dest: "dist/recurve-sourcemap.js",
                 options: {
                     bundleOptions: {
                         debug: true
                     }
-                }
-            },
-
-            distBrowserifyMap: {
-                src: ["src/recurve-*.js"],
-                dest: "dist/recurve-browserify-sourcemap.js",
-                bundleOptions: {
-                    debug: true
                 }
             },
 
@@ -65,19 +52,9 @@ module.exports = function(grunt) {
                 dest: 'dist/recurve.js'
             },
 
-            distMap: {
+            distSourceMap: {
                 src: ['dist/recurve-sourcemap.js'],
                 dest: 'dist/recurve-sourcemap.js'
-            },
-
-            distBrowserify: {
-                src: ['dist/recurve-browserify.js'],
-                dest: 'dist/recurve-browserify.js'
-            },
-
-            distBrowserifyMap: {
-                src: ['dist/recurve-browserify-sourcemap.js'],
-                dest: 'dist/recurve-browserify-sourcemap.js'
             },
 
             karma: {
@@ -94,12 +71,6 @@ module.exports = function(grunt) {
             dist: {
                 files: {
                     "dist/recurve.min.js": ["dist/recurve.js"]
-                }
-            },
-
-            distBrowserify: {
-                files: {
-                    "dist/recurve-browserify.min.js": ["dist/recurve-browserify.js"]
                 }
             }
         },

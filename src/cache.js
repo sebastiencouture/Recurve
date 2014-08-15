@@ -1,9 +1,9 @@
 "use strict";
 
-var Proto = require("./recurve-proto.js");
-var ObjectUtils = require("./recurve-object.js");
-var DateUtils = require("./recurve-date.js");
-var assert = require("./recurve-assert.js");
+var Proto = require("./proto.js");
+var ObjectUtils = require("./utils/object.js");
+var DateUtils = require("./utils/date.js");
+var assert = require("./assert.js");
 
 module.exports = Proto.define([
     function ctor(countLimit, totalCostLimit) {

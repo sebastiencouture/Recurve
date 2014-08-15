@@ -1,9 +1,9 @@
 "use strict";
 
-var Proto = require("./recurve-proto.js");
-var ArrayUtils = require("./recurve-array.js");
-var StringUtils = require("./recurve-string.js");
-var LogTarget = require("./recurve-log-console.js");
+var Proto = require("../proto.js");
+var ArrayUtils = require("../utils/array.js");
+var StringUtils = require("../utils/string.js");
+var LogTarget = require("./log-console.js");
 
 module.exports = Proto.define([
 
