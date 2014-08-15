@@ -22,6 +22,7 @@
     Recurve.SessionStorage = require("./storage/session-storage.js");
     Recurve.PerformanceMonitor = require("./performance-monitor.js");
     Recurve.LazyLoad = require("./lazy-load.js");
+    Recurve.Cookies = require("./cookies.js");
 
     window.Recurve = Recurve;
 })();

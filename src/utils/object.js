@@ -2,7 +2,7 @@
 
 module.exports = {
     forEach: function(obj, iterator, context) {
-        if (!obj) {
+        if (!obj || !iterator) {
             return;
         }
 
@@ -19,7 +19,8 @@ module.exports = {
         else {
             var keys = this.keys(obj);
             for (var index = 0; index < keys.length; index++) {
-                if (false === iterator.call(context, obj[keys[index]], keys[index], obj)) {
+                var key = keys[index];
+                if (false === iterator.call(context, obj[key], key, obj)) {
                     return;
                 }
             }
@@ -168,6 +169,10 @@ module.exports = {
 
     isFile: function(value) {
         return "[object File]" === String(data);
+    },
+
+    isNumber: function(value) {
+        return "number" == typeof value;
     },
 
     bind: function(func, context) {

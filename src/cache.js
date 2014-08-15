@@ -49,6 +49,12 @@ module.exports = Proto.define([
             delete this._cache[key];
         },
 
+        exists: function(key) {
+            assert(key, "key must be set");
+
+            return this._cache[key] ? true : false;
+        },
+
         clear: function() {
             this._cache = {};
         },
@@ -69,6 +75,12 @@ module.exports = Proto.define([
 
         totalCostLimit: function() {
             return this._totalCostLimit;
+        },
+
+        forEach: function(iterator) {
+            assert(iterator, "iterator must be set");
+
+            ObjectUtils.forEach(this._cache, iterator);
         },
 
         _currentTotalCost: function() {

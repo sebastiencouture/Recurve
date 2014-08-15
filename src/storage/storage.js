@@ -45,7 +45,7 @@ module.exports = Proto.define([
             }
 
             value = this._storage.getItem(key);
-            value = deSerialize(value);
+            value = parse(value);
 
             if (this._cache) {
                 this._cache.set(key, value);
@@ -87,6 +87,16 @@ module.exports = Proto.define([
             return this._storage.removeItem(key);
         },
 
+        exists: function(key) {
+            assert(key, "key must be set");
+
+            if (!this.supported) {
+                return false;
+            }
+
+            return this._storage.getItem(key) ? true : false;
+        },
+
         clear: function() {
             if (!this.supported) {
                 return;
@@ -126,7 +136,7 @@ module.exports = Proto.define([
 
             for (var key in this._storage) {
                 var value = this.get(key);
-                iterator(key, value);
+                iterator(value, key);
             }
         },
 
@@ -141,16 +151,16 @@ function serialize(value) {
     return JSON.stringify(value);
 }
 
-function deSerialize(value) {
+function parse(value) {
     if (!ObjectUtils.isString(value)) {
-        return undefined;
+        return null;
     }
 
     try {
         return JSON.parse(value);
     }
     catch(e) {
-        return value || undefined;
+        return value;
     }
 }
 

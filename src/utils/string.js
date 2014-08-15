@@ -143,6 +143,24 @@ module.exports = {
         return 0 <= str.indexOf(value);
     },
 
+    beforeSeparator: function(str, separator) {
+        if (!str || !separator) {
+            return null;
+        }
+
+        var index = str.indexOf(separator);
+        return -1 < index ? str.substring(0, index) : null;
+    },
+
+    afterSeparator: function(str, separator) {
+        if (!str || !separator) {
+            return null;
+        }
+
+        var index = str.indexOf(separator);
+        return -1 < index ? str.substring(index + 1) : null;
+    },
+
     // TODO TBD where to put this function?
     generateUUID: function() {
         var now = DateUtils.now();

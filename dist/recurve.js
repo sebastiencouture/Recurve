@@ -50,10 +50,11 @@ SOFTWARE.
     Recurve.SessionStorage = require("./storage/session-storage.js");
     Recurve.PerformanceMonitor = require("./performance-monitor.js");
     Recurve.LazyLoad = require("./lazy-load.js");
+    Recurve.Cookies = require("./cookies.js");
 
     window.Recurve = Recurve;
 })();
-},{"./assert.js":2,"./cache.js":3,"./global-error-handler.js":4,"./http/http.js":9,"./lazy-load.js":10,"./log/log-console.js":11,"./log/log.js":12,"./performance-monitor.js":13,"./proto.js":14,"./signal.js":15,"./storage/local-storage.js":16,"./storage/session-storage.js":17,"./utils/array.js":19,"./utils/date.js":20,"./utils/object.js":22,"./utils/string.js":23,"./utils/window.js":24}],2:[function(require,module,exports){
+},{"./assert.js":2,"./cache.js":3,"./cookies.js":4,"./global-error-handler.js":5,"./http/http.js":10,"./lazy-load.js":11,"./log/log-console.js":12,"./log/log.js":13,"./performance-monitor.js":14,"./proto.js":15,"./signal.js":16,"./storage/local-storage.js":17,"./storage/session-storage.js":18,"./utils/array.js":20,"./utils/date.js":21,"./utils/object.js":23,"./utils/string.js":24,"./utils/window.js":26}],2:[function(require,module,exports){
 "use strict";
 
 var StringUtils = require("./utils/string.js");
@@ -108,7 +109,7 @@ assert = ObjectUtils.extend(assert, {
 });
 
 module.exports = assert;
-},{"./utils/array.js":19,"./utils/object.js":22,"./utils/string.js":23}],3:[function(require,module,exports){
+},{"./utils/array.js":20,"./utils/object.js":23,"./utils/string.js":24}],3:[function(require,module,exports){
 "use strict";
 
 var Proto = require("./proto.js");
@@ -160,6 +161,12 @@ module.exports = Proto.define([
             delete this._cache[key];
         },
 
+        exists: function(key) {
+            assert(key, "key must be set");
+
+            return this._cache[key] ? true : false;
+        },
+
         clear: function() {
             this._cache = {};
         },
@@ -180,6 +187,12 @@ module.exports = Proto.define([
 
         totalCostLimit: function() {
             return this._totalCostLimit;
+        },
+
+        forEach: function(iterator) {
+            assert(iterator, "iterator must be set");
+
+            ObjectUtils.forEach(this._cache, iterator);
         },
 
         _currentTotalCost: function() {
@@ -245,7 +258,150 @@ module.exports = Proto.define([
     }
 ]);
 
-},{"./assert.js":2,"./proto.js":14,"./utils/date.js":20,"./utils/object.js":22}],4:[function(require,module,exports){
+},{"./assert.js":2,"./proto.js":15,"./utils/date.js":21,"./utils/object.js":23}],4:[function(require,module,exports){
+"use strict";
+
+var ObjectUtils = require("./utils/object.js");
+var StringUtils = require("./utils/string.js");
+var DateUtils = require("./utils/date.js");
+var assert = require("./assert.js");
+
+module.exports = {
+    get: function(key) {
+        assert(key, "key must be set");
+
+        var value = null;
+
+        forEachCookie(function(cookie, name){
+            if (name === key) {
+                var rawValue = StringUtils.afterSeparator(cookie, "=");
+                value = parse(rawValue);
+
+                return false;
+            }
+        });
+
+        return value;
+    },
+
+    set: function(key, value, options) {
+        assert(key, "key must be set");
+
+        if (undefined === options) {
+            options = {};
+        }
+
+        if (ObjectUtils.isNumber(options.expires)) {
+            options.expires = DateUtils.addDaysFromNow(options.expires);
+        }
+
+        var cookie = encodeURIComponent(key) + "=" + serialize(value);
+
+        if (ObjectUtils.isDate(options.expires)) {
+            cookie +=  "; expires=" + options.expires.toUTCString();
+        }
+
+        if (options.domain) {
+            cookie += "; domain=" + options.domain;
+        }
+
+        if (options.path) {
+            cookie += "; path=" + options.path;
+        }
+
+        if (options.secure) {
+            cookie += "; secure";
+        }
+
+        document.cookie = cookie;
+    },
+
+    remove: function(key, options) {
+        assert(key, "key must be set");
+
+        if (undefined === options) {
+            options = {};
+        }
+
+        if (!this.exists(key)) {
+            return false;
+        }
+
+        var updated = encodeURIComponent(key) + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+
+        if (options.domain) {
+            updated += "; domain=" + options.domain;
+        }
+
+        if (options.path) {
+            updated += "; path=" + options.path;
+        }
+
+        document.cookie = updated;
+
+        return true;
+    },
+
+    exists: function(key) {
+        var exists = false;
+
+        forEachCookie(function(cookie, name){
+            if (name === key) {
+                exists = true;
+                return false;
+            }
+        });
+
+        return exists;
+    },
+
+    forEach: function(iterator) {
+        assert(iterator, "iterator must be set");
+
+        forEachCookie(function(cookie, name){
+            var rawValue = StringUtils.afterSeparator(cookie, "=");
+            var value = parse(rawValue);
+
+            iterator(value, name, cookie);
+        });
+    }
+};
+
+
+function forEachCookie(iterator) {
+    var cookies = document.cookie ? document.cookie.split(";") : [];
+
+    ObjectUtils.forEach(cookies, function(cookie) {
+        cookie = cookie.trim();
+        var name = decodeURIComponent(StringUtils.beforeSeparator(cookie, "="));
+        iterator(cookie, name);
+    });
+}
+
+function serialize(value) {
+    var string = ObjectUtils.isObject(value) ? JSON.stringify(value) : String(value);
+    return encodeURIComponent(string);
+}
+
+function parse(value) {
+    if (!ObjectUtils.isString(value)) {
+        return null;
+    }
+
+    // quoted cookie, unescape
+    if (0 === value.indexOf('"')) {
+        value = value.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+    }
+
+    try {
+        value = decodeURIComponent(value);
+        return JSON.parse(value);
+    }
+    catch(e) {
+        return value;
+    }
+}
+},{"./assert.js":2,"./utils/date.js":21,"./utils/object.js":23,"./utils/string.js":24}],5:[function(require,module,exports){
 "use strict";
 
 var Proto = require("./proto.js");
@@ -359,7 +515,7 @@ module.exports = Proto.define([
         }
     }
 ]);
-},{"./proto.js":14,"./utils/array.js":19,"./utils/object.js":22,"./utils/string.js":23}],5:[function(require,module,exports){
+},{"./proto.js":15,"./utils/array.js":20,"./utils/object.js":23,"./utils/string.js":24}],6:[function(require,module,exports){
 "use strict";
 
 var ObjectUtils = require("../utils/object.js");
@@ -411,7 +567,7 @@ module.exports = Proto.define([
         }
     }
 ]);
-},{"../proto.js":14,"../utils/object.js":22,"../utils/string.js":23}],6:[function(require,module,exports){
+},{"../proto.js":15,"../utils/object.js":23,"../utils/string.js":24}],7:[function(require,module,exports){
 "use strict";
 
 var Signal = require("../signal.js");
@@ -469,11 +625,12 @@ module.exports = Proto.define([
         }
     }
 ]);
-},{"../proto.js":14,"../signal.js":15}],7:[function(require,module,exports){
+},{"../proto.js":15,"../signal.js":16}],8:[function(require,module,exports){
 "use strict";
 
 var ObjectUtils = require("../utils/object.js");
 var StringUtils = require("../utils/string.js");
+var UrlUtils = require("../utils/url.js");
 var Proto = require("../proto.js");
 
 var requestId = 0;
@@ -488,8 +645,8 @@ module.exports = Proto.define([
     {
         send: function() {
             var callbackId = "RecurveJsonPCallback" + this._id;
-            var url = StringUtils.removeParameterFromUrl(this._options.url, "callback");
-            url = StringUtils.addParametersToUrl(url, {callback: callbackId});
+            var url = UrlUtils.removeParameterFromUrl(this._options.url, "callback");
+            url = UrlUtils.addParametersToUrl(url, {callback: callbackId});
 
             var script = document.createElement("script");
             script.src = url;
@@ -556,7 +713,7 @@ module.exports = Proto.define([
         }
     }
 ]);
-},{"../proto.js":14,"../utils/object.js":22,"../utils/string.js":23}],8:[function(require,module,exports){
+},{"../proto.js":15,"../utils/object.js":23,"../utils/string.js":24,"../utils/url.js":25}],9:[function(require,module,exports){
 "use strict";
 
 var ObjectUtils = require("../utils/object.js");
@@ -730,12 +887,13 @@ module.exports = Proto.define([
         }
     }
 ]);
-},{"../proto.js":14,"../utils/object.js":22,"../utils/string.js":23,"../utils/window.js":24}],9:[function(require,module,exports){
+},{"../proto.js":15,"../utils/object.js":23,"../utils/string.js":24,"../utils/window.js":26}],10:[function(require,module,exports){
 "use strict";
 
 var ObjectUtils = require("../utils/object.js");
 var StringUtils = require("../utils/string.js");
 var DateUtils = require("../utils/date.js");
+var UrlUtils = require("../utils/url.js");
 
 var Xhr = require("./http-xhr.js");
 var JsonpRequest = require("./http-jsonp.js");
@@ -964,7 +1122,7 @@ function updateUrl(options) {
     }
 
     options.url =
-        StringUtils.addParametersToUrl(
+        UrlUtils.addParametersToUrl(
             options.url, options.params);
 }
 
@@ -1057,7 +1215,7 @@ function serializeData(options) {
 
     options.data = data;
 }
-},{"../utils/date.js":20,"../utils/object.js":22,"../utils/string.js":23,"./http-cors-script.js":5,"./http-deferred.js":6,"./http-jsonp.js":7,"./http-xhr.js":8}],10:[function(require,module,exports){
+},{"../utils/date.js":21,"../utils/object.js":23,"../utils/string.js":24,"../utils/url.js":25,"./http-cors-script.js":6,"./http-deferred.js":7,"./http-jsonp.js":8,"./http-xhr.js":9}],11:[function(require,module,exports){
 "use strict";
 
 var DomUtils = require("./utils/dom.js");
@@ -1119,7 +1277,7 @@ function load(element, onComplete, onError) {
 
     document.head.appendChild(element);
 }
-},{"./utils/dom.js":21,"./utils/string.js":23}],11:[function(require,module,exports){
+},{"./utils/dom.js":22,"./utils/string.js":24}],12:[function(require,module,exports){
 "use strict";
 
 var Proto = require("../proto.js");
@@ -1190,7 +1348,7 @@ module.exports = Proto.define([
     }
 ]);
 
-},{"../proto.js":14}],12:[function(require,module,exports){
+},{"../proto.js":15}],13:[function(require,module,exports){
 "use strict";
 
 var Proto = require("../proto.js");
@@ -1367,7 +1525,7 @@ module.exports = Proto.define([
         }
     }
 ]);
-},{"../proto.js":14,"../utils/array.js":19,"../utils/string.js":23,"./log-console.js":11}],13:[function(require,module,exports){
+},{"../proto.js":15,"../utils/array.js":20,"../utils/string.js":24,"./log-console.js":12}],14:[function(require,module,exports){
 "use strict";
 
 var Proto = require("./proto.js");
@@ -1451,7 +1609,7 @@ var Timer = Proto.define([
 function supportsConsoleTime() {
     return console && console.time && console.timeEnd;
 }
-},{"./log/log.js":12,"./proto.js":14,"./utils/date.js":20}],14:[function(require,module,exports){
+},{"./log/log.js":13,"./proto.js":15,"./utils/date.js":21}],15:[function(require,module,exports){
 var dontInvokeConstructor = {};
 
 function isFunction(value) {
@@ -1558,7 +1716,7 @@ Proto.mixinWith = function(obj, properties) {
 };
 
 module.exports = Proto;
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 "use strict";
 
 var Proto = require("./proto.js");
@@ -1690,21 +1848,22 @@ var SignalListener = Proto.define([
         }
     }
 ]);
-},{"./proto.js":14,"./utils/array.js":19}],16:[function(require,module,exports){
+},{"./proto.js":15,"./utils/array.js":20}],17:[function(require,module,exports){
 "use strict";
 
 var Storage = require("./storage.js")
 
 module.exports = new Storage(window.localStorage);
-},{"./storage.js":18}],17:[function(require,module,exports){
+},{"./storage.js":19}],18:[function(require,module,exports){
 var Storage = require("./storage.js")
 
 module.exports = new Storage(window.sessionStorage);
-},{"./storage.js":18}],18:[function(require,module,exports){
+},{"./storage.js":19}],19:[function(require,module,exports){
 "use strict";
 
 var DateUtils = require("../utils/date.js");
 var ObjectUtils = require("../utils/object.js");
+var StringUtils = require("../utils/string.js");
 var Proto = require("../proto.js");
 var Cache = require("../cache.js");
 var assert = require("../assert.js");
@@ -1724,11 +1883,17 @@ module.exports = Proto.define([
 
             this._cache = cache;
         }
+
+        this.supported = isSupported(this._storage);
     },
 
     {
         get: function(key) {
             assert(key, "key must be set");
+
+            if (!this.supported) {
+                return null;
+            }
 
             var value;
 
@@ -1741,7 +1906,7 @@ module.exports = Proto.define([
             }
 
             value = this._storage.getItem(key);
-            value = deSerialize(value);
+            value = parse(value);
 
             if (this._cache) {
                 this._cache.set(key, value);
@@ -1752,6 +1917,10 @@ module.exports = Proto.define([
 
         set: function(key, value) {
             assert(key, "key must be set");
+
+            if (!this.supported) {
+                return;
+            }
 
             if (undefined === value) {
                 this.remove(key);
@@ -1768,6 +1937,10 @@ module.exports = Proto.define([
         remove: function(key) {
             assert(key, "key must be set");
 
+            if (!this.supported) {
+                return;
+            }
+
             if (this._cache) {
                 this._cache.remove(key);
             }
@@ -1775,7 +1948,21 @@ module.exports = Proto.define([
             return this._storage.removeItem(key);
         },
 
+        exists: function(key) {
+            assert(key, "key must be set");
+
+            if (!this.supported) {
+                return false;
+            }
+
+            return this._storage.getItem(key) ? true : false;
+        },
+
         clear: function() {
+            if (!this.supported) {
+                return;
+            }
+
             this._storage.clear();
 
             if (this._cache) {
@@ -1804,9 +1991,13 @@ module.exports = Proto.define([
         forEach: function(iterator) {
             assert(iterator, "iterator must be set");
 
+            if (!this.supported) {
+                return;
+            }
+
             for (var key in this._storage) {
                 var value = this.get(key);
-                iterator(key, value);
+                iterator(value, key);
             }
         },
 
@@ -1821,19 +2012,38 @@ function serialize(value) {
     return JSON.stringify(value);
 }
 
-function deSerialize(value) {
+function parse(value) {
     if (!ObjectUtils.isString(value)) {
-        return undefined;
+        return null;
     }
 
     try {
         return JSON.parse(value);
     }
     catch(e) {
-        return value || undefined;
+        return value;
     }
 }
-},{"../assert.js":2,"../cache.js":3,"../proto.js":14,"../utils/date.js":20,"../utils/object.js":22}],19:[function(require,module,exports){
+
+function isSupported(storage) {
+    if (!storage) {
+        return false;
+    }
+
+    // When Safari is in private browsing mode, storage will still be available
+    // but it will throw an error when trying to set an item
+    var key = "_recurve" + StringUtils.generateUUID();
+    try {
+        storage.setItem(key, "");
+        storage.removeItem(key);
+    }
+    catch (e) {
+        return false;
+    }
+
+    return true;
+}
+},{"../assert.js":2,"../cache.js":3,"../proto.js":15,"../utils/date.js":21,"../utils/object.js":23,"../utils/string.js":24}],20:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -1879,19 +2089,26 @@ module.exports = {
         return sliceCount < args.length ? Array.prototype.slice.call(args, sliceCount) : [];
     }
 };
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 "use strict";
 
 module.exports = {
     now: function() {
-        return new Date().getTime();
+        return Date.now ? Date.now() : new Date().getTime();
     },
 
     performanceNow: function() {
         return performance && performance.now ? performance.now() : this.now();
+    },
+
+    addDaysFromNow: function(days) {
+        var date = new Date();
+        date.setDate(date.getDate() + days);
+
+        return date;
     }
 };
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 "use strict";
 
 var ObjectUtils = require("./object.js");
@@ -1911,12 +2128,12 @@ module.exports = {
         return name in element;
     }
 };
-},{"./object.js":22}],22:[function(require,module,exports){
+},{"./object.js":23}],23:[function(require,module,exports){
 "use strict";
 
 module.exports = {
     forEach: function(obj, iterator, context) {
-        if (!obj) {
+        if (!obj || !iterator) {
             return;
         }
 
@@ -1933,7 +2150,8 @@ module.exports = {
         else {
             var keys = this.keys(obj);
             for (var index = 0; index < keys.length; index++) {
-                if (false === iterator.call(context, obj[keys[index]], keys[index], obj)) {
+                var key = keys[index];
+                if (false === iterator.call(context, obj[key], key, obj)) {
                     return;
                 }
             }
@@ -2084,6 +2302,10 @@ module.exports = {
         return "[object File]" === String(data);
     },
 
+    isNumber: function(value) {
+        return "number" == typeof value;
+    },
+
     bind: function(func, context) {
         // Based heavily on underscore/firefox implementation.
 
@@ -2161,10 +2383,11 @@ module.exports = {
 };
 
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 "use strict";
 
 var ObjectUtils = require("./object.js");
+var DateUtils = require("./date.js");
 
 module.exports = {
     format: function(value) {
@@ -2262,15 +2485,6 @@ module.exports = {
         return value.charAt(0).toUpperCase()  + value.slice(1);
     },
 
-    urlLastPath: function(value) {
-        if (!value) {
-            return;
-        }
-
-        var split = value.split("/");
-        return 0 < split.length ? split[split.length-1] : null;
-    },
-
     hasValue: function(value) {
         return value && 0 < value.length;
     },
@@ -2315,12 +2529,60 @@ module.exports = {
         return 0 <= str.indexOf(value);
     },
 
+    beforeSeparator: function(str, separator) {
+        if (!str || !separator) {
+            return null;
+        }
+
+        var index = str.indexOf(separator);
+        return -1 < index ? str.substring(0, index) : null;
+    },
+
+    afterSeparator: function(str, separator) {
+        if (!str || !separator) {
+            return null;
+        }
+
+        var index = str.indexOf(separator);
+        return -1 < index ? str.substring(index + 1) : null;
+    },
+
+    // TODO TBD where to put this function?
+    generateUUID: function() {
+        var now = DateUtils.now();
+        var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(character) {
+            var random = (now + Math.random()*16)%16 | 0;
+            now = Math.floor(now/16);
+            return (character=='x' ? random : (random&0x7|0x8)).toString(16);
+        });
+
+        return uuid;
+    }
+};
+
+
+},{"./date.js":21,"./object.js":23}],25:[function(require,module,exports){
+"use strict";
+
+var ObjectUtils = require("./object.js");
+var StringUtils = require("./string.js");
+
+module.exports = {
+    urlLastPath: function(value) {
+        if (!value) {
+            return;
+        }
+
+        var split = value.split("/");
+        return 0 < split.length ? split[split.length-1] : null;
+    },
+
     addParametersToUrl: function(url, parameters) {
         if (!url || !parameters) {
             return;
         }
 
-        var seperator = this.contains(url, "?") ? "&" : "?";
+        var seperator = StringUtils.contains(url, "?") ? "&" : "?";
 
         for (var key in parameters) {
             var value = parameters[key];
@@ -2365,9 +2627,7 @@ module.exports = {
         return url;
     }
 };
-
-
-},{"./object.js":22}],24:[function(require,module,exports){
+},{"./object.js":23,"./string.js":24}],26:[function(require,module,exports){
 "use strict";
 
 module.exports  = {
@@ -2392,4 +2652,4 @@ module.exports  = {
         func();
     }
 }
-},{}]},{},[1,2,3,4,10,13,14,15]);
+},{}]},{},[1,2,3,4,5,11,14,15,16]);
