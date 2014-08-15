@@ -80,7 +80,7 @@ assert = ObjectUtils.extend(assert, {
 });
 
 module.exports = assert;
-},{"./utils/array.js":15,"./utils/object.js":18,"./utils/string.js":19}],2:[function(require,module,exports){
+},{"./utils/array.js":19,"./utils/object.js":22,"./utils/string.js":23}],2:[function(require,module,exports){
 "use strict";
 
 var Proto = require("./proto.js");
@@ -217,7 +217,7 @@ module.exports = Proto.define([
     }
 ]);
 
-},{"./assert.js":1,"./proto.js":10,"./utils/date.js":16,"./utils/object.js":18}],3:[function(require,module,exports){
+},{"./assert.js":1,"./proto.js":14,"./utils/date.js":20,"./utils/object.js":22}],3:[function(require,module,exports){
 (function(){
     "use strict";
 
@@ -245,7 +245,7 @@ module.exports = Proto.define([
 
     window.Recurve = Recurve;
 })();
-},{"./assert.js":1,"./cache.js":2,"./global-error-handler.js":4,"./http/http.js":5,"./lazy-load.js":6,"./log/log-console.js":7,"./log/log.js":8,"./performance-monitor.js":9,"./proto.js":10,"./signal.js":11,"./storage/local-storage.js":12,"./storage/session-storage.js":13,"./utils/array.js":15,"./utils/date.js":16,"./utils/object.js":18,"./utils/string.js":19,"./utils/window.js":20}],4:[function(require,module,exports){
+},{"./assert.js":1,"./cache.js":2,"./global-error-handler.js":4,"./http/http.js":9,"./lazy-load.js":10,"./log/log-console.js":11,"./log/log.js":12,"./performance-monitor.js":13,"./proto.js":14,"./signal.js":15,"./storage/local-storage.js":16,"./storage/session-storage.js":17,"./utils/array.js":19,"./utils/date.js":20,"./utils/object.js":22,"./utils/string.js":23,"./utils/window.js":24}],4:[function(require,module,exports){
 "use strict";
 
 var Proto = require("./proto.js");
@@ -359,15 +359,388 @@ module.exports = Proto.define([
         }
     }
 ]);
-},{"./proto.js":10,"./utils/array.js":15,"./utils/object.js":18,"./utils/string.js":19}],5:[function(require,module,exports){
+},{"./proto.js":14,"./utils/array.js":19,"./utils/object.js":22,"./utils/string.js":23}],5:[function(require,module,exports){
+"use strict";
+
+var ObjectUtils = require("../utils/object.js");
+var StringUtils = require("../utils/string.js");
+var Proto = require("../proto.js");
+
+var requestId = 0;
+
+module.exports = Proto.define([
+    function ctor(options, deferred) {
+        this._options = options;
+        this._deferred = deferred;
+        this._id = requestId++;
+    },
+
+    {
+        send: function() {
+            var script = document.createElement("script");
+            script.src = this._options.url;
+            script.async = true;
+
+            var that = this;
+
+            function loadErrorHandler (event) {
+                script.removeEventListener("load", loadErrorHandler);
+                script.removeEventListener("error", loadErrorHandler);
+
+                document.head.removeChild(script);
+                script = null;
+
+                if (event && "error" === event.type) {
+                    that._deferred.reject({status: 404, canceled: that._canceled});
+                }
+                else {
+                    that._deferred.resolve({status: 200, canceled: that._canceled});
+                }
+            }
+
+            // TODO TBD if going to support IE8 then need to check "onreadystatechange" as well
+            // http://pieisgood.org/test/script-link-events/
+            script.addEventListener("load", loadErrorHandler);
+            script.addEventListener("error", loadErrorHandler);
+
+            document.head.appendChild(script);
+        },
+
+        cancel: function() {
+            this._canceled = true;
+        }
+    }
+]);
+},{"../proto.js":14,"../utils/object.js":22,"../utils/string.js":23}],6:[function(require,module,exports){
+"use strict";
+
+var Signal = require("../signal.js");
+var Proto = require("../proto.js");
+
+module.exports = Proto.define([
+    function ctor() {
+        this._succeeded = new Signal();
+        this._errored = new Signal();
+    },
+
+    {
+        resolve: function(response) {
+            this._succeeded.trigger(response);
+            this._cleanUp();
+        },
+
+        reject: function(response) {
+            this._errored.trigger(response);
+            this._cleanUp();
+        },
+
+        promise: {
+            then: function(onSuccess, onError) {
+                this._succeeded.addOnce(onSuccess);
+                this._errored.addOnce(onError);
+            },
+
+            success: function(onSuccess) {
+                this._succeeded.addOnce(function(response) {
+                    onSuccess(response.data, response.status, response.statusText,
+                        response.headers, response.options, response.canceled);
+                });
+            },
+
+            error: function(onError) {
+                this._errored.addOnce(function(response) {
+                    onError(response.data, response.status, response.statusText,
+                        response.headers, response.options, response.canceled);
+                });
+
+            },
+
+            cancel: function() {
+                this.request && this.request.cancel();
+            }
+        },
+
+        _cleanUp: function() {
+            this._succeeded.removeAll();
+            this._succeeded = null;
+
+            this._errored.removeAll();
+            this._errored = null;
+        }
+    }
+]);
+},{"../proto.js":14,"../signal.js":15}],7:[function(require,module,exports){
+"use strict";
+
+var ObjectUtils = require("../utils/object.js");
+var StringUtils = require("../utils/string.js");
+var Proto = require("../proto.js");
+
+var requestId = 0;
+
+module.exports = Proto.define([
+    function ctor(options, deferred) {
+        this._options = options;
+        this._deferred = deferred;
+        this._id = requestId++;
+    },
+
+    {
+        send: function() {
+            var callbackId = "RecurveJsonPCallback" + this._id;
+            var url = StringUtils.removeParameterFromUrl(this._options.url, "callback");
+            url = StringUtils.addParametersToUrl(url, {callback: callbackId});
+
+            var script = document.createElement("script");
+            script.src = url;
+            script.type = "text/javascript";
+            script.async = true;
+
+            var called;
+            var that = this;
+
+            function callbackHandler(data) {
+                called = true;
+
+                if (that._canceled && that._options.errorOnCancel) {
+                    that._complete();
+                }
+                else {
+                    that._complete(true, data, 200);
+                }
+            }
+
+            function loadErrorHandler (event) {
+                script.removeEventListener("load", loadErrorHandler);
+                script.removeEventListener("error", loadErrorHandler);
+
+                document.head.removeChild(script);
+                script = null;
+
+                delete window[callbackId];
+
+                if (event && "load" === event.type && !called) {
+                    that._complete(false, null, 404, "jsonp callback not called");
+                }
+            }
+
+            // TODO TBD if going to support IE8 then need to check "onreadystatechange" as well
+            // http://pieisgood.org/test/script-link-events/
+            script.addEventListener("load", loadErrorHandler);
+            script.addEventListener("error", loadErrorHandler);
+
+            window[callbackId] = callbackHandler;
+
+            document.head.appendChild(script);
+        },
+
+        cancel: function() {
+            this._canceled = true;
+        },
+
+        _complete: function(success, data, status, statusText) {
+            var response = {
+                data: data,
+                status: status,
+                statusText: statusText,
+                options: this._options,
+                canceled: this._canceled
+            };
+
+            if (success) {
+                this._deferred.resolve(response);
+            }
+            else {
+                this._deferred.reject(response);
+            }
+        }
+    }
+]);
+},{"../proto.js":14,"../utils/object.js":22,"../utils/string.js":23}],8:[function(require,module,exports){
+"use strict";
+
+var ObjectUtils = require("../utils/object.js");
+var StringUtils = require("../utils/string.js");
+var WindowUtils = require("../utils/window.js");
+var Proto = require("../proto.js");
+
+var requestId = 0;
+
+module.exports = Proto.define([
+    function ctor(options, deferred) {
+        this._options = options;
+        this._deferred = deferred;
+        this._id = requestId++;
+    },
+
+    {
+        send: function() {
+            if (window.XMLHttpRequest) {
+                this._xhr = new XMLHttpRequest();
+            }
+            else {
+                throw new Error("Recurve only supports IE8+");
+            }
+
+            this._config();
+
+            this._xhr.onreadystatechange =
+                ObjectUtils.bind(this._stateChangeHandler, this);
+
+            this._xhr.open(this._options.method.toUpperCase(), this._options.url, true);
+
+            if (this._options.beforeSend) {
+                this._options.beforeSend(this._xhr, this._options);
+            }
+
+            this._xhr.send(this._options.data);
+        },
+
+        cancel: function() {
+            this._canceled = true;
+
+            if (this._xhr) {
+                this._xhr.abort();
+            }
+        },
+
+        _config: function() {
+            this._addHeaders();
+
+            if (this._options.withCredentials) {
+                this._xhr.withCredentials = true;
+            }
+
+            if (this._options.timeout) {
+                this._xhr.timeout = this._options.timeout;
+            }
+
+            if (this._options.responseType) {
+                try {
+                    this._xhr.responseType = this._options.responseType;
+                }
+                catch (error) {
+                    // https://bugs.webkit.org/show_bug.cgi?id=73648
+                    // Safari will throw error for "json" method, ignore this since
+                    // we can handle it
+                    if (!StringUtils.isEqualIgnoreCase("json", this._options.method)) {
+                        throw error;
+                    }
+                }
+            }
+        },
+
+        _addHeaders: function() {
+            ObjectUtils.forEach(this._options.headers, function(value, header) {
+                if (value) {
+                    this._xhr.setRequestHeader(header, value);
+                }
+            })
+        },
+
+        _stateChangeHandler: function() {
+            if (4 !== this._xhr.readyState) {
+                return;
+            }
+
+            if (this._isSuccess()) {
+                this._handleSuccess();
+            }
+            else {
+                this._handleError();
+            }
+        },
+
+        _isSuccess: function() {
+            if (this._canceled && this._options.errorOnCancel) {
+                return false;
+            }
+
+            var status = this._xhr.status;
+
+            return (200 <= status && 300 > status) ||
+                304 === status ||
+                (0 === status && WindowUtils.isFileProtocol());
+        },
+
+        _handleSuccess: function() {
+            if (!this._options.success) {
+                return;
+            }
+
+            var data;
+
+            if (StringUtils.isEqualIgnoreCase("script", this._options.dataType)) {
+                data = this._request.responseText;
+                WindowUtils.globalEval(data);
+            }
+            else {
+                try {
+                    data = this._parseResponse();
+                }
+                catch (error) {
+                    this._handleError("unable to parse response");
+                    return;
+                }
+            }
+
+            this._complete(true, data);
+        },
+
+        _handleError: function(statusText) {
+            this._complete(false, null, statusText);
+        },
+
+        _complete: function(success, data, statusText) {
+            var response = {
+                data: data,
+                status : this._xhr.status,
+                statusText : statusText ? statusText : this._xhr.statusText,
+                headers : this._xhr.getAllResponseHeaders(),
+                options : this._options,
+                canceled : this._canceled
+            };
+
+            if (success) {
+                this._deferred.resolve(response);
+            }
+            else {
+                this._deferred.reject(response);
+            }
+        },
+
+        _parseResponse: function() {
+            var accept =  this._options.headers && this._options.headers.Accept;
+            if (!accept) {
+                accept = this._xhr.getResponseHeader('content-type');
+            }
+
+            var data;
+
+            if (ObjectUtils.isFunction(this._options.serializer)) {
+                data = this._options.parser(this._xhr), accept;
+            }
+            else {
+                ObjectUtils.forEach(this._options.parser, function(parser) {
+                    data = parser(this._xhr, accept);
+                });
+            }
+
+            return data;
+        }
+    }
+]);
+},{"../proto.js":14,"../utils/object.js":22,"../utils/string.js":23,"../utils/window.js":24}],9:[function(require,module,exports){
 "use strict";
 
 var ObjectUtils = require("../utils/object.js");
 var StringUtils = require("../utils/string.js");
 var DateUtils = require("../utils/date.js");
-var WindowUtils = require("../utils/window.js");
-var Signal = require("../signal.js");
-var Proto = require("../proto.js");
+
+var Xhr = require("./http-xhr.js");
+var JsonpRequest = require("./http-jsonp.js");
+var CrossDomainScriptRequest = require("./http-cors-script.js");
+var HttpDeferred = require("./http-deferred.js");
 
 var Http = {
     defaults: {
@@ -684,353 +1057,7 @@ function serializeData(options) {
 
     options.data = data;
 }
-
-
-var HttpDeferred = Proto.define([
-    function ctor() {
-        this._succeeded = new Signal();
-        this._errored = new Signal();
-    },
-
-    {
-        resolve: function(response) {
-            this._succeeded.trigger(response);
-            this._cleanUp();
-        },
-
-        reject: function(response) {
-            this._errored.trigger(response);
-            this._cleanUp();
-        },
-
-        promise: {
-            then: function(onSuccess, onError) {
-                this._succeeded.addOnce(onSuccess);
-                this._errored.addOnce(onError);
-            },
-
-            success: function(onSuccess) {
-                this._succeeded.addOnce(function(response) {
-                    onSuccess(response.data, response.status, response.statusText,
-                        response.headers, response.options, response.canceled);
-                });
-            },
-
-            error: function(onError) {
-                this._errored.addOnce(function(response) {
-                    onError(response.data, response.status, response.statusText,
-                        response.headers, response.options, response.canceled);
-                });
-
-            },
-
-            cancel: function() {
-                this.request && this.request.cancel();
-            }
-        },
-
-        _cleanUp: function() {
-            this._succeeded.removeAll();
-            this._succeeded = null;
-
-            this._errored.removeAll();
-            this._errored = null;
-        }
-    }
-]);
-
-
-var requestId = 0;
-
-var Xhr = Proto.define([
-    function ctor(options, deferred) {
-        this._options = options;
-        this._deferred = deferred;
-        this._id = requestId++;
-    },
-
-    {
-        send: function() {
-            if (window.XMLHttpRequest) {
-                this._xhr = new XMLHttpRequest();
-            }
-            else {
-                throw new Error("Recurve only supports IE8+");
-            }
-
-            this._config();
-
-            this._xhr.onreadystatechange =
-                ObjectUtils.bind(this._stateChangeHandler, this);
-
-            this._xhr.open(this._options.method.toUpperCase(), this._options.url, true);
-
-            if (this._options.beforeSend) {
-                this._options.beforeSend(this._xhr, this._options);
-            }
-
-            this._xhr.send(this._options.data);
-        },
-
-        cancel: function() {
-            this._canceled = true;
-
-            if (this._xhr) {
-                this._xhr.abort();
-            }
-        },
-
-        _config: function() {
-            this._addHeaders();
-
-            if (this._options.withCredentials) {
-                this._xhr.withCredentials = true;
-            }
-
-            if (this._options.timeout) {
-                this._xhr.timeout = this._options.timeout;
-            }
-
-            if (this._options.responseType) {
-                try {
-                    this._xhr.responseType = this._options.responseType;
-                }
-                catch (error) {
-                    // https://bugs.webkit.org/show_bug.cgi?id=73648
-                    // Safari will throw error for "json" method, ignore this since
-                    // we can handle it
-                    if (!StringUtils.isEqualIgnoreCase("json", this._options.method)) {
-                        throw error;
-                    }
-                }
-            }
-        },
-
-        _addHeaders: function() {
-            ObjectUtils.forEach(this._options.headers, function(value, header) {
-                if (value) {
-                    this._xhr.setRequestHeader(header, value);
-                }
-            })
-        },
-
-        _stateChangeHandler: function() {
-            if (4 !== this._xhr.readyState) {
-                return;
-            }
-
-            if (this._isSuccess()) {
-                this._handleSuccess();
-            }
-            else {
-                this._handleError();
-            }
-        },
-
-        _isSuccess: function() {
-            if (this._canceled && this._options.errorOnCancel) {
-                return false;
-            }
-
-            var status = this._xhr.status;
-
-            return (200 <= status && 300 > status) ||
-                304 === status ||
-                (0 === status && WindowUtils.isFileProtocol());
-        },
-
-        _handleSuccess: function() {
-            if (!this._options.success) {
-                return;
-            }
-
-            var data;
-
-            if (StringUtils.isEqualIgnoreCase("script", this._options.dataType)) {
-                data = this._request.responseText;
-                WindowUtils.globalEval(data);
-            }
-            else {
-                try {
-                    data = this._parseResponse();
-                }
-                catch (error) {
-                    this._handleError("unable to parse response");
-                    return;
-                }
-            }
-
-            this._complete(true, data);
-        },
-
-        _handleError: function(statusText) {
-            this._complete(false, null, statusText);
-        },
-
-        _complete: function(success, data, statusText) {
-            var response = {
-                data: data,
-                status : this._xhr.status,
-                statusText : statusText ? statusText : this._xhr.statusText,
-                headers : this._xhr.getAllResponseHeaders(),
-                options : this._options,
-                canceled : this._canceled
-            };
-
-            if (success) {
-                this._deferred.resolve(response);
-            }
-            else {
-                this._deferred.reject(response);
-            }
-        },
-
-        _parseResponse: function() {
-            var accept =  this._options.headers && this._options.headers.Accept;
-            if (!accept) {
-                accept = this._xhr.getResponseHeader('content-type');
-            }
-
-            var data;
-
-            if (ObjectUtils.isFunction(this._options.serializer)) {
-                data = this._options.parser(this._xhr), accept;
-            }
-            else {
-                ObjectUtils.forEach(this._options.parser, function(parser) {
-                    data = parser(this._xhr, accept);
-                });
-            }
-
-            return data;
-        }
-    }
-]);
-
-
-var JsonpRequest = Proto.define([
-    function ctor(options, deferred) {
-        this._options = options;
-        this._deferred = deferred;
-        this._id = requestId++;
-    },
-
-    {
-        send: function() {
-            var callbackId = "RecurveJsonPCallback" + this._id;
-            var url = StringUtils.removeParameterFromUrl(this._options.url, "callback");
-            url = StringUtils.addParametersToUrl(url, {callback: callbackId});
-
-            var script = document.createElement("script");
-            script.src = url;
-            script.type = "text/javascript";
-            script.async = true;
-
-            var called;
-            var that = this;
-
-            function callbackHandler(data) {
-                called = true;
-
-                if (that._canceled && that._options.errorOnCancel) {
-                    that._complete();
-                }
-                else {
-                    that._complete(true, data, 200);
-                }
-            }
-
-            function loadErrorHandler (event) {
-                script.removeEventListener("load", loadErrorHandler);
-                script.removeEventListener("error", loadErrorHandler);
-
-                document.head.removeChild(script);
-                script = null;
-
-                delete window[callbackId];
-
-                if (event && "load" === event.type && !called) {
-                    that._complete(false, null, 404, "jsonp callback not called");
-                }
-            }
-
-            // TODO TBD if going to support IE8 then need to check "onreadystatechange" as well
-            // http://pieisgood.org/test/script-link-events/
-            script.addEventListener("load", loadErrorHandler);
-            script.addEventListener("error", loadErrorHandler);
-
-            window[callbackId] = callbackHandler;
-
-            document.head.appendChild(script);
-        },
-
-        cancel: function() {
-            this._canceled = true;
-        },
-
-        _complete: function(success, data, status, statusText) {
-            var response = {
-                data: data,
-                status: status,
-                statusText: statusText,
-                options: this._options,
-                canceled: this._canceled
-            };
-
-            if (success) {
-                this._deferred.resolve(response);
-            }
-            else {
-                this._deferred.reject(response);
-            }
-        }
-    }
-]);
-
-var CrossDomainScriptRequest = Proto.define([
-    function ctor(options, deferred) {
-        this._options = options;
-        this._deferred = deferred;
-        this._id = requestId++;
-    },
-
-    {
-        send: function() {
-            var script = document.createElement("script");
-            script.src = this._options.url;
-            script.async = true;
-
-            var that = this;
-
-            function loadErrorHandler (event) {
-                script.removeEventListener("load", loadErrorHandler);
-                script.removeEventListener("error", loadErrorHandler);
-
-                document.head.removeChild(script);
-                script = null;
-
-                if (event && "error" === event.type) {
-                    that._deferred.reject({status: 404, canceled: that._canceled});
-                }
-                else {
-                    that._deferred.resolve({status: 200, canceled: that._canceled});
-                }
-            }
-
-            // TODO TBD if going to support IE8 then need to check "onreadystatechange" as well
-            // http://pieisgood.org/test/script-link-events/
-            script.addEventListener("load", loadErrorHandler);
-            script.addEventListener("error", loadErrorHandler);
-
-            document.head.appendChild(script);
-        },
-
-        cancel: function() {
-            this._canceled = true;
-        }
-    }
-]);
-},{"../proto.js":10,"../signal.js":11,"../utils/date.js":16,"../utils/object.js":18,"../utils/string.js":19,"../utils/window.js":20}],6:[function(require,module,exports){
+},{"../utils/date.js":20,"../utils/object.js":22,"../utils/string.js":23,"./http-cors-script.js":5,"./http-deferred.js":6,"./http-jsonp.js":7,"./http-xhr.js":8}],10:[function(require,module,exports){
 "use strict";
 
 var DomUtils = require("./utils/dom.js");
@@ -1092,7 +1119,7 @@ function load(element, onComplete, onError) {
 
     document.head.appendChild(element);
 }
-},{"./utils/dom.js":17,"./utils/string.js":19}],7:[function(require,module,exports){
+},{"./utils/dom.js":21,"./utils/string.js":23}],11:[function(require,module,exports){
 "use strict";
 
 var Proto = require("../proto.js");
@@ -1163,7 +1190,7 @@ module.exports = Proto.define([
     }
 ]);
 
-},{"../proto.js":10}],8:[function(require,module,exports){
+},{"../proto.js":14}],12:[function(require,module,exports){
 "use strict";
 
 var Proto = require("../proto.js");
@@ -1340,7 +1367,7 @@ module.exports = Proto.define([
         }
     }
 ]);
-},{"../proto.js":10,"../utils/array.js":15,"../utils/string.js":19,"./log-console.js":7}],9:[function(require,module,exports){
+},{"../proto.js":14,"../utils/array.js":19,"../utils/string.js":23,"./log-console.js":11}],13:[function(require,module,exports){
 "use strict";
 
 var Proto = require("./proto.js");
@@ -1424,7 +1451,7 @@ var Timer = Proto.define([
 function supportsConsoleTime() {
     return console && console.time && console.timeEnd;
 }
-},{"./log/log.js":8,"./proto.js":10,"./utils/date.js":16}],10:[function(require,module,exports){
+},{"./log/log.js":12,"./proto.js":14,"./utils/date.js":20}],14:[function(require,module,exports){
 var dontInvokeConstructor = {};
 
 function isFunction(value) {
@@ -1531,7 +1558,7 @@ Proto.mixinWith = function(obj, properties) {
 };
 
 module.exports = Proto;
-},{}],11:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 "use strict";
 
 var Proto = require("./proto.js");
@@ -1663,17 +1690,17 @@ var SignalListener = Proto.define([
         }
     }
 ]);
-},{"./proto.js":10,"./utils/array.js":15}],12:[function(require,module,exports){
+},{"./proto.js":14,"./utils/array.js":19}],16:[function(require,module,exports){
 "use strict";
 
 var Storage = require("./storage.js")
 
 module.exports = new Storage(window.localStorage);
-},{"./storage.js":14}],13:[function(require,module,exports){
+},{"./storage.js":18}],17:[function(require,module,exports){
 var Storage = require("./storage.js")
 
 module.exports = new Storage(window.sessionStorage);
-},{"./storage.js":14}],14:[function(require,module,exports){
+},{"./storage.js":18}],18:[function(require,module,exports){
 "use strict";
 
 var DateUtils = require("../utils/date.js");
@@ -1806,7 +1833,7 @@ function deSerialize(value) {
         return value || undefined;
     }
 }
-},{"../assert.js":1,"../cache.js":2,"../proto.js":10,"../utils/date.js":16,"../utils/object.js":18}],15:[function(require,module,exports){
+},{"../assert.js":1,"../cache.js":2,"../proto.js":14,"../utils/date.js":20,"../utils/object.js":22}],19:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -1852,7 +1879,7 @@ module.exports = {
         return sliceCount < args.length ? Array.prototype.slice.call(args, sliceCount) : [];
     }
 };
-},{}],16:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -1864,7 +1891,7 @@ module.exports = {
         return performance && performance.now ? performance.now() : this.now();
     }
 };
-},{}],17:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 "use strict";
 
 var ObjectUtils = require("./object.js");
@@ -1884,7 +1911,7 @@ module.exports = {
         return name in element;
     }
 };
-},{"./object.js":18}],18:[function(require,module,exports){
+},{"./object.js":22}],22:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -2134,7 +2161,7 @@ module.exports = {
 };
 
 
-},{}],19:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 "use strict";
 
 var ObjectUtils = require("./object.js");
@@ -2340,7 +2367,7 @@ module.exports = {
 };
 
 
-},{"./object.js":18}],20:[function(require,module,exports){
+},{"./object.js":22}],24:[function(require,module,exports){
 "use strict";
 
 module.exports  = {
@@ -2365,4 +2392,4 @@ module.exports  = {
         func();
     }
 }
-},{}]},{},[1,2,3,4,6,9,10,11]);
+},{}]},{},[1,2,3,4,10,13,14,15]);
