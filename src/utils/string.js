@@ -1,6 +1,7 @@
 "use strict";
 
 var ObjectUtils = require("./object.js");
+var DateUtils = require("./date.js");
 
 module.exports = {
     format: function(value) {
@@ -151,6 +152,7 @@ module.exports = {
         return 0 <= str.indexOf(value);
     },
 
+    // TODO TBD move to url.js file
     addParametersToUrl: function(url, parameters) {
         if (!url || !parameters) {
             return;
@@ -199,6 +201,18 @@ module.exports = {
         }
 
         return url;
+    },
+
+    // TODO TBD where to put this function?
+    generateUUID: function() {
+        var now = DateUtils.now();
+        var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(character) {
+            var random = (now + Math.random()*16)%16 | 0;
+            now = Math.floor(now/16);
+            return (character=='x' ? random : (random&0x7|0x8)).toString(16);
+        });
+
+        return uuid;
     }
 };
 

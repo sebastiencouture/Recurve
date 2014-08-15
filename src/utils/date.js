@@ -2,7 +2,7 @@
 
 module.exports = {
     now: function() {
-        return new Date().getTime();
+        return Date.now ? Date.now() : new Date().getTime();
     },
 
     performanceNow: function() {
