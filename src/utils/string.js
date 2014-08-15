@@ -99,15 +99,6 @@ module.exports = {
         return value.charAt(0).toUpperCase()  + value.slice(1);
     },
 
-    urlLastPath: function(value) {
-        if (!value) {
-            return;
-        }
-
-        var split = value.split("/");
-        return 0 < split.length ? split[split.length-1] : null;
-    },
-
     hasValue: function(value) {
         return value && 0 < value.length;
     },
@@ -150,57 +141,6 @@ module.exports = {
         }
 
         return 0 <= str.indexOf(value);
-    },
-
-    // TODO TBD move to url.js file
-    addParametersToUrl: function(url, parameters) {
-        if (!url || !parameters) {
-            return;
-        }
-
-        var seperator = this.contains(url, "?") ? "&" : "?";
-
-        for (var key in parameters) {
-            var value = parameters[key];
-
-            if (ObjectUtils.isObject(value)) {
-                if (ObjectUtils.isDate(value)) {
-                    value = value.toISOString();
-                }
-                else {
-                    value = ObjectUtils.toJson(value);
-                }
-            }
-
-            url += seperator +  encodeURIComponent(key) + encodeURIComponent(parameters[key]);
-            seperator = "?";
-        }
-
-        return url;
-    },
-
-    removeParameterFromUrl: function(url, parameter) {
-        if (!url || !parameter) {
-            return;
-        }
-
-        var search = parameter + "=";
-        var startIndex = url.indexOf(search);
-
-        if (-1 === index) {
-            return;
-        }
-
-        var endIndex = url.indexOf("&", startIndex);
-
-        if (-1 < endIndex) {
-            url = url.substr(0, Math.max(startIndex - 1, 0)) + url.substr(endIndex);
-        }
-        else {
-            url = url.substr(0, Math.max(startIndex - 1, 0));
-        }
-
-        return url;
     },
 
     // TODO TBD where to put this function?

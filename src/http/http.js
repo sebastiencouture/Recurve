@@ -3,6 +3,7 @@
 var ObjectUtils = require("../utils/object.js");
 var StringUtils = require("../utils/string.js");
 var DateUtils = require("../utils/date.js");
+var UrlUtils = require("../utils/url.js");
 
 var Xhr = require("./http-xhr.js");
 var JsonpRequest = require("./http-jsonp.js");
@@ -231,7 +232,7 @@ function updateUrl(options) {
     }
 
     options.url =
-        StringUtils.addParametersToUrl(
+        UrlUtils.addParametersToUrl(
             options.url, options.params);
 }
 

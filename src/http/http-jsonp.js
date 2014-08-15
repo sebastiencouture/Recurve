@@ -2,6 +2,7 @@
 
 var ObjectUtils = require("../utils/object.js");
 var StringUtils = require("../utils/string.js");
+var UrlUtils = require("../utils/url.js");
 var Proto = require("../proto.js");
 
 var requestId = 0;
@@ -16,8 +17,8 @@ module.exports = Proto.define([
     {
         send: function() {
             var callbackId = "RecurveJsonPCallback" + this._id;
-            var url = StringUtils.removeParameterFromUrl(this._options.url, "callback");
-            url = StringUtils.addParametersToUrl(url, {callback: callbackId});
+            var url = UrlUtils.removeParameterFromUrl(this._options.url, "callback");
+            url = UrlUtils.addParametersToUrl(url, {callback: callbackId});
 
             var script = document.createElement("script");
             script.src = url;
