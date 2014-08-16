@@ -2,6 +2,7 @@
 
 var ObjectUtils = require("../utils/object.js");
 var StringUtils = require("../utils/string.js");
+var DomUtils = require("../utils/dom.js");
 var Proto = require("../proto.js");
 
 var requestId = 0;
@@ -22,8 +23,8 @@ module.exports = Proto.define([
             var that = this;
 
             function loadErrorHandler (event) {
-                script.removeEventListener("load", loadErrorHandler);
-                script.removeEventListener("error", loadErrorHandler);
+                DomUtils.removeEventListener(script, "load", loadErrorHandler);
+                DomUtils.removeEventListener(script, "error", loadErrorHandler);
 
                 document.head.removeChild(script);
                 script = null;
@@ -36,10 +37,8 @@ module.exports = Proto.define([
                 }
             }
 
-            // TODO TBD if going to support IE8 then need to check "onreadystatechange" as well
-            // http://pieisgood.org/test/script-link-events/
-            script.addEventListener("load", loadErrorHandler);
-            script.addEventListener("error", loadErrorHandler);
+            DomUtils.addEventListener(script, "load", loadErrorHandler);
+            DomUtils.addEventListener(script, "error", loadErrorHandler);
 
             document.head.appendChild(script);
         },

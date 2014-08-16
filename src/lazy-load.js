@@ -16,27 +16,19 @@ module.exports = {
 };
 
 function load(element, onComplete, onError) {
-    function readyStateHandler() {
-        if (StringUtils.isEqualIgnoreCase("loaded", element.readyState) ||
-            StringUtils.isEqualIgnoreCase("complete", element.readyState)) {
-            loadedHandler();
-        }
-    }
-
     function loadedHandler() {
-        clearCallbacks();
+        cleanup();
         onComplete();
     }
 
     function errorHandler(event) {
-        clearCallbacks();
+        cleanup();
         onError(event);
     }
 
-    function clearCallbacks() {
-        element.onload = null;
-        element.onreadystatechange = null;
-        element.onerror = null;
+    function cleanup() {
+        DomUtils.removeEventListener(element, "load", loadedHandler);
+        DomUtils.removeEventListener(element, "error", errorHandler);
     }
 
     // Maintain execution order
@@ -45,17 +37,8 @@ function load(element, onComplete, onError) {
     element.async = false;
     element.defer = false;
 
-    // http://pieisgood.org/test/script-link-events/
-    // TODO TBD link tags don't support any type of load callback on old WebKit (Safari 5)
-    // TODO TBD if not going to support IE8 then don't need to worry about onreadystatechange
-    if (DomUtils.elementSupportsOnEvent(element, "onreadystatechange")) {
-        element.onreadystatechange = readyStateHandler
-    }
-    else {
-        element.onload = loadedHandler;
-    }
-
-    element.onerror = errorHandler;
+    DomUtils.addEventListener(element, "load", loadedHandler);
+    DomUtils.addEventListener(element, "error", errorHandler);
 
     document.head.appendChild(element);
 }

@@ -54,7 +54,7 @@ var Http = {
         var deferred = withDefaults.deferredFactory(withDefaults);
         var request = withDefaults.requestFactory(withDefaults, deferred);
 
-        deferred.request = deferred;
+        deferred.request = request;
         request.send();
 
         return deferred.promise;

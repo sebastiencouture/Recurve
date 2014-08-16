@@ -3,6 +3,7 @@
 var ObjectUtils = require("../utils/object.js");
 var StringUtils = require("../utils/string.js");
 var UrlUtils = require("../utils/url.js");
+var DomUtils = require("../utils/dom.js");
 var Proto = require("../proto.js");
 
 var requestId = 0;
@@ -16,7 +17,7 @@ module.exports = Proto.define([
 
     {
         send: function() {
-            var callbackId = "RecurveJsonPCallback" + this._id;
+            var callbackId = "Recurve" + StringUtils.generateUUID();
             var url = UrlUtils.removeParameterFromUrl(this._options.url, "callback");
             url = UrlUtils.addParametersToUrl(url, {callback: callbackId});
 
@@ -40,8 +41,8 @@ module.exports = Proto.define([
             }
 
             function loadErrorHandler (event) {
-                script.removeEventListener("load", loadErrorHandler);
-                script.removeEventListener("error", loadErrorHandler);
+                DomUtils.removeEventListener(script, "load", loadErrorHandler);
+                DomUtils.removeEventListener(script, "error", loadErrorHandler);
 
                 document.head.removeChild(script);
                 script = null;
@@ -53,10 +54,8 @@ module.exports = Proto.define([
                 }
             }
 
-            // TODO TBD if going to support IE8 then need to check "onreadystatechange" as well
-            // http://pieisgood.org/test/script-link-events/
-            script.addEventListener("load", loadErrorHandler);
-            script.addEventListener("error", loadErrorHandler);
+            DomUtils.addEventListener(script, "load", loadErrorHandler);
+            DomUtils.addEventListener(script, "error", loadErrorHandler);
 
             window[callbackId] = callbackHandler;
 
