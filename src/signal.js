@@ -2,6 +2,7 @@
 
 var Proto = require("./proto.js");
 var ArrayUtils = require("./utils/array.js");
+var assert = require("./assert.js");
 
 module.exports = Proto.define([
     function ctor() {
@@ -10,9 +11,7 @@ module.exports = Proto.define([
 
     {
         add: function(callback, context) {
-            if (!callback) {
-                return;
-            }
+            assert(callback, "callback must exist");
 
             if (this._listenerExists(callback, context)) {
                 return;
@@ -22,9 +21,7 @@ module.exports = Proto.define([
         },
 
         addOnce: function(callback, context) {
-            if (!callback) {
-                return;
-            }
+            assert(callback, "callback must exist");
 
             if (this._listenerExists(callback, context)) {
                 return;
@@ -61,10 +58,6 @@ module.exports = Proto.define([
             }
         },
 
-        removeAll: function() {
-            this._listeners = [];
-        },
-
         trigger: function() {
             if (this._disabled) {
                 return;
@@ -80,6 +73,10 @@ module.exports = Proto.define([
                 }
             }
 
+        },
+
+        removeAll: function() {
+            this._listeners = [];
         },
 
         disable: function(value) {

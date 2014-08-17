@@ -16,6 +16,7 @@
     Recurve.Log = require("./log/log.js");
     Recurve.LogConsoleTarget = require("./log/log-console.js");
     Recurve.Signal = require("./signal.js");
+    Recurve.EventEmitter = require("./event-emitter.js");
     Recurve.Http = require("./http/http.js");
     Recurve.GlobalErrorHandler = require("./global-error-handler.js");
     Recurve.LocalStorage = require("./storage/local-storage.js");
