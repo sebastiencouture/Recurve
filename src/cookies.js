@@ -111,7 +111,7 @@ function forEachCookie(iterator) {
     var cookies = document.cookie ? document.cookie.split(";") : [];
 
     ObjectUtils.forEach(cookies, function(cookie) {
-        cookie = cookie.trim();
+        cookie = StringUtils.trim(cookie);
         var name = decodeURIComponent(StringUtils.beforeSeparator(cookie, "="));
         iterator(cookie, name);
     });

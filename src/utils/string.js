@@ -19,22 +19,22 @@ module.exports = {
         return value;
     },
 
-    formatWithProperties: function(value, formatProperties) {
+    formatWithObject: function(value, obj) {
         if (!value) {
             return null;
         }
 
-        for (var property in formatProperties) {
-            if (formatProperties.hasOwnProperty(property)) {
+        for (var property in obj) {
+            if (obj.hasOwnProperty(property)) {
                 var search = "{" + property + "}";
-                value = value.replace(search, formatProperties[property]);
+                value = value.replace(search, obj[property]);
             }
         }
 
         return value;
     },
 
-    pad: function( value, padCount, padValue ) {
+    pad: function(value, padCount, padValue) {
         if (undefined === padValue) {
             padValue = "0";
         }
@@ -46,6 +46,20 @@ module.exports = {
         }
 
         return value;
+    },
+
+    trim: function(value) {
+        if (!value) {
+            return null;
+        }
+
+        // IE8 no support :T, but native trim() is much faster, so use it
+        // when available
+        if (String.prototype.trim) {
+            return value.trim();
+        }
+
+        return value.replace(/^\s+|\s+$/g, '');
     },
 
     formatTime: function(date) {
@@ -163,6 +177,7 @@ module.exports = {
 
     // TODO TBD where to put this function?
     generateUUID: function() {
+        // http://stackoverflow.com/a/8809472
         var now = DateUtils.now();
         var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(character) {
             var random = (now + Math.random()*16)%16 | 0;
