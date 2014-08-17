@@ -175,6 +175,10 @@ module.exports = {
         return "number" == typeof value;
     },
 
+    hasFunction: function(obj, func) {
+        return this.isObject(obj) && obj[func] && this.isFunction(obj[func]);
+    },
+
     bind: function(func, context) {
         // Based heavily on underscore/firefox implementation.
 
