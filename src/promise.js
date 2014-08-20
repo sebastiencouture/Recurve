@@ -8,14 +8,42 @@ var Promise = Proto.define([
     function ctor(resolver) {
         assert(ObjectUtils.isFunction(resolver), "Promise resolver {0} is not a function", resolver);
 
+        this._subscribers = [];
+
+        function resolveHandler(value) {
+            resolve(this, value);
+        }
+
+        function rejectHandler(reason) {
+            reject(this, reason);
+        }
+
+        try {
+            resolver(resolveHandler, rejectHandler);
+        }
+        catch (error) {
+            rejectHandler(error);
+        }
     },
 
     {
+        // if callback returns:
+        // - value then continue down the chain with the value
+        // - thenable then wait for it to be fulfilled before continuing down the chain ( need to check if fulfilled/rejected already )
+        // -
         then: function(onFulfilled, onRejected) {
 
+            if (this._fulfilled || this._rejected) {
+
+            }
+            else {
+                this._subscribers.push(new Subscriber(onFulfilled, onRejected));
+            }
+
+            return new Promise(function() {});
         },
 
-        catch: function(onRejected) {
+        "catch": function(onRejected) {
             return this.then(null, onRejected);
         }
     },
@@ -28,14 +56,13 @@ var Promise = Proto.define([
 
             return new Promise(function(resolve) {
                 resolve(value);
-            })
-
+            });
         },
 
         reject: function(reason) {
             return new Promise(function(resolve, reject) {
                 reject(reason);
-            })
+            });
         },
 
         all: function(iterable) {
@@ -49,7 +76,7 @@ var Promise = Proto.define([
                     resolve(results);
                 }
 
-                function resolvedWithValue(index, value) {
+                function resolveWithValueHandler(index, value) {
                     results[index] = value;
                     countLeft--;
 
@@ -58,21 +85,21 @@ var Promise = Proto.define([
                     }
                 }
 
-                function resolved(index) {
+                function resolveHandler(index) {
                     return function(value) {
-                        resolvedWithValue(index, value)
+                        resolveWithValueHandler(index, value)
                     }
                 }
 
                 ObjectUtils.forEach(iterable, function(value, index) {
                     if (isThenable(value)) {
-                        value.then(resolved(index), reject);
+                        value.then(resolveHandler(index), reject);
                     }
                     else {
-                        resolvedWithValue(index, value);
+                        resolveWithValueHandler(index, value);
                     }
                 });
-            })
+            });
         },
 
         race: function(iterable) {
@@ -93,7 +120,25 @@ var Promise = Proto.define([
 ]);
 
 function isThenable(obj) {
-    return obj && ObjectUtils.isFunction(obj.then);
+    return ObjectUtils.isFunction(obj.then);
 }
+
+function resolve(value, promise) {
+
+}
+
+function reject(reason, promise) {
+
+}
+
+var Subscriber = Proto.define([
+    function ctor() {
+
+    },
+
+    {
+
+    }
+]);
 
 module.exports = Promise;
