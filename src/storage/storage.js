@@ -1,6 +1,5 @@
 "use strict";
 
-var DateUtils = require("../utils/date.js");
 var ObjectUtils = require("../utils/object.js");
 var StringUtils = require("../utils/string.js");
 var Proto = require("../proto.js");
@@ -115,7 +114,7 @@ module.exports = Proto.define([
                 return null;
             }
 
-            var elapsed = DateUtils.now() - item.time;
+            var elapsed = Date.now() - item.time;
             if (item.expiry < elapsed) {
                 return null;
             }
@@ -124,7 +123,7 @@ module.exports = Proto.define([
         },
 
         setWithExpiration: function(key, value, expiry) {
-            this.set(key, {value: value, expiry: expiry, time: DateUtils.now()});
+            this.set(key, {value: value, expiry: expiry, time: Date.now()});
         },
 
         forEach: function(iterator) {

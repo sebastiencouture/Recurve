@@ -1,10 +1,6 @@
 "use strict";
 
 module.exports  = {
-    isFileProtocol: function() {
-        return "file:" === window.location.protocol;
-    },
-
     globalEval: function(src) {
         if (!src) {
             return;

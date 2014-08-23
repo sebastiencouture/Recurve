@@ -17,7 +17,7 @@ module.exports = {
             }
         }
         else {
-            var keys = this.keys(obj);
+            var keys = Object.keys(obj);
             for (var index = 0; index < keys.length; index++) {
                 var key = keys[index];
                 if (false === iterator.call(context, obj[key], key, obj)) {
@@ -27,42 +27,6 @@ module.exports = {
         }
 
         return keys;
-    },
-
-    keys: function(obj) {
-        if (!this.isObject(obj)) {
-            return [];
-        }
-
-        if (Object.keys) {
-            return Object.keys(obj);
-        }
-
-        var keys = [];
-
-        for (var key in obj) {
-            if (obj.hasOwnProperty(key)) {
-                keys.push(key);
-            }
-        }
-
-        return keys;
-    },
-
-    keyCount: function(obj) {
-        if (!this.isObject(obj)) {
-            return 0;
-        }
-
-        var count = 0;
-
-        for (var key in obj) {
-            if (obj.hasOwnProperty(key)) {
-                count++;
-            }
-        }
-
-        return count;
     },
 
     // both values pass strict equality (===)
@@ -177,39 +141,6 @@ module.exports = {
 
     hasFunction: function(obj, func) {
         return this.isObject(obj) && obj[func] && this.isFunction(obj[func]);
-    },
-
-    bind: function(func, context) {
-        // Based heavily on underscore/firefox implementation.
-
-        if (!this.isFunction(func)) {
-            throw new TypeError("not a function");
-        }
-
-        if (Function.prototype.bind) {
-            return Function.prototype.bind.apply(func, Array.prototype.slice.call(arguments, 1));
-        }
-
-        var args = Array.prototype.slice.call(arguments, 2);
-
-        var bound = function() {
-            if (!(this instanceof bound)) {
-                return func.apply(context, args.concat(Array.prototype.slice.call(arguments)));
-            }
-
-            bindCtor.prototype = func.prototype;
-            var that = new bindCtor();
-            bindCtor.prototype = null;
-
-            var result = func.apply(that, args.concat(Array.prototype.slice.call(arguments)));
-            if (Object(result) === result) {
-                return result;
-            }
-
-            return that;
-        };
-
-        return bound;
     },
 
     extend: function(dest, src) {

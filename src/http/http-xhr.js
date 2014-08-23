@@ -26,7 +26,7 @@ module.exports = Proto.define([
             this._config();
 
             this._xhr.onreadystatechange =
-                ObjectUtils.bind(this._stateChangeHandler, this);
+                this._stateChangeHandler.bind(this)
 
             this._xhr.open(this._options.method.toUpperCase(), this._options.url, true);
 
@@ -101,7 +101,7 @@ module.exports = Proto.define([
 
             return (200 <= status && 300 > status) ||
                 304 === status ||
-                (0 === status && WindowUtils.isFileProtocol());
+                (0 === status && "file:" === window.location.protocol);
         },
 
         _handleSuccess: function() {

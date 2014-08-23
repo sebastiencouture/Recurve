@@ -2,7 +2,6 @@
 
 var ObjectUtils = require("../utils/object.js");
 var StringUtils = require("../utils/string.js");
-var DateUtils = require("../utils/date.js");
 var UrlUtils = require("../utils/url.js");
 
 var Xhr = require("./http-xhr.js");
@@ -75,7 +74,7 @@ var Http = {
         return this.request(options);
     },
 
-    delete: function(url, options) {
+    "delete": function(url, options) {
         options = ObjectUtils.extend(options, {method: "delete", url: url});
         return this.request(options);
     },
@@ -228,7 +227,7 @@ function mergeHeaders(method, options, defaultHeaders) {
 
 function updateUrl(options) {
     if (!options.cache) {
-        options.params.cache = DateUtils.now();
+        options.params.cache = Date.now();
     }
 
     options.url =

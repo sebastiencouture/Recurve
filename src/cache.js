@@ -2,7 +2,6 @@
 
 var Proto = require("./proto.js");
 var ObjectUtils = require("./utils/object.js");
-var DateUtils = require("./utils/date.js");
 var assert = require("./assert.js");
 
 module.exports = Proto.define([
@@ -96,7 +95,7 @@ module.exports = Proto.define([
         },
 
         _currentCount: function() {
-            return ObjectUtils.keyCount(this._cache);
+            return Object.keys(this._cache).length;
         },
 
         _evict: function() {
@@ -136,12 +135,12 @@ module.exports = Proto.define([
     {
         // Smaller the cost for newer
         inverseCurrentTimeCost: function() {
-            return 1 / DateUtils.now();
+            return 1 / Date.now();
         },
 
         // Smaller the cost for older
         currentTimeCost: function() {
-            return DateUtils.now();
+            return Date.now();
         }
     }
 ]);
