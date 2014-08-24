@@ -1,8 +1,10 @@
 "use strict";
 
-var Proto = require("../proto.js");
-var ArrayUtils = require("../utils/array.js");
-var StringUtils = require("../utils/string.js");
+var Proto = require("../../utils/proto.js");
+var ArrayUtils = require("../../utils/array.js");
+var StringUtils = require("../../utils/string.js");
+
+// TODO TBD should be a service
 var LogTarget = require("./log-console.js");
 
 module.exports = Proto.define([

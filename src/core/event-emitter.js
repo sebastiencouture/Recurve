@@ -1,10 +1,12 @@
 "use strict";
 
-var Proto = require("./proto.js");
-var Signal = require("./signal.js");
-var ArrayUtils = require("./utils/array.js");
-var ObjectUtils = require("./utils/object.js");
-var assert = require("./assert.js");
+var Proto = require("../utils/proto.js");
+var ArrayUtils = require("../utils/array.js");
+var ObjectUtils = require("../utils/object.js");
+var assert = require("../utils/assert.js");
+
+// TODO TBD should be a service
+var Signal = require("../signal.js");
 
 module.exports = Proto.define([
     function ctor() {

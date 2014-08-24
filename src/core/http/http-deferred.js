@@ -1,7 +1,8 @@
 "use strict";
 
+var Proto = require("../../utils/proto.js");
+
 var Signal = require("../signal.js");
-var Proto = require("../proto.js");
 
 module.exports = Proto.define([
     function ctor() {

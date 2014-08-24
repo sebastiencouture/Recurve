@@ -139,10 +139,6 @@ module.exports = {
         return "number" == typeof value;
     },
 
-    hasFunction: function(obj, func) {
-        return this.isObject(obj) && obj[func] && this.isFunction(obj[func]);
-    },
-
     extend: function(dest, src) {
         if (!src) {
             return;

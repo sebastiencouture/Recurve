@@ -1,9 +1,9 @@
 "use strict";
 
-var ObjectUtils = require("./utils/object.js");
-var StringUtils = require("./utils/string.js");
-var DateUtils = require("./utils/date.js");
-var assert = require("./assert.js");
+var ObjectUtils = require("../utils/object.js");
+var StringUtils = require("../utils/string.js");
+var DateUtils = require("../utils/date.js");
+var assert = require("../utils/assert.js");
 
 module.exports = {
     get: function(key) {

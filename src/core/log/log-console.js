@@ -1,6 +1,6 @@
 "use strict";
 
-var Proto = require("../proto.js");
+var Proto = require("../../utils/proto.js");
 
 module.exports = Proto.define([
     function ctor() {

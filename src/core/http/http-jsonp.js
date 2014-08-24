@@ -1,10 +1,10 @@
 "use strict";
 
-var ObjectUtils = require("../utils/object.js");
-var StringUtils = require("../utils/string.js");
-var UrlUtils = require("../utils/url.js");
-var DomUtils = require("../utils/dom.js");
-var Proto = require("../proto.js");
+var ObjectUtils = require("../../utils/object.js");
+var StringUtils = require("../../utils/string.js");
+var UrlUtils = require("../../utils/url.js");
+var DomUtils = require("../../utils/dom.js");
+var Proto = require("../../utils/proto.js");
 
 var requestId = 0;
 

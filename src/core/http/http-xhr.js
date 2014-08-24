@@ -1,9 +1,9 @@
 "use strict";
 
-var ObjectUtils = require("../utils/object.js");
-var StringUtils = require("../utils/string.js");
-var WindowUtils = require("../utils/window.js");
-var Proto = require("../proto.js");
+var ObjectUtils = require("../../utils/object.js");
+var StringUtils = require("../../utils/string.js");
+var WindowUtils = require("../../utils/window.js");
+var Proto = require("../../utils/proto.js");
 
 var requestId = 0;
 

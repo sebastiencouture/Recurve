@@ -1,8 +1,8 @@
 "use strict";
 
-var Proto = require("./proto.js");
-var ObjectUtils = require("./utils/object.js");
-var assert = require("./assert.js");
+var Proto = require("../utils/proto.js");
+var ObjectUtils = require("../utils/object.js");
+var assert = require("../utils/assert.js");
 
 module.exports = Proto.define([
     function ctor(countLimit, totalCostLimit) {

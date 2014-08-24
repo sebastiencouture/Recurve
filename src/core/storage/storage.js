@@ -1,10 +1,12 @@
 "use strict";
 
-var ObjectUtils = require("../utils/object.js");
-var StringUtils = require("../utils/string.js");
-var Proto = require("../proto.js");
+var ObjectUtils = require("../../utils/object.js");
+var StringUtils = require("../../utils/string.js");
+var Proto = require("../../utils/proto.js");
+var assert = require("../../utils/assert.js");
+
+// TODO TBD should be a service
 var Cache = require("../cache.js");
-var assert = require("../assert.js");
 
 module.exports = Proto.define([
     function ctor(storage, useCache, cache) {

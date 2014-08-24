@@ -1,7 +1,9 @@
 "use strict";
 
-var Proto = require("./proto.js");
-var DateUtils = require("./utils/date.js");
+var Proto = require("../utils/proto.js");
+var DateUtils = require("../utils/date.js");
+
+// TODO TBD should be a service
 var Log = require("./log/log.js");
 
 module.exports = Proto.define([
