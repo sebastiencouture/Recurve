@@ -5,7 +5,11 @@ var StringUtils = require("../utils/string.js");
 var DateUtils = require("../utils/date.js");
 var assert = require("../utils/assert.js");
 
-module.exports = {
+module.exports = function(coreModule) {
+    coreModule.value("$cookies", cookies);
+};
+
+var cookies = {
     get: function(key) {
         assert(key, "key must be set");
 

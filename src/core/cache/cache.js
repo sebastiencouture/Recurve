@@ -1,10 +1,14 @@
 "use strict";
 
-var Proto = require("../utils/proto.js");
-var ObjectUtils = require("../utils/object.js");
-var assert = require("../utils/assert.js");
+var Proto = require("../../utils/proto.js");
+var ObjectUtils = require("../../utils/object.js");
+var assert = require("../../utils/assert.js");
 
-module.exports = Proto.define([
+module.exports = function(coreModule) {
+    coreModule.value("$cache", Cache);
+};
+
+var Cache = Proto.define([
     function ctor(countLimit, totalCostLimit) {
         if (undefined === countLimit) {
             countLimit = 0;

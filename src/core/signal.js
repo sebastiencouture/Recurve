@@ -4,7 +4,11 @@ var Proto = require("../utils/proto.js");
 var ArrayUtils = require("../utils/array.js");
 var assert = require("../utils/assert.js");
 
-module.exports = Proto.define([
+module.exports = function(coreModule) {
+    coreModule.value("$signal", Signal);
+};
+
+var Signal = Proto.define([
     function ctor() {
         this._listeners = [];
     },

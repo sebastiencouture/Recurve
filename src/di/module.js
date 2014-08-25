@@ -1,36 +1,6 @@
 "use strict";
 
-/*
- recurve.module("myApp").register("testService", ["dep1", "dep2", function(dep1, dep2){
- return {
- count: function() {
- return dep1.count() + dep2.count();
- },
- describe: function(message) {
- return dep1.message() + ":" + message;
- }
- }
- }], {instantiate: false});
-
- recurve.module("myApp").configurable("testService", function provider(){
- this.setMe = function(){
-
- };
-
- this.$get = ["dep1", function(dep1){
-
- }];
- });
-
- recurve.module("myApp").action();
- recurve.module("myApp").store();
- recurve.module("myApp").view();
- recurve.module("myApp").viewController();
- recurve.module("myApp").value();
- */
-
 var ObjectUtils = require("../utils/object.js");
-var ArrayUtils = require("../utils/array.js");
 var assert = require("../utils/assert.js");
 
 function Module(name, dependencies) {
@@ -45,33 +15,31 @@ function Module(name, dependencies) {
 }
 
 Module.prototype = {
-    register: function(name, definition, options) {
-        this._services[name] = new Service(name, definition, options, this);
+    register: function(name, dependencies, constructor, options) {
+        this._services[name] = new Service(name, dependencies, constructor, options, this);
     },
 
-    configurable: function(name, definition) {
-        this.register(name, definition, {configurable: true});
+    configurable: function(name, constructor) {
+        this.register(name, null, constructor, {configurable: true});
     },
 
-    action: function(name, definition) {
-        return this.register(name, definition);
+    action: function(name, dependencies, constructor) {
+        return this.register(name, dependencies, constructor, {instantiate: true});
     },
 
-    store: function(name, definition) {
-        return this.register(name, definition);
+    store: function(name, dependencies, constructor) {
+        return this.register(name, dependencies, constructor, {instantiate: true});
     },
 
-    view: function(name, definition) {
-        return this.register(name, definition, {instantiate: false});
+    view: function(name, dependencies, constructor) {
+        return this.register(name, dependencies, constructor);
     },
 
-    viewController: function(name, definition) {
-        return this.register(name, definition, {instantiate: false});
+    viewController: function(name, dependencies, constructor) {
+        return this.register(name, dependencies, constructor);
     },
 
     value: function(name, value) {
-        assert(!ObjectUtils.isFunction(value), "{0} value cannot be a function", name);
-
         function getValue() {
             return value;
         }
@@ -140,11 +108,11 @@ Module.prototype = {
 
 
 var defaultOptions = {
-    instantiate: true,
+    instantiate: false,
     configurable: false
 };
 
-function Service(name, definition, options, module) {
+function Service(name, dependencies, constructor, options, module) {
     assert(name, "service name must be set");
     assert(definition, "{0} definition must be set", name);
 
@@ -157,30 +125,27 @@ function Service(name, definition, options, module) {
     this._module = module;
 
     if (options.configurable) {
-        assert(ObjectUtils.isFunction(definition), "{0} configurable definition must only provide a function", name);
+        assert(ObjectUtils.isFunction(constructor), "{0} configurable constructor must only provide a function", name);
 
-        this.configurable = new definition();
+        this.configurable = new constructor();
         var getter = this.configurable.$get;
 
-        assert(getter, "{0} configurable definition must include $get", name);
+        assert(getter, "{0} configurable constructor must include $get", name);
 
-        if (ObjectUtils.isArray(getter)) {
-            this._dependencies = allBeforeLast(getter);
-            this._provider = last(getter);
+        if (ObjectUtils.isFunction(getter)) {
+            this._constructor = getter;
         }
         else {
-            this._provider = getter;
+            this._dependencies = getter.dependencies;
+            this._contructor = getter.constructor;
         }
     }
-    else if (ObjectUtils.isArray(definition)) {
-        this._dependencies = allBeforeLast(definition);
-        this._provider = last(definition);
-    }
     else {
-        this._provider = definition;
+        this._dependencies = dependencies;
+        this._contructor = constructor;
     }
 
-    assert(ObjectUtils.isFunction(this._provider), "{0} provider must be a function", name);
+    assert(ObjectUtils.isFunction(this._contructor), "{0} constructor must be a function", name);
 }
 
 Service.prototype = {
@@ -202,10 +167,10 @@ Service.prototype = {
         });
 
         if (this._options.configurable || !this._options.instantiate) {
-            this.instance = this._provider.apply(null, instances);
+            this.instance = this._contructor.apply(null, instances);
         }
         else {
-            this.instance = new this._provider.apply(null, instances);
+            this.instance = new this._contructor.apply(null, instances);
         }
 
         this._resolved = true;
@@ -241,13 +206,5 @@ Service.prototype = {
         });
     }
 };
-
-function allBeforeLast(array) {
-    return array.slice(0, -1);
-}
-
-function last(array) {
-    return array[array.length-1];
-}
 
 module.exports = Module;
