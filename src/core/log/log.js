@@ -4,10 +4,38 @@ var Proto = require("../../utils/proto.js");
 var ArrayUtils = require("../../utils/array.js");
 var StringUtils = require("../../utils/string.js");
 
-// TODO TBD should be a service
-var LogTarget = require("./log-console.js");
+var ConsoleTarget = require("./log-console.js");
 
-module.exports = Proto.define([
+module.exports = function(coreModule) {
+    coreModule.configurable("$log", function() {
+        var enabled = true;
+        var targets = [new ConsoleTarget()];
+
+        return {
+            setEnabled: function(value) {
+                enabled = value;
+            },
+
+            setTargets: function(value) {
+                targets = value;
+            },
+
+            $get: {
+                dependencies: ["$window"],
+                constructor: function($window) {
+                    if (!targets) {
+                        targets = [new ConsoleTarget($window)];
+                    }
+
+                    return new Log(enabled, targets);
+                }
+            }
+        };
+    });
+};
+
+
+var Log = Proto.define([
 
     /**
      *
@@ -16,14 +44,6 @@ module.exports = Proto.define([
      * @param enabled, default true
      */
      function ctor(enabled, targets) {
-        if (undefined === enabled) {
-            enabled = true;
-        }
-
-        if (undefined === targets) {
-            targets = [new LogTarget()];
-        }
-
         this.targets = targets;
         this.disable(!enabled);
     },

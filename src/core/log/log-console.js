@@ -3,7 +3,8 @@
 var Proto = require("../../utils/proto.js");
 
 module.exports = Proto.define([
-    function ctor() {
+    function ctor($window) {
+        this.$window = $window;
     },
 
     {
@@ -14,7 +15,7 @@ module.exports = Proto.define([
          * each of these objects are appended together in the order listed and output (same as console.log)
          */
         info: function() {
-            console && console.log.apply(console, arguments);
+            this.$window.console && this.$window.console.log.apply(this.$window.console, arguments);
         },
 
         /**
@@ -24,12 +25,12 @@ module.exports = Proto.define([
          * each of these objects are appended together in the order listed and output (same as console.log)
          */
         debug: function() {
-            if (!console || !console.debug) {
+            if (!this.$window.console || !this.$window.console.debug) {
                 this.info.apply(this, arguments);
                 return;
             }
 
-            console.debug.apply(console, arguments);
+            this.$window.console.debug.apply(this.$window.console, arguments);
         },
 
         /**
@@ -39,12 +40,12 @@ module.exports = Proto.define([
          * each of these objects are appended together in the order listed and output (same as console.log)
          */
         warn: function() {
-            if (!console || !console.warn) {
+            if (!this.$window.console || !this.$window.console.warn) {
                 this.info.apply(this, arguments);
                 return;
             }
 
-            console.warn.apply(console, arguments);
+            this.$window.console.warn.apply(this.$window.console, arguments);
         },
 
         /**
@@ -54,16 +55,16 @@ module.exports = Proto.define([
          * each of these objects are appended together in the order listed and output (same as console.log)
          */
         error: function() {
-            if (!console || !console.error) {
+            if (!this.$window.console || !this.$window.console.error) {
                 this.info.apply(this, arguments);
                 return;
             }
 
-            console.error.apply(console, arguments);
+            this.$window.console.error.apply(this.$window.console, arguments);
         },
 
         clear: function() {
-            console && console.clear();
+            this.$window.console && this.$window.console.clear();
         }
     }
 ]);

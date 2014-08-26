@@ -57,8 +57,10 @@ var recurve = window.recurve = {
 var coreModule = recurve.module("rc");
 
 // TODO TBD register services
+require("./core/window.js")(coreModule);
 require("./core/cookies.js")(coreModule);
 require("./core/signal.js")(coreModule);
 require("./core/event-emitter.js")(coreModule);
 require("./core/cache.js")(coreModule);
 require("./core/cache-factory.js")(coreModule);
+require("./core/log.js")(coreModule);
