@@ -5,7 +5,36 @@ var StringUtils = require("../utils/string.js");
 var ObjectUtils = require("../utils/object.js");
 var ArrayUtils = require("../utils/array.js");
 
-module.exports = Proto.define([
+module.exports = function(coreModule) {
+    coreModule.configurable("$globalErrorHandler", function() {
+        var onError;
+        var enabled = true;
+        var preventBrowserHandle = true;
+
+        return {
+            setOnError: function(value) {
+                onError = value;
+            },
+
+            setEnabled: function(value) {
+                enabled = value;
+            },
+
+            setPreventBrowserHandler: function(value) {
+                preventBrowserHandle = value;
+            },
+
+            $get: {
+                dependencies: ["$window"],
+                provider: function($window) {
+                    return new GlobalErrorHandler($window, onError, enabled, preventBrowserHandle);
+                }
+            }
+        }
+    });
+};
+
+var GlobalErrorHandler = Proto.define([
 
     /**
      * NOTE, If your JS is hosted on a CDN then the browser will sanitize and exclude all error output
@@ -15,20 +44,12 @@ module.exports = Proto.define([
      * @param enabled, default true
      * @param preventBrowserHandle, default true
      */
-     function ctor(onError, enabled, preventBrowserHandle) {
-        if (undefined === enabled) {
-            enabled = true;
-        }
-
-        if (undefined === preventBrowserHandle) {
-            preventBrowserHandle = true;
-        }
-
+     function ctor($window, onError, enabled, preventBrowserHandle) {
         this._enabled = enabled;
         this._preventBrowserHandle = preventBrowserHandle;
         this._onError = onError;
 
-        window.onerror = this._errorHandler.bind(this);
+        $window.onerror = this._errorHandler.bind(this);
     },
 
     {
@@ -87,6 +108,10 @@ module.exports = Proto.define([
             }
 
             return description;
+        },
+
+        setOnError: function(value) {
+            this._onError = value;
         },
 
         _errorHandler: function(message, filename, line, column, error) {

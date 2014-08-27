@@ -15,14 +15,14 @@ module.exports = function(grunt) {
         license: grunt.file.read("LICENSE"),
 
         browserify: {
-            dist: {
+            recurve: {
                 src: ["src/*.js"],
-                dest: "dist/recurve.js"
+                dest: "build/recurve.js"
             },
 
-            distSourceMap: {
+            recurveSourceMap: {
                 src: ["src/*.js"],
-                dest: "dist/recurve-sourcemap.js",
+                dest: "build/recurve-sourcemap.js",
                 options: {
                     bundleOptions: {
                         debug: true
@@ -32,7 +32,7 @@ module.exports = function(grunt) {
 
             karma: {
                 src: ["tests/*.test.js"],
-                dest: "dist/tests.js",
+                dest: "build/tests.js",
                 options: {
                     bundleOptions: {
                         debug: true
@@ -47,18 +47,18 @@ module.exports = function(grunt) {
                 banner: banner
             },
 
-            dist: {
-                src: ['dist/recurve.js'],
+            recurve: {
+                src: ['build/recurve.js'],
                 dest: 'dist/recurve.js'
             },
 
-            distSourceMap: {
-                src: ['dist/recurve-sourcemap.js'],
+            recurveSourceMap: {
+                src: ['build/recurve-sourcemap.js'],
                 dest: 'dist/recurve-sourcemap.js'
             },
 
             karma: {
-                src: ['dist/tests.js'],
+                src: ['build/tests.js'],
                 dest: 'dist/tests.js'
             }
         },
@@ -68,9 +68,9 @@ module.exports = function(grunt) {
                 banner: minBanner
             },
 
-            dist: {
+            recurve: {
                 files: {
-                    "dist/recurve.min.js": ["dist/recurve.js"]
+                    "dist/recurve.min.js": ["build/recurve.js"]
                 }
             }
         },
@@ -95,7 +95,7 @@ module.exports = function(grunt) {
             },
 
             karma: {
-                files: ["dist/tests.js", "karma.conf.js"],
+                files: ["build/tests.js", "karma.conf.js"],
                 tasks: ["karma:unit:run"]
             }
         },
@@ -125,7 +125,8 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-concurrent');
 
-    grunt.registerTask("default", ["browserify", "concat", "uglify", "connect", "karma", "watch"]);
-    grunt.registerTask("dev", ["browserify:karma", "connect", "karma", "concurrent:dev"]);
+    grunt.registerTask("default", ["browserify:recurve", "browserify:karma", "connect", "karma", "concurrent:dev"]);
+    //grunt.registerTask("dev", ["browserify:recurve", "browserify:karma", "connect", "karma", "concurrent:dev"]);
     grunt.registerTask("test", ["karma:unit:run"]);
+    grunt.registerTask("dist", ["browserify", "karma", "concat", "uglify"]);
 };

@@ -22,7 +22,7 @@ module.exports = function(coreModule) {
 
             $get: {
                 dependencies: ["$window"],
-                constructor: function($window) {
+                provider: function($window) {
                     if (!targets) {
                         targets = [new ConsoleTarget($window)];
                     }

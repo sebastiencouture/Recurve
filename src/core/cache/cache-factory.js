@@ -5,10 +5,10 @@ var ObjectUtils = require("../../utils/object.js");
 var assert = require("../../utils/assert.js");
 
 module.exports = function(coreModule) {
-    coreModule.register("$cacheFactory", ["$cache"], constructor, {instantiate: true});
+    coreModule.register("$cacheFactory", ["$cache"], provider, {instantiate: true});
 };
 
-function constructor($cache) {
+function provider($cache) {
     return Proto.define([
         function ctor() {
             this._caches = {};
@@ -21,6 +21,7 @@ function constructor($cache) {
                 }
 
                 this._caches[name] = new $cache(countLimit, totalCostLimit);
+                return this._caches[name];
             },
 
             destroy: function(name) {

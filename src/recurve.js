@@ -35,7 +35,6 @@ var recurve = window.recurve = {
 
     define: Proto.define,
     mixin: Proto.mixin,
-    mixinWith: Proto.mixinWith,
 
     forEach: ObjectUtils.forEach,
     areEqual: ObjectUtils.areEqual,
@@ -64,3 +63,7 @@ require("./core/event-emitter.js")(coreModule);
 require("./core/cache.js")(coreModule);
 require("./core/cache-factory.js")(coreModule);
 require("./core/log.js")(coreModule);
+require("./core/local-storage.js")(coreModule);
+require("./core/session-storage.js")(coreModule);
+require("./core/global-error-handler.js")(coreModule);
+require("./core/performance-monitor.js")(coreModule);

@@ -5,14 +5,11 @@ var ArrayUtils = require("../utils/array.js");
 var ObjectUtils = require("../utils/object.js");
 var assert = require("../utils/assert.js");
 
-// TODO TBD should be a service
-var Signal = require("../signal.js");
-
 module.exports = function(coreModule) {
-    coreModule.register("$eventEmitter", ["$signal"], constructor);
+    coreModule.register("$eventEmitter", ["$signal"], provider);
 };
 
-function constructor($signal) {
+function provider($signal) {
     return Proto.define([
         function ctor() {
             this._signals = {};

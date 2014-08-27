@@ -5,25 +5,10 @@ var StringUtils = require("../../utils/string.js");
 var Proto = require("../../utils/proto.js");
 var assert = require("../../utils/assert.js");
 
-// TODO TBD should be a service
-var Cache = require("../cache.js");
-
 module.exports = Proto.define([
-    function ctor(storage, useCache, cache) {
-        if (undefined === useCache) {
-            useCache = true;
-        }
-
+    function ctor(storage, cache) {
         this._storage = storage;
-
-        if (useCache) {
-            if (undefined === cache) {
-                cache = new Cache();
-            }
-
-            this._cache = cache;
-        }
-
+        this._cache = cache;
         this.supported = isSupported(this._storage);
     },
 

@@ -15,28 +15,28 @@ function Module(name, dependencies) {
 }
 
 Module.prototype = {
-    register: function(name, dependencies, constructor, options) {
-        this._services[name] = new Service(name, dependencies, constructor, options, this);
+    register: function(name, dependencies, provider, options) {
+        this._services[name] = new Service(name, dependencies, provider, options, this);
     },
 
-    configurable: function(name, constructor) {
-        this.register(name, null, constructor, {configurable: true});
+    configurable: function(name, provider) {
+        this.register(name, null, provider, {configurable: true});
     },
 
-    action: function(name, dependencies, constructor) {
-        return this.register(name, dependencies, constructor, {instantiate: true});
+    action: function(name, dependencies, provider) {
+        return this.register(name, dependencies, provider, {instantiate: true});
     },
 
-    store: function(name, dependencies, constructor) {
-        return this.register(name, dependencies, constructor, {instantiate: true});
+    store: function(name, dependencies, provider) {
+        return this.register(name, dependencies, provider, {instantiate: true});
     },
 
-    view: function(name, dependencies, constructor) {
-        return this.register(name, dependencies, constructor);
+    view: function(name, dependencies, provider) {
+        return this.register(name, dependencies, provider);
     },
 
-    viewController: function(name, dependencies, constructor) {
-        return this.register(name, dependencies, constructor);
+    viewController: function(name, dependencies, provider) {
+        return this.register(name, dependencies, provider);
     },
 
     value: function(name, value) {
@@ -112,7 +112,7 @@ var defaultOptions = {
     configurable: false
 };
 
-function Service(name, dependencies, constructor, options, module) {
+function Service(name, dependencies, provider, options, module) {
     assert(name, "service name must be set");
     assert(definition, "{0} definition must be set", name);
 
@@ -125,27 +125,27 @@ function Service(name, dependencies, constructor, options, module) {
     this._module = module;
 
     if (options.configurable) {
-        assert(ObjectUtils.isFunction(constructor), "{0} configurable constructor must only provide a function", name);
+        assert(ObjectUtils.isFunction(provider), "{0} configurable provider must only provide a function", name);
 
-        this.configurable = new constructor();
+        this.configurable = new provider();
         var getter = this.configurable.$get;
 
-        assert(getter, "{0} configurable constructor must include $get", name);
+        assert(getter, "{0} configurable provider must include $get", name);
 
         if (ObjectUtils.isFunction(getter)) {
-            this._constructor = getter;
+            this._provider = getter;
         }
         else {
             this._dependencies = getter.dependencies;
-            this._contructor = getter.constructor;
+            this._provider = getter.provider;
         }
     }
     else {
         this._dependencies = dependencies;
-        this._contructor = constructor;
+        this._provider = provider;
     }
 
-    assert(ObjectUtils.isFunction(this._contructor), "{0} constructor must be a function", name);
+    assert(ObjectUtils.isFunction(this._provider), "{0} provider must be a function", name);
 }
 
 Service.prototype = {
@@ -167,10 +167,10 @@ Service.prototype = {
         });
 
         if (this._options.configurable || !this._options.instantiate) {
-            this.instance = this._contructor.apply(null, instances);
+            this.instance = this._provider.apply(null, instances);
         }
         else {
-            this.instance = new this._contructor.apply(null, instances);
+            this.instance = new this._provider.apply(null, instances);
         }
 
         this._resolved = true;

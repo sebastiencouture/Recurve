@@ -3,19 +3,29 @@
 var Proto = require("../utils/proto.js");
 var DateUtils = require("../utils/date.js");
 
-// TODO TBD should be a service
-var Log = require("./log/log.js");
+module.exports = function(coreModule) {
+    coreModule.configurable("$performance", function() {
+        var enabled = true;
 
-module.exports = Proto.define([
-    function ctor(log, enabled) {
-        if (undefined === log) {
-            this._log = new Log();
+        return {
+            setEnabled: function(value) {
+                enabled = value;
+            },
+
+            $get: {
+                dependencies: ["$window", "$log"],
+                provider: function($window, $log) {
+                    return new PerformanceMonitor($window, $log, enabled);
+                }
+            }
         }
+    });
+};
 
-        if (undefined === enabled) {
-            enabled = true;
-        }
-
+var PerformanceMonitor = Proto.define([
+    function ctor($window, $log, enabled) {
+        this._$window = $window;
+        this._$log = $log;
         this.disable(!enabled);
     },
 
@@ -25,7 +35,10 @@ module.exports = Proto.define([
                 return;
             }
 
-            return new Timer(this._log, message);
+            var timer = new Timer(this._$window, this._$log);
+            timer.start(message);
+
+            return timer;
         },
 
         end: function(timer, description) {
@@ -48,15 +61,15 @@ module.exports = Proto.define([
 
 
 var Timer = Proto.define([
-    function ctor() {
+    function ctor($window, $log) {
+        this._$window = $window;
+        this._$log = $log;
     },
 
     {
-        start: function(log, message) {
-            this._log = log;
-
-            if (supportsConsoleTime()) {
-                console.time(message);
+        start: function(message) {
+            if (this._supportsConsoleTime()) {
+                this._$window.console.time(message);
             }
             else {
                 this._startTime = DateUtils.performanceNow();
@@ -66,20 +79,20 @@ var Timer = Proto.define([
         },
 
         end: function(description) {
-            if (supportsConsoleTime()) {
-                console.timeEnd(this._message);
+            if (this._supportsConsoleTime()) {
+                this._$window.console.timeEnd(this._message);
             }
             else {
-                this._log.info(this._message + ": " + (DateUtils.performanceNow() - this._startTime) + " ms");
+                this._$log.info(this._message + ": " + (DateUtils.performanceNow() - this._startTime) + " ms");
             }
 
             if (description) {
-                this._log.info(description);
+                this._$log.info(description);
             }
+        },
+
+        _supportsConsoleTime: function() {
+            return this._$window.console && this._$window.console.time && this._$window.console.timeEnd;
         }
     }
 ]);
-
-function supportsConsoleTime() {
-    return console && console.time && console.timeEnd;
-}
