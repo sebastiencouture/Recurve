@@ -1,69 +1,71 @@
-"use strict";
+(function(){
+    "use strict";
 
-var Module = require("./di/module.js");
-var ObjectUtils = require("./utils/object.js");
-var Proto = require("./utils/proto.js");
-var assert = require("./utils/assert.js");
+    var Module = require("./di/module.js");
+    var ObjectUtils = require("./utils/object.js");
+    var Proto = require("./utils/proto.js");
+    var assert = require("./utils/assert.js");
 
-var modules = [];
+    var modules = [];
 
-var recurve = window.recurve = {
-    module: function(name, dependencyNames) {
-        var dependencies = [];
-        var coreAdded = false;
+    var recurve = window.recurve = {
+        module: function(name, dependencyNames) {
+            var dependencies = [];
+            var coreAdded = false;
 
-        ObjectUtils.forEach(dependencyNames, function(name) {
-            var knownModule = modules[name];
-            assert(knownModule, "module {0} does not exist", name);
+            ObjectUtils.forEach(dependencyNames, function(name) {
+                var knownModule = modules[name];
+                assert(knownModule, "module {0} does not exist", name);
 
-            if (name === "rc") {
-                coreAdded = true;
+                if (name === "rc") {
+                    coreAdded = true;
+                }
+
+                dependencies.push(knownModule);
+            });
+
+            // Always include the core!
+            if (!coreAdded && "rc" !== name) {
+                dependencies.unshift(coreModule);
             }
 
-            dependencies.push(knownModule);
-        });
+            var module = new Module(name, dependencies);
+            modules.push(module);
 
-        if (!coreAdded) {
-            dependencies.unshift(coreModule);
-        }
+            return module;
+        },
 
-        var module = new Module(name, dependencies);
-        modules.push(module);
+        define: Proto.define,
+        mixin: Proto.mixin,
 
-        return module;
-    },
+        forEach: ObjectUtils.forEach,
+        areEqual: ObjectUtils.areEqual,
+        isNaN: ObjectUtils.isNaN,
+        isSameType: ObjectUtils.isSameType,
+        isString: ObjectUtils.isString,
+        isError: ObjectUtils.isError,
+        isObject: ObjectUtils.isObject,
+        isArray: ObjectUtils.isArray,
+        isFunction: ObjectUtils.isFunction,
+        isDate: ObjectUtils.isDate,
+        isNumber: ObjectUtils.isNumber,
+        toJson: ObjectUtils.toJson,
+        fromJson: ObjectUtils.fromJson,
 
-    define: Proto.define,
-    mixin: Proto.mixin,
+        assert: assert
+    };
 
-    forEach: ObjectUtils.forEach,
-    areEqual: ObjectUtils.areEqual,
-    isNaN: ObjectUtils.isNaN,
-    isSameType: ObjectUtils.isSameType,
-    isString: ObjectUtils.isString,
-    isError: ObjectUtils.isError,
-    isObject: ObjectUtils.isObject,
-    isArray: ObjectUtils.isArray,
-    isFunction: ObjectUtils.isFunction,
-    isDate: ObjectUtils.isDate,
-    isNumber: ObjectUtils.isNumber,
-    toJson: ObjectUtils.toJson,
-    fromJson: ObjectUtils.fromJson,
+    var coreModule = recurve.module("rc");
 
-    assert: assert
-};
-
-var coreModule = recurve.module("rc");
-
-// TODO TBD register services
-require("./core/window.js")(coreModule);
-require("./core/cookies.js")(coreModule);
-require("./core/signal.js")(coreModule);
-require("./core/event-emitter.js")(coreModule);
-require("./core/cache.js")(coreModule);
-require("./core/cache-factory.js")(coreModule);
-require("./core/log.js")(coreModule);
-require("./core/local-storage.js")(coreModule);
-require("./core/session-storage.js")(coreModule);
-require("./core/global-error-handler.js")(coreModule);
-require("./core/performance-monitor.js")(coreModule);
+    require("./core/window.js")(coreModule);
+    require("./core/cookies.js")(coreModule);
+    require("./core/signal.js")(coreModule);
+    require("./core/event-emitter.js")(coreModule);
+    require("./core/cache.js")(coreModule);
+    require("./core/cache-factory.js")(coreModule);
+    require("./core/log.js")(coreModule);
+    require("./core/local-storage.js")(coreModule);
+    require("./core/session-storage.js")(coreModule);
+    require("./core/global-error-handler.js")(coreModule);
+    require("./core/performance-monitor.js")(coreModule);
+})();
