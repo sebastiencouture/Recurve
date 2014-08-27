@@ -16,10 +16,18 @@ function provider($window){
             this._subscribers = [];
 
             function resolveHandler(value) {
+                if (this._resolved || this._rejected) {
+                    return;
+                }
+
                 resolve(this, value);
             }
 
             function rejectHandler(reason) {
+                if (this._resolved || this._rejected) {
+                    return;
+                }
+
                 reject(this, reason);
             }
 
