@@ -14,21 +14,22 @@ function provider($window){
             assert(ObjectUtils.isFunction(resolver), "Promise resolver {0} is not a function", resolver);
 
             this._subscribers = [];
+            var that = this;
 
             function resolveHandler(value) {
-                if (this._resolved || this._rejected) {
+                if (that._resolved || that._rejected) {
                     return;
                 }
 
-                resolve(this, value);
+                resolve(that, value);
             }
 
             function rejectHandler(reason) {
-                if (this._resolved || this._rejected) {
+                if (that._resolved || that._rejected) {
                     return;
                 }
 
-                reject(this, reason);
+                reject(that, reason);
             }
 
             async(function(){
@@ -196,8 +197,10 @@ function provider($window){
                     invokeCallback(this._onFulfilled, value, this._deferred);
                 }
                 else {
+                    var that = this;
+
                     async(function(){
-                        this._deferred.resolve(value);
+                        that._deferred.resolve(value);
                     });
                 }
             },
@@ -207,8 +210,10 @@ function provider($window){
                     invokeCallback(this._onRejected, reason, this._deferred);
                 }
                 else {
+                    var that = this;
+
                     async(function(){
-                        this._deferred.reject(reason);
+                        that._deferred.reject(reason);
                     });
                 }
             }
