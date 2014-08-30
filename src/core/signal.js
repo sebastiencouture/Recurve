@@ -4,9 +4,11 @@ var Proto = require("../utils/proto.js");
 var ArrayUtils = require("../utils/array.js");
 var assert = require("../utils/assert.js");
 
-module.exports = function(coreModule) {
-    coreModule.value("$signal", Signal);
+module.exports = function(recurveModule) {
+    recurveModule.value("$signal", Signal);
 };
+
+// TODO TBD update add/addOnce/remove to on/once/off so consistent with event emitter
 
 var Signal = Proto.define([
     function ctor() {

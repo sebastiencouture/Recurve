@@ -6,8 +6,8 @@ var StringUtils = require("../../utils/string.js");
 
 var ConsoleTarget = require("./log-console.js");
 
-module.exports = function(coreModule) {
-    coreModule.configurable("$log", function() {
+module.exports = function(recurveModule) {
+    recurveModule.configurable("$log", function() {
         var enabled = true;
         var targets = [new ConsoleTarget()];
 
@@ -20,15 +20,14 @@ module.exports = function(coreModule) {
                 targets = value;
             },
 
-            $get: {
-                dependencies: ["$window"],
-                provider: function($window) {
-                    if (!targets) {
-                        targets = [new ConsoleTarget($window)];
-                    }
+            $dependencies: ["$window"],
 
-                    return new Log(enabled, targets);
+            $provider:  function($window) {
+                if (!targets) {
+                    targets = [new ConsoleTarget($window)];
                 }
+
+                return new Log(enabled, targets);
             }
         };
     });

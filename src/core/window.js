@@ -1,5 +1,5 @@
 "use strict";
 
-module.exports = function(coreModule) {
-    coreModule.value("$window", window);
+module.exports = function(recurveModule) {
+    recurveModule.value("$window", window);
 };

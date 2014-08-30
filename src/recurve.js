@@ -1,69 +1,105 @@
-"use strict";
+(function() {
+    "use strict";
 
-var Module = require("./di/module.js");
-var ObjectUtils = require("./utils/object.js");
-var Proto = require("./utils/proto.js");
-var assert = require("./utils/assert.js");
+    var Module = require("./di/module.js");
+    var Container = require("./di/container.js");
+    var ObjectUtils = require("./utils/object.js");
+    var Proto = require("./utils/proto.js");
+    var assert = require("./utils/assert.js");
 
-var modules = [];
+    var modules = [];
 
-var recurve = window.recurve = {
-    module: function(name, dependencyNames) {
-        var dependencies = [];
-        var coreAdded = false;
+    var recurve = window.recurve = {
+        module: function(name) {
+            var knownModule = null;
 
-        ObjectUtils.forEach(dependencyNames, function(name) {
-            var knownModule = modules[name];
+            ObjectUtils.forEach(modules, function(module) {
+               if (module.name === name) {
+                   knownModule = module;
+                   return true;
+               }
+            });
+
             assert(knownModule, "module {0} does not exist", name);
+            return knownModule;
+        },
 
-            if (name === "rc") {
-                coreAdded = true;
+        createModule: function(name, dependencyNames) {
+            var dependencies = [];
+            var coreAdded = false;
+
+            var that = this;
+
+            ObjectUtils.forEach(dependencyNames, function(name) {
+                var knownModule = that.module[name];
+
+                if (name === "rc") {
+                    coreAdded = true;
+                }
+
+                dependencies.push(knownModule);
+            });
+
+            if (!coreAdded) {
+                dependencies.unshift(coreModule);
             }
 
-            dependencies.push(knownModule);
-        });
+            var module = new Module(name, dependencies);
+            modules.push(module);
 
-        if (!coreAdded) {
-            dependencies.unshift(coreModule);
-        }
+            return module;
+        },
 
-        var module = new Module(name, dependencies);
-        modules.push(module);
+        createContainer: function(moduleNames) {
+            var coreAdded = false;
+            var that = this;
 
-        return module;
-    },
+            ObjectUtils.forEach(moduleNames, function(name) {
+                modules.push(that.module[name]);
 
-    define: Proto.define,
-    mixin: Proto.mixin,
+                if (name === "rc") {
+                    coreAdded = true;
+                }
+            });
 
-    forEach: ObjectUtils.forEach,
-    areEqual: ObjectUtils.areEqual,
-    isNaN: ObjectUtils.isNaN,
-    isSameType: ObjectUtils.isSameType,
-    isString: ObjectUtils.isString,
-    isError: ObjectUtils.isError,
-    isObject: ObjectUtils.isObject,
-    isArray: ObjectUtils.isArray,
-    isFunction: ObjectUtils.isFunction,
-    isDate: ObjectUtils.isDate,
-    isNumber: ObjectUtils.isNumber,
-    toJson: ObjectUtils.toJson,
-    fromJson: ObjectUtils.fromJson,
+            if (!coreAdded) {
+                modules.unshift(this.module("rc"));
+            }
 
-    assert: assert
-};
+            return new Container(modules);
+        },
 
-var coreModule = recurve.module("rc");
+        define: Proto.define,
+        mixin: Proto.mixin,
 
-// TODO TBD register services
-require("./core/window.js")(coreModule);
-require("./core/cookies.js")(coreModule);
-require("./core/signal.js")(coreModule);
-require("./core/event-emitter.js")(coreModule);
-require("./core/cache.js")(coreModule);
-require("./core/cache-factory.js")(coreModule);
-require("./core/log.js")(coreModule);
-require("./core/local-storage.js")(coreModule);
-require("./core/session-storage.js")(coreModule);
-require("./core/global-error-handler.js")(coreModule);
-require("./core/performance-monitor.js")(coreModule);
+        forEach: ObjectUtils.forEach,
+        areEqual: ObjectUtils.areEqual,
+        isNaN: ObjectUtils.isNaN,
+        isSameType: ObjectUtils.isSameType,
+        isString: ObjectUtils.isString,
+        isError: ObjectUtils.isError,
+        isObject: ObjectUtils.isObject,
+        isArray: ObjectUtils.isArray,
+        isFunction: ObjectUtils.isFunction,
+        isDate: ObjectUtils.isDate,
+        isNumber: ObjectUtils.isNumber,
+        toJson: ObjectUtils.toJson,
+        fromJson: ObjectUtils.fromJson,
+
+        assert: assert
+    };
+
+    var coreModule = recurve.createModule("rc");
+
+    require("./core/window.js")(coreModule);
+    require("./core/cookies.js")(coreModule);
+    require("./core/signal.js")(coreModule);
+    require("./core/event-emitter.js")(coreModule);
+    require("./core/cache.js")(coreModule);
+    require("./core/cache-factory.js")(coreModule);
+    require("./core/log.js")(coreModule);
+    require("./core/local-storage.js")(coreModule);
+    require("./core/session-storage.js")(coreModule);
+    require("./core/global-error-handler.js")(coreModule);
+    require("./core/performance-monitor.js")(coreModule);
+})();

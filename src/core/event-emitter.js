@@ -5,8 +5,8 @@ var ArrayUtils = require("../utils/array.js");
 var ObjectUtils = require("../utils/object.js");
 var assert = require("../utils/assert.js");
 
-module.exports = function(coreModule) {
-    coreModule.register("$eventEmitter", ["$signal"], provider);
+module.exports = function(recurveModule) {
+    recurveModule.factory("$eventEmitter", ["$signal"], provider);
 };
 
 function provider($signal) {

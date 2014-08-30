@@ -3,8 +3,8 @@
 var Proto = require("../utils/proto.js");
 var DateUtils = require("../utils/date.js");
 
-module.exports = function(coreModule) {
-    coreModule.configurable("$performance", function() {
+module.exports = function(recurveModule) {
+    recurveModule.configurable("$performance", function() {
         var enabled = true;
 
         return {
@@ -12,11 +12,10 @@ module.exports = function(coreModule) {
                 enabled = value;
             },
 
-            $get: {
-                dependencies: ["$window", "$log"],
-                provider: function($window, $log) {
-                    return new PerformanceMonitor($window, $log, enabled);
-                }
+            $dependencies: ["$window", "$log"],
+
+            $provider:  function($window, $log) {
+                return new PerformanceMonitor($window, $log, enabled);
             }
         }
     });

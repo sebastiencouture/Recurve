@@ -2,8 +2,8 @@
 
 var Storage = require("./storage.js");
 
-module.exports = function(coreModule) {
-    coreModule.configurable("$localStorage", function() {
+module.exports = function(recurveModule) {
+    recurveModule.configurable("$localStorage", function() {
         var useCache = true;
         var cacheCountLimit;
 
@@ -16,12 +16,11 @@ module.exports = function(coreModule) {
                 cacheCountLimit = value;
             },
 
-            $get: {
-                dependencies: ["$window", "$cacheFactory"],
-                provider: function($window, $cacheFactory) {
-                    var cache = useCache ? $cacheFactory.get("sessionStorage", cacheCountLimit) : null;
-                    return new Storage($window.sessionStorage, cache);
-                }
+            $dependencies: ["$window", "$cacheFactory"],
+
+            $provider: function($window, $cacheFactory) {
+                var cache = useCache ? $cacheFactory.get("sessionStorage", cacheCountLimit) : null;
+                return new Storage($window.sessionStorage, cache);
             }
         }
     });

@@ -4,8 +4,8 @@ var Proto = require("../../utils/proto.js");
 var ObjectUtils = require("../../utils/object.js");
 var assert = require("../../utils/assert.js");
 
-module.exports = function(coreModule) {
-    coreModule.value("$cache", Cache);
+module.exports = function(recurveModule) {
+    recurveModule.value("$cache", Cache);
 };
 
 var Cache = Proto.define([

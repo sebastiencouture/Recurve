@@ -5,8 +5,8 @@ var StringUtils = require("../utils/string.js");
 var DateUtils = require("../utils/date.js");
 var assert = require("../utils/assert.js");
 
-module.exports = function(coreModule) {
-    coreModule.value("$cookies", cookies);
+module.exports = function(recurveModule) {
+    recurveModule.value("$cookies", cookies);
 };
 
 var cookies = {

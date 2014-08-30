@@ -6,17 +6,33 @@ var assert = require("../utils/assert.js");
 function Module(name, dependencies) {
     assert(name, "module name must be set");
 
-    this._name = name;
-    this._services = {};
-    this._configHandlers = [];
-    this._readyhandlers = [];
+    this.name = name;
+    this.services = {};
+    this.configHandlers = [];
+    this.readyhandlers = [];
 
     this._loadDependencies(dependencies);
 }
 
 Module.prototype = {
-    register: function(name, dependencies, provider, options) {
-        this._services[name] = new Service(name, dependencies, provider, options, this);
+    factory: function(name, dependencies, provider) {
+        this._register(name, dependencies, provider, "factory");
+    },
+
+    constructor: function(name, dependencies, provider) {
+        this._register(name, dependencies, provider, "constructor");
+    },
+
+    value: function(name, value) {
+        var provider = value;
+
+        if (!ObjectUtils.isFunction(value)) {
+            provider = function() {
+                return value;
+            }
+        }
+
+        this._register(name, null, provider, "value");
     },
 
     configurable: function(name, provider) {
@@ -24,41 +40,33 @@ Module.prototype = {
     },
 
     action: function(name, dependencies, provider) {
-        return this.register(name, dependencies, provider, {instantiate: true});
+        this.constructor(name, dependencies, provider);
     },
 
     store: function(name, dependencies, provider) {
-        return this.register(name, dependencies, provider, {instantiate: true});
+        this.constructor(name, dependencies, provider);
     },
 
     view: function(name, dependencies, provider) {
-        return this.register(name, dependencies, provider);
+        this.factory(name, dependencies, provider);
     },
 
     viewController: function(name, dependencies, provider) {
-        return this.register(name, dependencies, provider);
-    },
-
-    value: function(name, value) {
-        function getValue() {
-            return value;
-        }
-
-        return this.register(name, getValue, {instantiate: false});
+        this.factory(name, dependencies, provider);
     },
 
     config: function(dependencies, onConfig) {
-        this._configHandlers.push({dependencies: dependencies, callback: onConfig});
+        this.configHandlers.push({dependencies: dependencies, callback: onConfig});
     },
 
     ready: function(dependencies, onReady) {
-        this._readyhandlers.push({dependencies: dependencies, callback: onReady});
+        this.readyhandlers.push({dependencies: dependencies, callback: onReady});
     },
 
     load: function() {
         var that = this;
 
-        ObjectUtils.forEach(this._configHandlers, function(handler) {
+        ObjectUtils.forEach(this.configHandlers, function(handler) {
             var configurables = [];
             ObjectUtils.forEach(handler.dependencies, function(name) {
                 var service = that._getService(name);
@@ -72,7 +80,7 @@ Module.prototype = {
 
         this._resolve();
 
-        ObjectUtils.forEach(this._readyhandlers, function(handler) {
+        ObjectUtils.forEach(this.readyhandlers, function(handler) {
             var instances = [];
             ObjectUtils.forEach(handler.dependencies, function(name) {
                 var service = that._getService(name);
@@ -83,15 +91,19 @@ Module.prototype = {
         });
     },
 
+    _register: function(name, dependencies, provider, type) {
+        this.services[name] = new Service(name, dependencies, provider, type, this);
+    },
+
     _getService: function(name) {
-        var service = this._services[name];
+        var service = this.services[name];
         assert(service, "{0} does not exist", name);
 
         return service;
     },
 
     _resolve: function() {
-        ObjectUtils.forEach(this._services, function(service) {
+        ObjectUtils.forEach(this.services, function(service) {
            service.resolve();
         });
     },
@@ -99,46 +111,29 @@ Module.prototype = {
     _loadDependencies: function(dependencies) {
         var that = this;
         ObjectUtils.forEach(dependencies, function(module){
-            ObjectUtils.forEach(module._services, function(service, name){
-               that._services[name] = service;
+            ObjectUtils.forEach(module.services, function(service, name){
+               that.services[name] = service;
             });
         });
     }
 };
 
-
-var defaultOptions = {
-    instantiate: false,
-    configurable: false
-};
-
-function Service(name, dependencies, provider, options, module) {
+function Service(name, dependencies, provider, type, module) {
     assert(name, "service name must be set");
-    assert(definition, "{0} definition must be set", name);
-
-    var defaults = ObjectUtils.extend({}, defaultOptions);
-    options = ObjectUtils.extend(defaults, options);
+    assert(provider, "{0} provider must be set", name);
+    assert(type, "{0} type must be set", name);
 
     this._name = name;
     this._dependencies = [];
-    this._options = options;
+    this._type = type;
     this._module = module;
 
-    if (options.configurable) {
+    if (this._isConfigurable()) {
         assert(ObjectUtils.isFunction(provider), "{0} configurable provider must only provide a function", name);
 
         this.configurable = new provider();
-        var getter = this.configurable.$get;
-
-        assert(getter, "{0} configurable provider must include $get", name);
-
-        if (ObjectUtils.isFunction(getter)) {
-            this._provider = getter;
-        }
-        else {
-            this._dependencies = getter.dependencies;
-            this._provider = getter.provider;
-        }
+        this._dependencies = this.configurable.$dependencies;
+        this._provider = this.configurable.$provider;
     }
     else {
         this._dependencies = dependencies;
@@ -149,8 +144,20 @@ function Service(name, dependencies, provider, options, module) {
 }
 
 Service.prototype = {
+    isFactory: function() {
+        return "factory" === this._type;
+    },
+
+    isConstructor: function() {
+        return "value" === this._type;
+    },
+
+    isValue: function() {
+        return "value" === this._type;
+    },
+
     isConfigurable: function() {
-        return this._options.configurable;
+        return "configurable" === this._type;
     },
 
     resolve: function() {
@@ -166,11 +173,11 @@ Service.prototype = {
             instances.push(service.instance);
         });
 
-        if (this._options.configurable || !this._options.instantiate) {
-            this.instance = this._provider.apply(null, instances);
+        if (this.isConstructor()) {
+            this.instance = new this._provider.apply(null, instances);
         }
         else {
-            this.instance = new this._provider.apply(null, instances);
+            this.instance = this._provider.apply(null, instances);
         }
 
         this._resolved = true;

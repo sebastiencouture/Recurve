@@ -5,8 +5,8 @@ var StringUtils = require("../utils/string.js");
 var ObjectUtils = require("../utils/object.js");
 var ArrayUtils = require("../utils/array.js");
 
-module.exports = function(coreModule) {
-    coreModule.configurable("$globalErrorHandler", function() {
+module.exports = function(recurveModule) {
+    recurveModule.configurable("$globalErrorHandler", function() {
         var onError;
         var enabled = true;
         var preventBrowserHandle = true;
@@ -24,11 +24,10 @@ module.exports = function(coreModule) {
                 preventBrowserHandle = value;
             },
 
-            $get: {
-                dependencies: ["$window"],
-                provider: function($window) {
-                    return new GlobalErrorHandler($window, onError, enabled, preventBrowserHandle);
-                }
+            $dependencies: [$window],
+
+            $provider: function($window) {
+                return new GlobalErrorHandler($window, onError, enabled, preventBrowserHandle);
             }
         }
     });
