@@ -25,46 +25,35 @@
         },
 
         createModule: function(name, dependencyNames) {
-            var dependencies = [];
             var coreAdded = false;
 
-            var that = this;
-
             ObjectUtils.forEach(dependencyNames, function(name) {
-                var knownModule = that.module[name];
-
                 if (name === "rc") {
                     coreAdded = true;
+                    return false;
                 }
-
-                dependencies.push(knownModule);
             });
 
             if (!coreAdded) {
-                dependencies.unshift(coreModule);
+                dependencyNames.unshift("rc");
             }
 
-            var module = new Module(name, dependencies);
+            var module = new Module(name, dependencyNames);
             modules.push(module);
 
             return module;
         },
 
         createContainer: function(moduleNames) {
-            var coreAdded = false;
             var that = this;
 
             ObjectUtils.forEach(moduleNames, function(name) {
-                modules.push(that.module[name]);
+                var module = that.module[name];
 
-                if (name === "rc") {
-                    coreAdded = true;
-                }
+                module.resolveDependencies(modules);
+                modules.push(that.module[name]);
             });
 
-            if (!coreAdded) {
-                modules.unshift(this.module("rc"));
-            }
 
             return new Container(modules);
         },

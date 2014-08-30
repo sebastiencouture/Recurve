@@ -2,6 +2,9 @@
 
 var Storage = require("./storage.js");
 
+// TODO TBD maybe just move this all to storage.js ?
+// can then re-use the configurable definition
+
 module.exports = function(recurveModule) {
     recurveModule.configurable("$localStorage", function() {
         var useCache = true;

@@ -10,7 +10,7 @@ function Container(modules) {
 
 Container.prototype = {
     // TODO TBD for mock need to support only injecting set of provided services and their dependencies
-    inject: function(services) {
+    inject: function(serviceNames) {
         var moduleServices = this._getServices();
 
         ObjectUtils.forEach(this._modules, function(module) {
@@ -54,16 +54,22 @@ Container.prototype = {
     },
 
     _resolve: function(services) {
+        var that = this;
 
+        ObjectUtils.forEach(services, function(service) {
+            service.resolve(services, that._instances);
+        });
     },
 
     _getServices: function() {
         var services = {};
 
         ObjectUtils.forEach(this._modules, function(module) {
-            ObjectUtils.forEach(module.services, function(service, name) {
-               services[name] = service;
+            ObjectUtils.forEach(module.dependencies, function(dependency){
+
             });
+
+            services = ObjectUtils.extend(services, module.services);
         });
 
         return services;

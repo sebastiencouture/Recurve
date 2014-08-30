@@ -3,15 +3,14 @@
 var ObjectUtils = require("../utils/object.js");
 var assert = require("../utils/assert.js");
 
-function Module(name, dependencies) {
+function Module(name, dependencyNames) {
     assert(name, "module name must be set");
 
     this.name = name;
     this.services = {};
     this.configHandlers = [];
     this.readyhandlers = [];
-
-    this._loadDependencies(dependencies);
+    this._dependencyNames = dependencyNames || [];
 }
 
 Module.prototype = {
@@ -36,7 +35,7 @@ Module.prototype = {
     },
 
     configurable: function(name, provider) {
-        this.register(name, null, provider, {configurable: true});
+        this._register(name, null, provider, "configurable");
     },
 
     action: function(name, dependencies, provider) {
@@ -63,62 +62,40 @@ Module.prototype = {
         this.readyhandlers.push({dependencies: dependencies, callback: onReady});
     },
 
-    load: function() {
-        var that = this;
+    resolveDependencies: function(modules) {
+        var dependencyServices = {};
 
-        ObjectUtils.forEach(this.configHandlers, function(handler) {
-            var configurables = [];
-            ObjectUtils.forEach(handler.dependencies, function(name) {
-                var service = that._getService(name);
-                assert(service.isConfigurable(), "{0} is not configurable", name);
+        ObjectUtils.forEach(this._dependencyNames, function(name){
+            var module = getModule(modules, name);
 
-                configurables.push(service.configurable);
+            ObjectUtils.forEach(module.services, function(service, name){
+                dependencyServices[name] = service;
+            });
+        }, this);
+
+        this.services = ObjectUtils.extend(dependencyServices, this.services);
+
+        function getModule(modules, name) {
+            var knownModule = null;
+
+            ObjectUtils.forEach(modules, function(module) {
+                if (module.name === name) {
+                    knownModule = module;
+                    return false;
+                }
             });
 
-            handler.callback.apply(null, configurables);
-        });
-
-        this._resolve();
-
-        ObjectUtils.forEach(this.readyhandlers, function(handler) {
-            var instances = [];
-            ObjectUtils.forEach(handler.dependencies, function(name) {
-                var service = that._getService(name);
-                instances.push(service.instance);
-            });
-
-            handler.callback.apply(null, instances);
-        });
+            assert(knownModule, "dependent module {0} does not exist", name);
+            return knownModule;
+        }
     },
 
     _register: function(name, dependencies, provider, type) {
-        this.services[name] = new Service(name, dependencies, provider, type, this);
-    },
-
-    _getService: function(name) {
-        var service = this.services[name];
-        assert(service, "{0} does not exist", name);
-
-        return service;
-    },
-
-    _resolve: function() {
-        ObjectUtils.forEach(this.services, function(service) {
-           service.resolve();
-        });
-    },
-
-    _loadDependencies: function(dependencies) {
-        var that = this;
-        ObjectUtils.forEach(dependencies, function(module){
-            ObjectUtils.forEach(module.services, function(service, name){
-               that.services[name] = service;
-            });
-        });
+        this.services[name] = new Service(name, dependencies, provider, type);
     }
 };
 
-function Service(name, dependencies, provider, type, module) {
+function Service(name, dependencies, provider, type) {
     assert(name, "service name must be set");
     assert(provider, "{0} provider must be set", name);
     assert(type, "{0} type must be set", name);
@@ -126,9 +103,8 @@ function Service(name, dependencies, provider, type, module) {
     this._name = name;
     this._dependencies = [];
     this._type = type;
-    this._module = module;
 
-    if (this._isConfigurable()) {
+    if (this.isConfigurable()) {
         assert(ObjectUtils.isFunction(provider), "{0} configurable provider must only provide a function", name);
 
         this.configurable = new provider();
@@ -160,54 +136,52 @@ Service.prototype = {
         return "configurable" === this._type;
     },
 
-    resolve: function() {
-        if (this._resolved) {
+    resolve: function(services, instances) {
+        if (instances[this._name]) {
             return;
         }
 
-        this._detectCircularReference();
+        this._detectCircularReference(services);
 
         var instances = [];
-        this._forEachDependentService(function(service) {
-            service.resolve();
+        this._forEachDependentService(services, function(service) {
+            service.resolve(services, instances);
             instances.push(service.instance);
         });
 
         if (this.isConstructor()) {
-            this.instance = new this._provider.apply(null, instances);
+            instances[this.name] = new this._provider.apply(null, instances);
         }
         else {
-            this.instance = this._provider.apply(null, instances);
+            instances[this.name] = this._provider.apply(null, instances);
         }
-
-        this._resolved = true;
     },
 
     // TODO TBD could this be improved?
-    _detectCircularReference: function() {
+    _detectCircularReference: function(services) {
         var that = this;
 
-        this._forEachDependentService(function(service) {
+        this._forEachDependentService(services, function(service) {
             service._detectCircularReferenceFor(that);
         });
     },
 
-    _detectCircularReferenceFor: function(service) {
-        this._forEachDependentProvider(function(possibleService) {
+    _detectCircularReferenceFor: function(services, service) {
+        this._forEachDependentService(services, function(possibleService) {
             if (service === possibleService) {
                 assert(false, "{0} contains a circular reference", service._name);
             }
 
-            possibleService._detectCircularReferenceFor(service);
+            possibleService._detectCircularReferenceFor(services, service);
         });
     },
 
-    _forEachDependentService: function(iterator) {
+    _forEachDependentService: function(services, iterator) {
         var that = this;
 
         ObjectUtils.forEach(this._dependencies, function(name) {
-            var service = that._module[name];
-            assert(service, "{0} does not exist", name);
+            var service = services[name];
+            assert(service, "{0} does not exist as dependency for {1}", name, that._name);
 
             iterator(service);
         });

@@ -29,6 +29,10 @@ module.exports = {
         return keys;
     },
 
+    find: function(obj, property, value) {
+
+    },
+
     // both values pass strict equality (===)
     // both objects are same type and all properties pass strict equality
     // both are NaN
