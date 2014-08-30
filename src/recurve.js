@@ -97,6 +97,7 @@
     require("./core/event-emitter.js")(coreModule);
     require("./core/cache.js")(coreModule);
     require("./core/cache-factory.js")(coreModule);
+    require("./core/log-console.js")(coreModule);
     require("./core/log.js")(coreModule);
     require("./core/cookies.js")(coreModule);
     require("./core/local-storage.js")(coreModule);

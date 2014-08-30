@@ -4,8 +4,6 @@ var Proto = require("../../utils/proto.js");
 var ArrayUtils = require("../../utils/array.js");
 var StringUtils = require("../../utils/string.js");
 
-var ConsoleTarget = require("./log-console.js");
-
 module.exports = function(recurveModule) {
     recurveModule.configurable("$log", function() {
         var enabled = true;
@@ -20,11 +18,11 @@ module.exports = function(recurveModule) {
                 targets = value;
             },
 
-            $dependencies: ["$window"],
+            $dependencies: ["$window", "$logConsole"],
 
-            $provider:  function($window) {
+            $provider:  function($window, $logConsole) {
                 if (!targets) {
-                    targets = [new ConsoleTarget($window)];
+                    targets = [new $logConsole()];
                 }
 
                 return new Log(enabled, targets);

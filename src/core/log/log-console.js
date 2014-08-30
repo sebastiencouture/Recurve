@@ -2,7 +2,11 @@
 
 var Proto = require("../../utils/proto.js");
 
-module.exports = function($window) {
+module.exports = function(recurveModule) {
+    recurveModule.factory("$logConsole", ["$window"], provider);
+};
+
+function provider($window) {
     return Proto.define([
         function ctor() {
         },
@@ -68,4 +72,4 @@ module.exports = function($window) {
             }
         }
     ]);
-};
+}
