@@ -44,12 +44,7 @@ function provider($window){
 
         {
             then: function(onFulfilled, onRejected) {
-                var deferred = {};
-                deferred.promise = new Promise(function(resolve, reject) {
-                    deferred.resolve = resolve;
-                    deferred.reject = reject;
-                });
-
+                var deferred = Promise.defer();
                 var subscriber = new Subscriber(onFulfilled, onRejected, deferred);
 
                 if (this._fulfilled) {
@@ -85,6 +80,16 @@ function provider($window){
                 return new Promise(function(resolve, reject) {
                     reject(reason);
                 });
+            },
+
+            defer: function() {
+                var deferred = {};
+                deferred.promise = new Promise(function(resolve, reject) {
+                    deferred.resolve = resolve;
+                    deferred.reject = reject;
+                });
+
+                return deferred;
             },
 
             all: function(iterable) {
