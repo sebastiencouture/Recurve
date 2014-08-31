@@ -25,16 +25,8 @@
         },
 
         createModule: function(name, dependencyNames) {
-            var coreAdded = false;
-
-            ObjectUtils.forEach(dependencyNames, function(name) {
-                if (name === "rc") {
-                    coreAdded = true;
-                    return false;
-                }
-            });
-
-            if (!coreAdded) {
+            // core module is always included, but does not need to be explicitly specified
+            if (!ObjectUtils.find(dependencyNames, null, "rc")) {
                 dependencyNames.unshift("rc");
             }
 
@@ -62,6 +54,7 @@
         mixin: Proto.mixin,
 
         forEach: ObjectUtils.forEach,
+        find: ObjectUtils.find,
         areEqual: ObjectUtils.areEqual,
         isNaN: ObjectUtils.isNaN,
         isSameType: ObjectUtils.isSameType,

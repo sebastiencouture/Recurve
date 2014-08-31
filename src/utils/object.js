@@ -9,7 +9,7 @@ module.exports = {
         if (obj.forEach && obj.forEach === Object.forEach) {
             obj.forEach(iterator, context);
         }
-        else if (this.isArray(obj) && obj.length) {
+        else if (this.isArray(obj)) {
             for (var index = 0; index < obj.length; index++) {
                 if (false === iterator.call(context, obj[index], index, obj)) {
                     return;
@@ -30,7 +30,32 @@ module.exports = {
     },
 
     find: function(obj, property, value) {
+        if (!obj) {
+            return;
+        }
 
+        if (this.isArray(obj)) {
+            for (var index = 0; index < obj.length; index++) {
+                var current = obj[index];
+
+                if (property &&
+                    this.isObject(current) &&
+                    current[property] === value) {
+                    return current;
+                }
+                else if (current === value) {
+                    return current;
+                }
+                else {
+                    // do nothing
+                }
+            }
+        }
+        else {
+            return value === obj[property] ? obj[property] : null;
+        }
+
+        return null;
     },
 
     // both values pass strict equality (===)
