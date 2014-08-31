@@ -30,14 +30,12 @@
         },
 
         createContainer: function(moduleNames) {
-            var that = this;
-
             ObjectUtils.forEach(moduleNames, function(name) {
-                var module = that.module[name];
+                var module = this.module[name];
 
                 module.resolveDependencies(modules);
-                modules.push(that.module[name]);
-            });
+                modules.push(module);
+            }, this);
 
 
             return new Container(modules);

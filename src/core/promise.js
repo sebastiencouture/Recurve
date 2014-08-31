@@ -180,8 +180,8 @@ function provider($window){
         promise._subscribers = null;
     }
 
-    function async(method) {
-        $window.setTimeout(method, 0);
+    function async(method, context) {
+        $window.setTimeout(method.bind(context || this), 0);
     }
 
     var Subscriber = Proto.define([
@@ -197,11 +197,9 @@ function provider($window){
                     invokeCallback(this._onFulfilled, value, this._deferred);
                 }
                 else {
-                    var that = this;
-
                     async(function(){
-                        that._deferred.resolve(value);
-                    });
+                        this._deferred.resolve(value);
+                    }, this);
                 }
             },
 
@@ -210,11 +208,9 @@ function provider($window){
                     invokeCallback(this._onRejected, reason, this._deferred);
                 }
                 else {
-                    var that = this;
-
                     async(function(){
-                        that._deferred.reject(reason);
-                    });
+                        this._deferred.reject(reason);
+                    }, this);
                 }
             }
         }
