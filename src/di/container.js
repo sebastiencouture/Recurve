@@ -19,7 +19,7 @@ Container.prototype = {
 
         // If only explicitly injecting certain services then we can't call the ready handlers since not all
         // service instances will exist. This is fine since injecting only certain services is intended
-        // to be used by unit tests
+        // to only be used by unit tests
         if (!serviceNames) {
             this._callReadyHandlers();
         }
