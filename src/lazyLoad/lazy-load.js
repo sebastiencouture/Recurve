@@ -3,7 +3,9 @@
 
     var DomUtils = require("../utils/dom.js");
 
-    recurve("rcLazyLoad").value("$lazyLoad", {
+    var lazyLoadModule = recurve.createModule("rcLazyLoad");
+    
+    lazyLoadModule.value("$lazyLoad", {
         js: function(url, onComplete, onError) {
             var element = DomUtils.createElement("link", {type: "text/css", rel: "stylesheet", href: url});
             load(element, onComplete, onError);
