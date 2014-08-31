@@ -11,16 +11,9 @@
 
     var recurve = window.recurve = {
         module: function(name) {
-            var knownModule = null;
-
-            ObjectUtils.forEach(modules, function(module) {
-               if (module.name === name) {
-                   knownModule = module;
-                   return true;
-               }
-            });
-
+            var knownModule = ObjectUtils.find(modules, "name", name);
             assert(knownModule, "module {0} does not exist", name);
+
             return knownModule;
         },
 
