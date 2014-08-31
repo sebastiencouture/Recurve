@@ -5,24 +5,36 @@ var assert = require("../utils/assert.js");
 
 module.exports = Container;
 
-function Container(modules) {
-    this._modules = modules;
+function Container() {
     this._instances = {};
 }
 
 Container.prototype = {
-    inject: function(serviceNames) {
-        var moduleServices = this._getServices();
+    inject: function(modules) {
+        var services = getServices(modules);
 
-        this._callConfigHandlers(moduleServices);
-        this._resolve(moduleServices, serviceNames);
+        callConfigHandlers(modules, services);
 
-        // If only explicitly injecting certain services then we can't call the ready handlers since not all
-        // service instances will exist. This is fine since injecting only certain services is intended
-        // to only be used by unit tests
-        if (!serviceNames) {
-            this._callReadyHandlers();
-        }
+        ObjectUtils.forEach(services, function(service) {
+            service.resolve(services, this._instances);
+        }, this);
+
+        callReadyHandlers(modules, this._instances);
+    },
+
+    injectOnly: function(modules, serviceNames) {
+        var services = getServices(modules);
+
+        callConfigHandlers(modules, services);
+
+        ObjectUtils.forEach(serviceNames, function(name) {
+            var service = services[name];
+            assert(service, "{0} is not a known service", name);
+
+            service.resolve(services, this._instances);
+        }, this);
+
+        callReadyHandlers(modules, this._instances);
     },
 
     get: function(serviceName) {
@@ -30,63 +42,48 @@ Container.prototype = {
         assert(instance, "no service instance for {0} exists in the container", serviceName);
 
         return instance;
-    },
-
-    _resolve: function(moduleServices, serviceNames) {
-        if (serviceNames) {
-            ObjectUtils.forEach(serviceNames, function(name) {
-                var service = moduleServices[name];
-                assert(service, "{0} is not a known service", name);
-
-                service.resolve(moduleServices, this._instances);
-            }, this);
-        }
-        else {
-            ObjectUtils.forEach(moduleServices, function(service) {
-                service.resolve(services, this._instances);
-            }, this);
-        }
-    },
-
-    _callConfigHandlers: function(moduleServices) {
-        ObjectUtils.forEach(this._modules, function(module) {
-            ObjectUtils.forEach(module.configHandlers, function(handler) {
-                var configurables = [];
-
-                ObjectUtils.forEach(handler.dependencies, function(name) {
-                    var service = moduleServices[name];
-                    assert(service, "{0} is not a known service", name);
-                    assert(service.isConfigurable(), "{0} is not a configurable service", name);
-
-                    configurables.push(service.configurable);
-                });
-
-                handler.callback.apply(null, configurables);
-            });
-        });
-    },
-
-    _callReadyHandlers: function() {
-        ObjectUtils.forEach(this._modules, function(module) {
-            ObjectUtils.forEach(module.readyHandlers, function(handler) {
-                var instances = [];
-
-                ObjectUtils.forEach(handler.dependencies, function(name) {
-                    instances.push(this.get(name));
-                }, this);
-
-                handler.callback.apply(null, instances);
-            }, this);
-        }, this);
-    },
-
-    _getServices: function() {
-        var services = {};
-
-        ObjectUtils.forEach(this._modules, function(module) {
-            services = ObjectUtils.extend(services, module.services);
-        });
-
-        return services;
     }
 };
+
+function getServices(modules) {
+    var services = {};
+
+    ObjectUtils.forEach(modules, function(module) {
+        services = ObjectUtils.extend(services, module.services);
+    });
+
+    return services;
+}
+
+function callConfigHandlers(modules, services) {
+    ObjectUtils.forEach(modules, function(module) {
+        ObjectUtils.forEach(module.configHandlers, function(handler) {
+            var configurables = [];
+
+            ObjectUtils.forEach(handler.dependencies, function(name) {
+                var service = services[name];
+                assert(service, "{0} is not a known service", name);
+                assert(service.isConfigurable(), "{0} is not a configurable service", name);
+
+                configurables.push(service.configurable);
+            });
+
+            handler.callback.apply(null, configurables);
+        });
+    });
+}
+
+function callReadyHandlers(modules, instances) {
+    ObjectUtils.forEach(modules, function(module) {
+        ObjectUtils.forEach(module.readyHandlers, function(handler) {
+            var handlerInstances = [];
+
+            ObjectUtils.forEach(handler.dependencies, function(name) {
+                // Could be null if explicitly only injected certain services through injectOnly(...)
+                handlerInstances.push(instances[name]);
+            });
+
+            handler.callback.apply(null, handlerInstances);
+        });
+    });
+}
