@@ -105,7 +105,7 @@ var cookies = {
             var rawValue = StringUtils.afterSeparator(cookie, "=");
             var value = parse(rawValue);
 
-            iterator(value, name, cookie);
+            iterator(value, name);
         });
     }
 };

@@ -13,6 +13,7 @@ var Container = require("../di/container.js");
 function addMockModules() {
     // TODO TBD override services such as $window, $log, $storage, $httpProvider, $cookies
     var mockModule = recurve.createModule("rcMock");
+    require("./mock-cookies.js")(mockModule);
 }
 
 function setupForJasmineMocha() {
