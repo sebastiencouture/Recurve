@@ -4,167 +4,143 @@ var ObjectUtils = require("../../utils/object.js");
 var StringUtils = require("../../utils/string.js");
 var UrlUtils = require("../../utils/url.js");
 
-var Xhr = require("./http-xhr.js");
-var JsonpRequest = require("./http-jsonp.js");
-var CrossDomainScriptRequest = require("./http-cors-script.js");
 var HttpDeferred = require("./http-deferred.js");
 
-var Http = {
-    defaults: {
-        headers: {
-            all: {},
+module.exports = function(recurveModule) {
+    recurveModule.configurable("$http", ["$httpProvider", "$httpTransformer"], function() {
+        var defaults = {
+            headers: {
+                all: {},
 
-            get: {},
-            post: {
-                "Content-Type" : "application/json; charset=UTF-8"
+                get: {},
+                post: {
+                    "Content-Type" : "application/json; charset=UTF-8"
+                },
+                put: {
+                    "Content-Type" : "application/json; charset=UTF-8"
+                },
+                head: {},
+                "delete": {},
+                jsonp: {},
+                script: {}
             },
-            put: {
-                "Content-Type" : "application/json; charset=UTF-8"
-            },
-            head: {},
-            "delete": {},
-            jsonp: {},
-            script: {}
+
+            method: "get",
+            dataType: "json",
+
+            cache: true,
+
+            errorOnCancel: true,
+            emulateHttp: false
+        };
+
+        return {
+            defaults: defaults,
+
+            $dependencies: ["$promise", "$httpProvider", "$httpTransformer"],
+
+            $provider: function($promise, $httpProvider, $httpTransformer) {
+                return Http(defaults, $promise, $httpProvider, $httpTransformer);
+            }
+        }
+    })
+};
+
+function Http(defaults, $promise, $httpProvider, $httpTransformer) {
+    return {
+        defaults: defaults,
+
+        request: function(options) {
+            var withDefaults = createOptionsWithDefaults(options, this.defaults);
+
+            updateUrl(withDefaults);
+            updateHeaders(withDefaults);
+
+            // TODO TBD should this be included in the transformer?
+            updateData(withDefaults);
+
+            options.data = $httpTransformer.serialize(options.data, options.contentType);
+
+            var deferred = createHttpDeferred($promise);
+            $httpProvider.send(withDefaults, deferred);
+
+            // TODO TBD parse response
+            //deferred.promise.then();
+
+            return deferred.promise;
         },
 
-        method: "get",
-        dataType: "json",
+        get: function(url, options) {
+            options = ObjectUtils.extend(options, {method: "get", url: url});
+            return this.request(options);
+        },
 
-        cache: true,
+        post: function(url, data, options) {
+            options = ObjectUtils.extend(options, {method: "post", url: url, data: data});
+            return this.request(options);
+        },
 
-        serializer : [defaultSerializer],
-        parser : [defaultParser],
+        jsonp: function(url, options) {
+            options = ObjectUtils.extend(options, {method: "jsonp", url: url});
+            return this.request(options);
+        },
 
-        requestFactory: DefaultRequestFactory,
-        deferredFactory: DefaultDeferredFactory,
+        "delete": function(url, options) {
+            options = ObjectUtils.extend(options, {method: "delete", url: url});
+            return this.request(options);
+        },
 
-        errorOnCancel: true,
-        emulateHttp: false
-    },
+        head: function(url, options) {
+            options = ObjectUtils.extend(options, {method: "head", url: url});
+            return this.request(options);
+        },
 
-    request: function(options) {
-        var withDefaults = createOptionsWithDefaults(options, Http.defaults);
+        put: function(url, data, options) {
+            options = ObjectUtils.extend(options, {method: "put", url: url, data: data});
+            return this.request(options);
+        },
 
-        updateUrl(withDefaults);
-        updateHeaders(withDefaults);
-        updateData(withDefaults);
-        serializeData(withDefaults);
+        patch: function(url, data, options) {
+            options = ObjectUtils.extend(options, {method: "patch", url: url, data: data});
+            return this.request(options);
+        },
 
-        var deferred = withDefaults.deferredFactory(withDefaults);
-        var request = withDefaults.requestFactory(withDefaults, deferred);
-
-        deferred.request = request;
-        request.send();
-
-        return deferred.promise;
-    },
-
-    get: function(url, options) {
-        options = ObjectUtils.extend(options, {method: "get", url: url});
-        return this.request(options);
-    },
-
-    post: function(url, data, options) {
-        options = ObjectUtils.extend(options, {method: "post", url: url, data: data});
-        return this.request(options);
-    },
-
-    jsonp: function(url, options) {
-        options = ObjectUtils.extend(options, {method: "jsonp", url: url});
-        return this.request(options);
-    },
-
-    "delete": function(url, options) {
-        options = ObjectUtils.extend(options, {method: "delete", url: url});
-        return this.request(options);
-    },
-
-    head: function(url, options) {
-        options = ObjectUtils.extend(options, {method: "head", url: url});
-        return this.request(options);
-    },
-
-    put: function(url, data, options) {
-        options = ObjectUtils.extend(options, {method: "put", url: url, data: data});
-        return this.request(options);
-    },
-
-    patch: function(url, data, options) {
-        options = ObjectUtils.extend(options, {method: "patch", url: url, data: data});
-        return this.request(options);
-    },
-
-    getScript: function(url, options) {
-        options = ObjectUtils.extend(options, {method: "script", url: url});
-        return this.request(options);
-    }
-};
-
-
-function defaultSerializer(data, contentType) {
-    var ignoreCase = true;
-
-    if (StringUtils.contains(contentType, "application/x-www-form-urlencoded", ignoreCase)) {
-        if (ObjectUtils.isObject(data) && !ObjectUtils.isFile(data)) {
-            data = ObjectUtils.toFormData(data);
+        getScript: function(url, options) {
+            options = ObjectUtils.extend(options, {method: "script", url: url});
+            return this.request(options);
         }
-    }
-    else if (StringUtils.contains(contentType, "application/json", ignoreCase)) {
-        if (ObjectUtils.isObject(data) && !ObjectUtils.isFile(data)) {
-            data = ObjectUtils.toJson(data);
-        }
-    }
-    else {
-        // do nothing - nothing to serialize
-    }
-
-    return data;
+    };
 }
 
-Http.serializer = defaultSerializer;
+function createHttpDeferred($promise) {
+    var deferred = $promise.defer();
 
+    deferred.promise.success = function(onSuccess) {
+        deferred.promise.then(function(response) {
+            onSuccess(
+                response.data, response.status, response.statusText,
+                response.headers, response.options, response.canceled);
+        });
 
-function defaultParser(xhr, accept) {
-    var data;
-    var ignoreCase = true;
+        return this._deferred.promise;
+    };
 
-    if (StringUtils.contains(accept, "application/xml", ignoreCase) ||
-        StringUtils.contains(accept, "text/xml", ignoreCase)) {
-        data = xhr.responseXML;
-    }
-    else if (StringUtils.contains(accept, "application/json", ignoreCase)) {
-        if (data) {
-            data = ObjectUtils.toJson(xhr.responseText);
-        }
-    }
-    else {
-        data = xhr.responseText;
-    }
+    deferred.promise.error = function(onError) {
+        deferred.promise.then(null, function(response) {
+            onError(
+                response.data, response.status, response.statusText,
+                response.headers, response.options, response.canceled);
+        });
 
-    return data;
+        return this._deferred.promise;
+    };
+
+    deferred.promise.cancel = function() {
+        deferred.request.cancel();
+    };
+
+    return deferred;
 }
-
-Http.parser = defaultParser;
-
-
-function DefaultRequestFactory(options, deferred) {
-    var request;
-
-    if (StringUtils.isEqualIgnoreCase("jsonp", options.method)) {
-        request = new JsonpRequest(options, deferred);
-    }
-    else if (options.crossDomain &&
-        StringUtils.isEqualIgnoreCase("script", options.method)) {
-        request = new CrossDomainScriptRequest(options, deferred);
-    }
-    else {
-        request = new Xhr(options, deferred);
-    }
-
-    return request;
-};
-
-Http.RequestFactory = DefaultRequestFactory;
 
 
 function DefaultDeferredFactory() {
@@ -304,23 +280,4 @@ function updateData(options) {
     }
 
     options.data._method = options.method.toLowerCase();
-}
-
-function serializeData(options) {
-    if (!options.data) {
-        return;
-    }
-
-    var data = options.data;
-
-    if (ObjectUtils.isFunction(options.serializer)) {
-        data = options.serializer(data, this._options.contentType);
-    }
-    else {
-        ObjectUtils.forEach(options.serializer, function(serializer) {
-            data = serializer(data, options.contentType);
-        });
-    }
-
-    options.data = data;
 }
