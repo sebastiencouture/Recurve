@@ -2,7 +2,7 @@
 
 module.exports = function(mockModule) {
     mockModule.value("$cookies", cookies);
-}
+};
 
 var cached = {};
 

@@ -11,9 +11,12 @@ var Container = require("../di/container.js");
 })();
 
 function addMockModules() {
-    // TODO TBD override services such as $window, $log, $storage, $httpProvider, $cookies
+    // TODO TBD override $httpProvider, $history once implemented
     var mockModule = recurve.createModule("rcMock");
     require("./mock-cookies.js")(mockModule);
+    require("./mock-global-error-handler.js")(mockModule);
+    require("./mock-log.js")(mockModule);
+    require("./mock-storage.js")(mockModule);
 }
 
 function setupForJasmineMocha() {
@@ -25,6 +28,7 @@ function setupForJasmineMocha() {
 
     (window.beforeEach || window.setup)(function(){
         currentSpec = this;
+        currentSpec.$modules = [];
     });
 
     (window.afterEach || window.teardown)(function(){
@@ -34,12 +38,10 @@ function setupForJasmineMocha() {
     window.$include = recurve.mock.include = function(moduleName, callback) {
         recurve.assert(currentSpec, "expected a current spec to exist");
 
-        currentSpec.$modules = currentSpec.modules || [];
-
-        // Make sure tok keep module ordering as specified with the includes
-        var index = currentSpec.modules.indexOf(recurve.module(moduleName));
+        // Make sure to keep module ordering as specified with the includes
+        var index = currentSpec.$modules.indexOf(recurve.module(moduleName));
         if (0 < index) {
-            currentSpec.modules.splice(index, 1);
+            currentSpec.$modules.splice(index, 1);
         }
 
         currentSpec.$modules.push(recurve.module(moduleName));
@@ -54,6 +56,9 @@ function setupForJasmineMocha() {
         recurve.assert(!currentSpec.$container, "spec can only be injected once");
 
         var modules = currentSpec.$modules.slice();
+
+        modules.push(recurve.module("rcMock"));
+
         if (currentSpec.$specModule) {
             modules.push(currentSpec.$specModule);
         }

@@ -124,10 +124,6 @@ module.exports = Proto.define([
                 var value = this.get(key);
                 iterator(value, key);
             }
-        },
-
-        setCache: function(value) {
-            this._cache = value;
         }
     }
 ]);
