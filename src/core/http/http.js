@@ -4,8 +4,6 @@ var ObjectUtils = require("../../utils/object.js");
 var StringUtils = require("../../utils/string.js");
 var UrlUtils = require("../../utils/url.js");
 
-var HttpDeferred = require("./http-deferred.js");
-
 module.exports = function(recurveModule) {
     recurveModule.configurable("$http", ["$httpProvider", "$httpTransformer"], function() {
         var defaults = {
@@ -55,8 +53,6 @@ function Http(defaults, $promise, $httpProvider, $httpTransformer) {
 
             updateUrl(withDefaults);
             updateHeaders(withDefaults);
-
-            // TODO TBD should this be included in the transformer?
             updateData(withDefaults);
 
             options.data = $httpTransformer.serialize(options.data, options.contentType);
@@ -141,46 +137,6 @@ function createHttpDeferred($promise) {
 
     return deferred;
 }
-
-
-function DefaultDeferredFactory() {
-    return new HttpDeferred();
-};
-
-Http.DeferredFactory = DefaultDeferredFactory;
-
-
-function QDeferredFactory() {
-    var deferred = Q.defer();
-
-    deferred.promise.success = function(onSuccess) {
-        deferred.promise.then(function(response) {
-            onSuccess(
-                response.data, response.status, response.statusText,
-                response.headers, response.options, response.canceled);
-        });
-
-        return this._deferred.promise;
-    };
-
-    deferred.promise.error = function(onError) {
-        deferred.promise.then(null, function(response) {
-            onError(
-                response.data, response.status, response.statusText,
-                response.headers, response.options, response.canceled);
-        });
-
-        return this._deferred.promise;
-    };
-
-    deferred.promise.cancel = function() {
-        deferred.request.cancel();
-    };
-
-    return deferred;
-};
-
-Http.QDeferredFactory = QDeferredFactory;
 
 
 function createOptionsWithDefaults(options, defaults) {
