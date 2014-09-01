@@ -13,6 +13,7 @@ var Container = require("../di/container.js");
 function addMockModules() {
     // TODO TBD override $httpProvider, $history once implemented
     var mockModule = recurve.createModule("rcMock");
+
     require("./mock-cookies.js")(mockModule);
     require("./mock-global-error-handler.js")(mockModule);
     require("./mock-log.js")(mockModule);
