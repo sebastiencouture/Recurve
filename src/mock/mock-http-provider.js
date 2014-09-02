@@ -30,7 +30,7 @@ module.exports = function(mockModule) {
             },
 
             whenDelete: function(url, response, accept) {
-                this.when(nurl, response, "delete", accept);
+                this.when(url, response, "delete", accept);
             },
 
             whenHead: function(url, response, accept) {
