@@ -2,7 +2,7 @@
 
 module.exports = function(mockModule) {
     mockModule.configurable("$httpProvider", function(){
-        var requests = [];
+        var requestHandlers = [];
         var baseUrl = "";
 
         return {
@@ -10,66 +10,81 @@ module.exports = function(mockModule) {
                 baseUrl = value;
             },
 
-            when: function(method, url, accept) {
-                // TODO TBD need to handle possible duplicates
+            request: function(method, url) {
+                recurve.forEach(requestHandlers, function(requestHandler, index) {
+                    if (requestHandler.isMatch(url, method)) {
+                        requestHandlers.splice(index, 1);
+                        return false;
+                    }
+                })
 
                 url = baseUrl + url;
-                return requests.push(new MockRequest(method, url, accept));
+                return requestHandlers.push(new RequestHandler(method, url));
             },
 
-            whenGet: function(url, accept) {
-                return this.when("get", url, accept);
+            requestGet: function(url) {
+                return this.request("get", url);
             },
 
-            whenPost: function(url, accept) {
-                return this.when("post", url, accept);
+            requestPost: function(url) {
+                return this.request("post", url);
             },
 
-            whenJsonp: function(url, accept) {
-                return this.when("jsonp", url, accept);
+            requestJsonp: function(url) {
+                return this.request("jsonp", url);
             },
 
-            whenDelete: function(url, accept) {
-                return this.when("delete", url, accept);
+            requestDelete: function(url) {
+                return this.request("delete", url);
             },
 
-            whenHead: function(url,  accept) {
-                return this.when("head", url, accept);
+            requestHead: function(url) {
+                return this.request("head", url);
             },
 
-            whenPut: function(url, accept) {
-                return this.when("put", url, accept);
+            requestPut: function(url) {
+                return this.request("put", url);
             },
 
-            whenPatch: function(url, accept) {
-                return this.when("patch", url, accept);
+            requestPatch: function(url) {
+                return this.request("patch", url);
             },
 
-            whenScript: function(url, accept) {
-                return this.when("script", url, accept);
+            requestScript: function(url) {
+                return this.request("script", url);
             },
 
             $provider: function() {
                 return {
                     send: function(options, deferred) {
-                        var response;
-                        recurve.forEach(requests, function(request) {
-                            if (response.isMatch(options.url, options.method, options.Accept)) {
-                                response = request.response;
+                        var requestHandler = null;
+                        recurve.forEach(requestHandlers, function(request) {
+                            if (request.isMatch(options.url, options.method)) {
+                                requestHandler = request;
                                 return false;
                             }
                         });
 
-                        if (!response) {
-                            recurve.assert("no mock response is configured for {0} {1} {2}", options.url, options.method, options.Accept);
+                        if (!requestHandler) {
+                            recurve.assert(false, "no mock request handler exists for {0} {1}", options.url, options.method);
                         }
 
+                        if (!requestHandler.response) {
+                            recurve.assert(false, "no mock response exists for {0} {1}", options.url, options.method);
+                        }
+
+                        requestHandler.count++;
+
+                        requestHandler.checkExpectations(options);
+
+                        var response = recurve.mixin({}, requestHandler.response);
                         recurve.mixin(response, {options: options});
+
                         deferred.resolve(response);
                     },
 
                     clear: function() {
-                        requests = null;
+                        requestHandlers = [];
                     }
                 };
             }
@@ -77,23 +92,18 @@ module.exports = function(mockModule) {
     });
 }
 
-function MockRequest(method, url, accept) {
-    if (undefined === accept) {
-        accept = "application/json"
-    }
-
-    this._url = url;
+function RequestHandler(method, url) {
     this._method = method;
-    this._accept = accept;
+    this._url = url;
+
+    this._expectations = [];
+
+    this.count = 0;
 }
 
-MockRequest.prototype = {
-    isMatch: function(url, method, accept) {
-        if (undefined === accept) {
-            accept = "application/json";
-        }
-
-        return this._url = url && this._method === method && this._accept === accept;
+RequestHandler.prototype = {
+    isMatch: function(url, method) {
+        return this._url = url && this._method === method;
     },
 
     respond: function(data, status, statusText, headers, canceled) {
@@ -104,5 +114,69 @@ MockRequest.prototype = {
             headers: headers,
             canceled: canceled
         };
+    },
+
+    expect: function(options, exactMatch) {
+        this._expectations.push({options: options, exactMatch: exactMatch});
+    },
+
+    expectExact: function(options) {
+        this.expect(options, true);
+    },
+
+    expectData: function(data, partialMatch) {
+        this.expect({data: data}, partialMatch);
+    },
+
+    expectDataExact: function(data) {
+        this.expectData({data: data}, true);
+    },
+
+    expectHeaders: function(headers, partialMatch) {
+        this.expect({headers: headers}, partialMatch)
+    },
+
+    expectHeadersExact: function(headers) {
+        this.expectHeaders(headers, true);
+    },
+
+    expectCallCountToBe: function(count) {
+        recurve.assert.strictEqual(count, this.count,
+            "request handler {0}:{1} call count does not match expected {2} != {3}",
+            this._url, this._method, this.count, count);
+    },
+
+    checkExpectations: function(options) {
+        recurve.forEach(this._expectations, function(expectation) {
+            if (expectation.exactMatch) {
+                recurve.assert.deepEqual(expectation.options, options,
+                    this._assertDescription(expectation.options, options));
+            }
+            else {
+                this._checkExpectationPartialMatch(expectation.options, options);
+            }
+        }, this);
+    },
+
+    _checkExpectationPartialMatch: function(expectated, actual) {
+        recurve.forEach(expectated, function(expectedValue, expectedKey) {
+            var actualValue = actual[expectedKey];
+
+            if (recurve.isObject(expectedValue) || recurve.isArray(expectedValue)) {
+                recurve.assert(actualValue, this._assertDescription(expectedValue, actualValue));
+                this._checkExpectationPartialMatch(expectedValue, actualValue);
+            }
+            else {
+                recurve.assert.strictEqual(expectedValue, actualValue,
+                    this._assertDescription(expectedValue, actualValue));
+            }
+        }, this);
+    },
+
+    _assertDescription: function(expectated, actual) {
+        return recurve.format(
+            "request handler {0} {1} expectation not met, expect: {2}, actual: {3}",
+            this._url, this._method, expectated, actual);
     }
+
 };
