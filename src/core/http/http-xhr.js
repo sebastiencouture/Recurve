@@ -3,6 +3,7 @@
 var ObjectUtils = require("../../utils/object.js");
 var StringUtils = require("../../utils/string.js");
 var WindowUtils = require("../../utils/window.js");
+var assert = require("../../utils/assert.js");
 
 module.exports = Xhr;
 
@@ -19,7 +20,7 @@ Xhr.Prototype = {
             this._xhr = new XMLHttpRequest();
         }
         else {
-            throw new Error("Recurve only supports IE8+");
+            assert(false, "recurve only supports IE8+");
         }
 
         this._config();
@@ -104,24 +105,10 @@ Xhr.Prototype = {
     },
 
     _handleSuccess: function() {
-        if (!this._options.success) {
-            return;
-        }
-
-        var data;
+        var data = this._getData();
 
         if (StringUtils.isEqualIgnoreCase("script", this._options.dataType)) {
-            data = this._request.responseText;
             WindowUtils.globalEval(this.$window, data);
-        }
-        else {
-            try {
-                data = this._parseResponse();
-            }
-            catch (error) {
-                this._handleError("unable to parse response");
-                return;
-            }
         }
 
         this._complete(true, data);
@@ -149,21 +136,21 @@ Xhr.Prototype = {
         }
     },
 
-    _parseResponse: function() {
+    _getData: function() {
         var accept =  this._options.headers && this._options.headers.Accept;
         if (!accept) {
             accept = this._xhr.getResponseHeader('content-type');
         }
 
         var data;
+        var ignoreCase = true;
 
-        if (ObjectUtils.isFunction(this._options.serializer)) {
-            data = this._options.parser(this._xhr), accept;
+        if (StringUtils.contains(accept, "application/xml", ignoreCase) ||
+            StringUtils.contains(accept, "text/xml", ignoreCase)) {
+            data = this._xhr.responseXML;
         }
         else {
-            ObjectUtils.forEach(this._options.parser, function(parser) {
-                data = parser(this._xhr, accept);
-            });
+            data = this._xhr.responseText;
         }
 
         return data;

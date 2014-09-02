@@ -77,4 +77,7 @@
     require("./core/session-storage.js")(coreModule);
     require("./core/global-error-handler.js")(coreModule);
     require("./core/performance-monitor.js")(coreModule);
+    require("./core/http.js")(coreModule);
+    require("./core/http-transformer.js")(coreModule);
+    require("./core/http-provider.js")(coreModule);
 })();

@@ -45,11 +45,49 @@ module.exports = function(recurveModule) {
 };
 
 function Http(defaults, $promise, $httpProvider, $httpTransformer) {
-    return {
-        defaults: defaults,
+    function parseResponseSuccess(response) {
+        response.data = $httpTransformer.parse(response.data);
+        return response;
+    }
 
+    function parseResponseError(response) {
+        response.data = $httpTransformer.parse(response.data);
+        $promise.reject(response);
+    }
+
+    function createHttpDeferred() {
+        var deferred = $promise.defer();
+
+        deferred.promise.success = function(onSuccess) {
+            deferred.promise.then(function(response) {
+                onSuccess(
+                    response.data, response.status, response.statusText,
+                    response.headers, response.options, response.canceled);
+            });
+
+            return this._deferred.promise;
+        };
+
+        deferred.promise.error = function(onError) {
+            deferred.promise.then(null, function(response) {
+                onError(
+                    response.data, response.status, response.statusText,
+                    response.headers, response.options, response.canceled);
+            });
+
+            return this._deferred.promise;
+        };
+
+        deferred.promise.cancel = function() {
+            deferred.request.cancel();
+        };
+
+        return deferred;
+    }
+
+    return {
         request: function(options) {
-            var withDefaults = createOptionsWithDefaults(options, this.defaults);
+            var withDefaults = createOptionsWithDefaults(options, defaults);
 
             updateUrl(withDefaults);
             updateHeaders(withDefaults);
@@ -57,13 +95,10 @@ function Http(defaults, $promise, $httpProvider, $httpTransformer) {
 
             options.data = $httpTransformer.serialize(options.data, options.contentType);
 
-            var deferred = createHttpDeferred($promise);
+            var deferred = createHttpDeferred();
             $httpProvider.send(withDefaults, deferred);
 
-            // TODO TBD parse response
-            //deferred.promise.then();
-
-            return deferred.promise;
+            return deferred.promise.then(parseResponseSuccess, parseResponseError);
         },
 
         get: function(url, options) {
@@ -106,36 +141,6 @@ function Http(defaults, $promise, $httpProvider, $httpTransformer) {
             return this.request(options);
         }
     };
-}
-
-function createHttpDeferred($promise) {
-    var deferred = $promise.defer();
-
-    deferred.promise.success = function(onSuccess) {
-        deferred.promise.then(function(response) {
-            onSuccess(
-                response.data, response.status, response.statusText,
-                response.headers, response.options, response.canceled);
-        });
-
-        return this._deferred.promise;
-    };
-
-    deferred.promise.error = function(onError) {
-        deferred.promise.then(null, function(response) {
-            onError(
-                response.data, response.status, response.statusText,
-                response.headers, response.options, response.canceled);
-        });
-
-        return this._deferred.promise;
-    };
-
-    deferred.promise.cancel = function() {
-        deferred.request.cancel();
-    };
-
-    return deferred;
 }
 
 
@@ -237,3 +242,4 @@ function updateData(options) {
 
     options.data._method = options.method.toLowerCase();
 }
+

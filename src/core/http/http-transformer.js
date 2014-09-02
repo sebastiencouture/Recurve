@@ -28,21 +28,14 @@ var httpTransformer = {
         return data;
     },
 
-    parse: function(xhr, accept) {
-        var data;
-        var ignoreCase = true;
-
-        if (StringUtils.contains(accept, "application/xml", ignoreCase) ||
-            StringUtils.contains(accept, "text/xml", ignoreCase)) {
-            data = xhr.responseXML;
-        }
-        else if (StringUtils.contains(accept, "application/json", ignoreCase)) {
-            if (data) {
-                data = ObjectUtils.toJson(xhr.responseText);
+    parse: function(data) {
+        if (data) {
+            try {
+                data = ObjectUtils.toJson(data);
             }
-        }
-        else {
-            data = xhr.responseText;
+            catch (error) {
+                // do nothing - not json, or invalid json
+            }
         }
 
         return data;
