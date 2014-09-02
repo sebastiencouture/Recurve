@@ -88,7 +88,7 @@ Proto.define = function(options) {
  * @param properties    variables/functions to mixin with this object
  */
 Proto.mixin = function(properties) {
-    Proto.mixinWith(this, properties);
+    return Proto.mixinWith(this, properties);
 };
 
 /**

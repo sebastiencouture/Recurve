@@ -2,7 +2,7 @@
 
 module.exports = function(mockModule) {
     mockModule.configurable("$httpProvider", function(){
-        var responses = [];
+        var requests = [];
         var baseUrl = "";
 
         return {
@@ -10,49 +10,66 @@ module.exports = function(mockModule) {
                 baseUrl = value;
             },
 
-            when: function(url, response, method, accept) {
+            when: function(method, url, accept) {
                 // TODO TBD need to handle possible duplicates
 
                 url = baseUrl + url;
-                responses.push(new MockResponse(url, response, method, accept));
+                return requests.push(new MockRequest(method, url, accept));
             },
 
-            whenGet: function(url, response, accept) {
-                this.when(url, response, "get", accept);
+            whenGet: function(url, accept) {
+                return this.when("get", url, accept);
             },
 
-            whenPost: function(url, response, accept) {
-                this.when(url, response, "post", accept);
+            whenPost: function(url, accept) {
+                return this.when("post", url, accept);
             },
 
-            whenJsonp: function(url, response, accept) {
-                this.when(url, response, "jsonp", accept);
+            whenJsonp: function(url, accept) {
+                return this.when("jsonp", url, accept);
             },
 
-            whenDelete: function(url, response, accept) {
-                this.when(url, response, "delete", accept);
+            whenDelete: function(url, accept) {
+                return this.when("delete", url, accept);
             },
 
-            whenHead: function(url, response, accept) {
-                this.when(url, response, "head", accept);
+            whenHead: function(url,  accept) {
+                return this.when("head", url, accept);
             },
 
-            whenPut: function(url, response, accept) {
-                this.when(url, response, "put", accept);
+            whenPut: function(url, accept) {
+                return this.when("put", url, accept);
             },
 
-            whenPatch: function(url, response, accept) {
-                this.when(url, response, "patch", accept);
+            whenPatch: function(url, accept) {
+                return this.when("patch", url, accept);
             },
 
-            whenScript: function(url, response, accept) {
-                this.when(url, response, "script", accept);
+            whenScript: function(url, accept) {
+                return this.when("script", url, accept);
             },
 
             $provider: function() {
                 return {
                     send: function(options, deferred) {
+                        var response;
+                        recurve.forEach(requests, function(request) {
+                            if (response.isMatch(options.url, options.method, options.Accept)) {
+                                response = request.response;
+                                return false;
+                            }
+                        });
 
+                        if (!response) {
+                            recurve.assert("no mock response is configured for {0} {1} {2}", options.url, options.method, options.Accept);
+                        }
+
+                        recurve.mixin(response, {options: options});
+                        deferred.resolve(response);
+                    },
+
+                    clear: function() {
+                        requests = null;
                     }
                 };
             }
@@ -60,28 +77,32 @@ module.exports = function(mockModule) {
     });
 }
 
-function MockResponse(url, response, method, accept) {
-    if (undefined === method) {
-        method = "get";
-    }
-
+function MockRequest(method, url, accept) {
     if (undefined === accept) {
         accept = "application/json"
     }
-
-    this.response = response;
 
     this._url = url;
     this._method = method;
     this._accept = accept;
 }
 
-MockResponse.prototype = {
+MockRequest.prototype = {
     isMatch: function(url, method, accept) {
         if (undefined === accept) {
             accept = "application/json";
         }
 
         return this._url = url && this._method === method && this._accept === accept;
+    },
+
+    respond: function(data, status, statusText, headers, canceled) {
+        this.response = {
+            data: data,
+            status: status,
+            statusText: statusText,
+            headers: headers,
+            canceled: canceled
+        };
     }
 };
