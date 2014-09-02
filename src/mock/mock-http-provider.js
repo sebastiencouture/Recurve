@@ -12,41 +12,41 @@ module.exports = function(mockModule) {
 
             when: function(url, response, method, accept) {
                 // TODO TBD need to handle possible duplicates
-                
+
                 url = baseUrl + url;
                 responses.push(new MockResponse(url, response, method, accept));
             },
 
             whenGet: function(url, response, accept) {
-                responses.push(new MockResponse(url, response, "get", accept));
+                this.when(url, response, "get", accept);
             },
 
             whenPost: function(url, response, accept) {
-                responses.push(new MockResponse(url, response, "post", accept));
+                this.when(url, response, "post", accept);
             },
 
             whenJsonp: function(url, response, accept) {
-                responses.push(new MockResponse(url, response, "jsonp", accept));
+                this.when(url, response, "jsonp", accept);
             },
 
             whenDelete: function(url, response, accept) {
-                responses.push(new MockResponse(url, response, "delete", accept));
+                this.when(nurl, response, "delete", accept);
             },
 
             whenHead: function(url, response, accept) {
-                responses.push(new MockResponse(url, response, "head", accept));
+                this.when(url, response, "head", accept);
             },
 
             whenPut: function(url, response, accept) {
-                responses.push(new MockResponse(url, response, "put", accept));
+                this.when(url, response, "put", accept);
             },
 
             whenPatch: function(url, response, accept) {
-                responses.push(new MockResponse(url, response, "patch", accept));
+                this.when(url, response, "patch", accept);
             },
 
             whenScript: function(url, response, accept) {
-                responses.push(new MockResponse(url, response, "script", accept));
+                this.when(url, response, "script", accept);
             },
 
             $provider: function() {
