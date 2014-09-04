@@ -17,11 +17,40 @@ function Module(name, dependencyNames) {
 }
 
 Module.prototype = {
-    factory: function(name, dependencies, provider) {
-        this._register(name, dependencies, provider, "factory");
+    provider: function(name, provider) {
+        this.services[name] = new Service(name, provider);
+        //this._register(name, null, provider, "provider");
+    },
+
+    factory: function(name, dependencies, getter) {
+        this.provider(name, {$dependencies: dependencies, $get: getter});
+        //this._register(name, dependencies, provider, "factory");
     },
 
     value: function(name, value) {
+        var getter = value;
+        if (!ObjectUtils.isFunction(value)) {
+            getter = function() {
+                return value;
+            };
+        }
+
+        return this.factory(name, null, getter);
+    },
+
+    instance: function(name, instantiableName, provider) {
+        if (provider) {
+            provider.$dependencies = provider.$dependencies || [instantiableName];
+            this.provider(name, provider);
+        }
+        else {
+            this.factory(name, [instantiableName], function(Instantiable) {
+                return new Instantiable();
+            });
+        }
+    },
+
+    /*value: function(name, value) {
         var provider = value;
 
         if (!ObjectUtils.isFunction(value)) {
@@ -45,11 +74,7 @@ Module.prototype = {
                 return new instantiable();
             });
         }
-    },
-
-    instanceConfig: function(name, configuration) {
-        this._register(name + "Config", null, configuration, "config");
-    },
+    },*/
 
     // TODO TBD No need for this anymore
     constructor: function(name, dependencies, provider) {
