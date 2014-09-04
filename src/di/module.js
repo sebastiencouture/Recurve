@@ -21,22 +21,42 @@ Module.prototype = {
         this._register(name, dependencies, provider, "factory");
     },
 
-    constructor: function(name, dependencies, provider) {
-        this._register(name, dependencies, provider, "constructor");
-    },
-
     value: function(name, value) {
         var provider = value;
 
         if (!ObjectUtils.isFunction(value)) {
             provider = function() {
                 return value;
-            }
+            };
         }
 
         this._register(name, null, provider, "value");
     },
 
+    instance: function(name, instantiableName, configuration) {
+        if (configuration) {
+            this.instanceConfig(name, configuration);
+            this.factory(name, [instantiableName, name + "Config"], function(instantiable, config){
+                return config.$constructor(instantiable);
+            });
+        }
+        else {
+            this.factory(name, [instantiableName], function(instantiable) {
+                return new instantiable();
+            });
+        }
+    },
+
+    instanceConfig: function(name, configuration) {
+        this._register(name + "Config", null, configuration, "config");
+    },
+
+    // TODO TBD No need for this anymore
+    constructor: function(name, dependencies, provider) {
+        this._register(name, dependencies, provider, "constructor");
+    },
+
+    // TODO TBD No need for this anymore
     configurable: function(name, provider) {
         this._register(name, null, provider, "configurable");
     },

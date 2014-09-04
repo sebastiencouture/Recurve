@@ -29,11 +29,6 @@ Xhr.Prototype = {
             this._stateChangeHandler.bind(this)
 
         this._xhr.open(this._options.method.toUpperCase(), this._options.url, true);
-
-        if (this._options.beforeSend) {
-            this._options.beforeSend(this._xhr, this._options);
-        }
-
         this._xhr.send(this._options.data);
     },
 

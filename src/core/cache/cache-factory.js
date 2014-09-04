@@ -33,7 +33,7 @@ function provider($cache) {
                 delete this._caches[name];
             },
 
-            destroyAll: function(name) {
+            destroyAll: function() {
                 ObjectUtils.forEach(this._caches, function(cache) {
                     cache.clear();
                 });

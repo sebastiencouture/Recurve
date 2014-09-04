@@ -1,12 +1,14 @@
+var Proto = function() {
+    // do nothing
+};
+
+module.exports = Proto;
+
 var dontInvokeConstructor = {};
 
 function isFunction(value) {
     return value && "function" == typeof value;
 }
-
-var Proto = function() {
-    // do nothing
-};
 
 /**
  * Create object that inherits from this object
@@ -35,11 +37,10 @@ Proto.define = function(options) {
         staticProperties = options[1];
     }
 
-    function ProtoObj(param)
-    {
+    function ProtoObj(param) {
         if (dontInvokeConstructor != param &&
             isFunction(this.$ctor)) {
-            this.$ctor.apply( this, arguments );
+            this.$ctor.apply(this, arguments);
         }
     }
 
@@ -50,8 +51,7 @@ Proto.define = function(options) {
         addProtoProperty(key, properties[key], ProtoObj.prototype[key]);
     }
 
-    function addProtoProperty(key, property, superProperty)
-    {
+    function addProtoProperty(key, property, superProperty) {
         if (!isFunction(property) ||
             !isFunction(superProperty)) {
             ProtoObj.prototype[key] = property;
@@ -59,8 +59,7 @@ Proto.define = function(options) {
         else
         {
             // Create function with ref to base method
-            ProtoObj.prototype[key] = function()
-            {
+            ProtoObj.prototype[key] = function() {
                 this._super = superProperty;
                 return property.apply(this, arguments);
             };
@@ -73,8 +72,7 @@ Proto.define = function(options) {
     ProtoObj.extend = this.extend || this.define;
     ProtoObj.mixin = this.mixin;
 
-    for (key in staticProperties)
-    {
+    for (key in staticProperties) {
         ProtoObj[key] = staticProperties[key];
     }
 
@@ -102,5 +100,3 @@ Proto.mixinWith = function(obj, properties) {
         obj.prototype[key] = properties[key];
     }
 };
-
-module.exports = Proto;

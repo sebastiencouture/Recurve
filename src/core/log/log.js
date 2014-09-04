@@ -3,29 +3,22 @@
 var Proto = require("../../utils/proto.js");
 var ArrayUtils = require("../../utils/array.js");
 var StringUtils = require("../../utils/string.js");
+var ObjectUtils = require("../../utils/object.js");
+var assert = require("../../utils/assert.js");
 
 module.exports = function(recurveModule) {
     recurveModule.configurable("$log", function() {
         var enabled = true;
-        var targets = [new ConsoleTarget()];
 
         return {
             setEnabled: function(value) {
                 enabled = value;
             },
 
-            setTargets: function(value) {
-                targets = value;
-            },
+            $dependencies: ["$logConsole"],
 
-            $dependencies: ["$window", "$logConsole"],
-
-            $provider:  function($window, $logConsole) {
-                if (!targets) {
-                    targets = [new $logConsole()];
-                }
-
-                return new Log(enabled, targets);
+            $provider:  function($logConsole) {
+                return new Log(enabled, [new $logConsole()]);
             }
         };
     });
@@ -33,7 +26,6 @@ module.exports = function(recurveModule) {
 
 
 var Log = Proto.define([
-
     /**
      *
      * @param targets, array of targets to log to (see Recurve.LogConsoleTarget as example).
@@ -41,7 +33,7 @@ var Log = Proto.define([
      * @param enabled, default true
      */
      function ctor(enabled, targets) {
-        this.targets = targets;
+        this._targets = targets;
         this.disable(!enabled);
     },
 
@@ -110,9 +102,9 @@ var Log = Proto.define([
          * Clear log for all targets
          */
         clear: function() {
-            for (var index = 0; index < this.targets.length; index++) {
-                this.targets[index].clear();
-            }
+            ObjectUtils.forEach(this._targets, function(target){
+               target.clear();
+            });
         },
 
         /**
@@ -128,6 +120,11 @@ var Log = Proto.define([
             this._infoDisabled = value;
             this._warnDisabled = value;
             this._errorDisabled = value;
+        },
+
+        setTargets: function(value) {
+            assert(value, "expected at least one target");
+            this._targets = value;
         },
 
         /**
@@ -180,16 +177,19 @@ var Log = Proto.define([
 
         _log: function(type, message, args) {
             args = ArrayUtils.argumentsToArray(args, 1);
-            var description = this._description(type.toUpperCase());
+            var description = describe(type.toUpperCase());
 
-            for (var index = 0; index < this.targets.length; index++) {
-                this.targets[index][type].apply(this.targets[index], [description, message].concat(args));
-            }
-        },
-
-        _description: function(type) {
-            var time = StringUtils.formatTime(new Date());
-            return "[" + type + "] " + time;
+            ObjectUtils.forEach(this._targets, function(target) {
+                var targetForType = target[type];
+                if (targetForType) {
+                    targetForType.apply(target, [description, message].concat(args));
+                }
+            });
         }
     }
 ]);
+
+function describe(type) {
+    var time = StringUtils.formatTime(new Date());
+    return "[" + type + "] " + time;
+}

@@ -74,11 +74,10 @@ module.exports = function(mockModule) {
                         }
 
                         requestHandler.count++;
-
                         requestHandler.checkExpectations(options);
 
-                        var response = recurve.mixin({}, requestHandler.response);
-                        recurve.mixin(response, {options: options});
+                        var response = recurve.extend({}, requestHandler.response);
+                        recurve.extend(response, {options: options});
 
                         deferred.resolve(response);
                     },
@@ -90,7 +89,7 @@ module.exports = function(mockModule) {
             }
         };
     });
-}
+};
 
 function RequestHandler(method, url) {
     this._method = method;

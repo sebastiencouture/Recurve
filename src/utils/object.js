@@ -180,6 +180,15 @@ module.exports = {
         return dest;
     },
 
+    // shallow clone
+    clone: function(object) {
+        if (!this.isObject(object)) {
+            return object;
+        }
+
+        return this.isArray(object) ? object.splice() : this.extend({}, object);
+    },
+
     toJson: function(obj) {
         if (!this.isObject(obj)) {
             throw new Error("not an object to convert to JSON");

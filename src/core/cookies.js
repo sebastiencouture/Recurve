@@ -3,112 +3,124 @@
 var ObjectUtils = require("../utils/object.js");
 var StringUtils = require("../utils/string.js");
 var DateUtils = require("../utils/date.js");
+var Proto = require("../utils/proto.js");
 var assert = require("../utils/assert.js");
 
 module.exports = function(recurveModule) {
-    recurveModule.value("$cookies", cookies);
+    recurveModule.value("$Cookies", Cookies);
+    recurveModule.factory("$cookies", ["$Cookies"], function($Cookies) {
+       return new $Cookies();
+    });
 };
 
-var cookies = {
-    get: function(key) {
-        assert(key, "key must be set");
+function Cookies() {
+    return Proto.define([
+        function ctor() {
+        },
 
-        var value = null;
+        {
+            get: function(key) {
+                assert(key, "key must be set");
 
-        forEachCookie(function(cookie, name){
-            if (name === key) {
-                var rawValue = StringUtils.afterSeparator(cookie, "=");
-                value = parse(rawValue);
+                var value = null;
 
-                return false;
+                forEachCookie(function(cookie, name){
+                    if (name === key) {
+                        var rawValue = StringUtils.afterSeparator(cookie, "=");
+                        value = parse(rawValue);
+
+                        return false;
+                    }
+                });
+
+                return value;
+            },
+
+            set: function(key, value, options) {
+                assert(key, "key must be set");
+
+                if (undefined === options) {
+                    options = {};
+                }
+
+                if (ObjectUtils.isNumber(options.expires)) {
+                    options.expires = DateUtils.addDaysFromNow(options.expires);
+                }
+
+                var cookie = encodeURIComponent(key) + "=" + serialize(value);
+
+                if (ObjectUtils.isDate(options.expires)) {
+                    cookie +=  "; expires=" + options.expires.toUTCString();
+                }
+
+                if (options.domain) {
+                    cookie += "; domain=" + options.domain;
+                }
+
+                if (options.path) {
+                    cookie += "; path=" + options.path;
+                }
+
+                if (options.secure) {
+                    cookie += "; secure";
+                }
+
+                document.cookie = cookie;
+            },
+
+            remove: function(key, options) {
+                assert(key, "key must be set");
+
+                if (undefined === options) {
+                    options = {};
+                }
+
+                if (!this.exists(key)) {
+                    return false;
+                }
+
+                var updated = encodeURIComponent(key) + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+
+                if (options.domain) {
+                    updated += "; domain=" + options.domain;
+                }
+
+                if (options.path) {
+                    updated += "; path=" + options.path;
+                }
+
+                document.cookie = updated;
+
+                return true;
+            },
+
+            exists: function(key) {
+                var exists = false;
+
+                forEachCookie(function(cookie, name){
+                    if (name === key) {
+                        exists = true;
+                        return false;
+                    }
+                });
+
+                return exists;
+            },
+
+            forEach: function(iterator) {
+                assert(iterator, "iterator must be set");
+
+                forEachCookie(function(cookie, name){
+                    var rawValue = StringUtils.afterSeparator(cookie, "=");
+                    var value = parse(rawValue);
+
+                    iterator(value, name);
+                });
             }
-        });
-
-        return value;
-    },
-
-    set: function(key, value, options) {
-        assert(key, "key must be set");
-
-        if (undefined === options) {
-            options = {};
         }
+    ]);
+}
 
-        if (ObjectUtils.isNumber(options.expires)) {
-            options.expires = DateUtils.addDaysFromNow(options.expires);
-        }
-
-        var cookie = encodeURIComponent(key) + "=" + serialize(value);
-
-        if (ObjectUtils.isDate(options.expires)) {
-            cookie +=  "; expires=" + options.expires.toUTCString();
-        }
-
-        if (options.domain) {
-            cookie += "; domain=" + options.domain;
-        }
-
-        if (options.path) {
-            cookie += "; path=" + options.path;
-        }
-
-        if (options.secure) {
-            cookie += "; secure";
-        }
-
-        document.cookie = cookie;
-    },
-
-    remove: function(key, options) {
-        assert(key, "key must be set");
-
-        if (undefined === options) {
-            options = {};
-        }
-
-        if (!this.exists(key)) {
-            return false;
-        }
-
-        var updated = encodeURIComponent(key) + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-
-        if (options.domain) {
-            updated += "; domain=" + options.domain;
-        }
-
-        if (options.path) {
-            updated += "; path=" + options.path;
-        }
-
-        document.cookie = updated;
-
-        return true;
-    },
-
-    exists: function(key) {
-        var exists = false;
-
-        forEachCookie(function(cookie, name){
-            if (name === key) {
-                exists = true;
-                return false;
-            }
-        });
-
-        return exists;
-    },
-
-    forEach: function(iterator) {
-        assert(iterator, "iterator must be set");
-
-        forEachCookie(function(cookie, name){
-            var rawValue = StringUtils.afterSeparator(cookie, "=");
-            var value = parse(rawValue);
-
-            iterator(value, name);
-        });
-    }
-};
 
 
 function forEachCookie(iterator) {

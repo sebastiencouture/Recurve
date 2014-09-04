@@ -3,6 +3,7 @@
 var StringUtils = require("./utils/string.js");
 var ObjectUtils = require("./utils/object.js");
 var ArrayUtils = require("./utils/array.js");
+var Proto = require("./utils/proto.js");
 
 var assert = function(condition, message) {
     if (condition) {

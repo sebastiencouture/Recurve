@@ -5,7 +5,7 @@ var ObjectUtils = require("./utils/object.js");
 var assert = require("./assert.js");
 
 module.exports = function(coreModule) {
-    coreModule.register("$promise", ["$window"], provider);
+    coreModule.factory("$promise", ["$window"], provider);
 };
 
 function provider($window){
