@@ -100,3 +100,31 @@ Proto.mixinWith = function(obj, properties) {
         obj.prototype[key] = properties[key];
     }
 };
+
+
+function createType(prototype) {
+    var instance = prototype.instance = function() {};
+    instance.prototype = prototype;
+
+    return instance;
+}
+
+module.exports = createType({
+    create: function() {
+        var instance = new this.instance;
+        this.init.apply(null, arguments);
+
+        return instance;
+    },
+
+    extend: function(properties) {
+        var $super = properties.$super = this;
+        var prototype = new $super.instance;
+
+        for (var key in propertiers) {
+            prototype[key] = properties[key];
+        }
+
+        return createType(prototype);
+    }
+});

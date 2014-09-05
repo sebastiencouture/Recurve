@@ -17,16 +17,27 @@ function Module(name, dependencyNames) {
 }
 
 Module.prototype = {
-    provider: function(name, provider) {
+    /*provider: function(name, provider) {
         this.services[name] = new Service(name, provider);
         //this._register(name, null, provider, "provider");
-    },
+    },*/
 
-    factory: function(name, dependencies, getter) {
+    // TODO TBD need to be able to specify private services
+    // make it so not global the root module so dont need to pass around module names
+
+    // returns provider()
+    factory: function(name, dependencies, provider) {
         this.provider(name, {$dependencies: dependencies, $get: getter});
         //this._register(name, dependencies, provider, "factory");
     },
 
+    // maybe call it blueprint?
+    // returns provider().create() or provider.create()
+    type: function(name, provider) {
+
+    },
+
+    // returns value
     value: function(name, value) {
         var getter = value;
         if (!ObjectUtils.isFunction(value)) {
@@ -38,7 +49,19 @@ Module.prototype = {
         return this.factory(name, null, getter);
     },
 
-    instance: function(name, instantiableName, provider) {
+    // decorator for factory, type, or value
+    decorator: function(name) {
+
+    },
+
+    // Config for type or factory
+    // which can then be a dependency for type or factory
+    // if there is none then it will use default values
+    config: function(name) {
+
+    },
+
+    /*instance: function(name, instantiableName, provider) {
         if (provider) {
             provider.$dependencies = provider.$dependencies || [instantiableName];
             this.provider(name, provider);
@@ -48,7 +71,7 @@ Module.prototype = {
                 return new Instantiable();
             });
         }
-    },
+    },*/
 
     /*value: function(name, value) {
         var provider = value;
