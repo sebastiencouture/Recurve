@@ -11,6 +11,7 @@ function Module(name, dependencyNames) {
 
     this.name = name;
     this.services = {};
+    this.decorators = {};
     this.configHandlers = [];
     this.readyhandlers = [];
     this._dependencyNames = dependencyNames || [];
@@ -25,16 +26,20 @@ Module.prototype = {
     // TODO TBD need to be able to specify private services
     // make it so not global the root module so dont need to pass around module names
 
-    // returns provider()
-    factory: function(name, dependencies, provider) {
-        this.provider(name, {$dependencies: dependencies, $get: getter});
+    // returns getter(...)
+    factory: function(name, dependencies, getter) {
+        this._register(name, dependencies, getter);
         //this._register(name, dependencies, provider, "factory");
     },
 
     // maybe call it blueprint?
-    // returns provider().create() or provider.create()
-    type: function(name, provider) {
+    // returns provider.create(...)
+    type: function(name, dependencies, type) {
+        this.factory(name, dependencies, function() {
+            type.create.apply(null, arguments);
+        });
 
+        this._register(name, dependencies, type);
     },
 
     // returns value
@@ -50,15 +55,14 @@ Module.prototype = {
     },
 
     // decorator for factory, type, or value
-    decorator: function(name) {
-
+    decorator: function(name, dependencies, decorator) {
+        this.decorators[name] = new Service(name, null, decorator);
     },
 
-    // Config for type or factory
-    // which can then be a dependency for type or factory
-    // if there is none then it will use default values
-    config: function(name) {
-
+    // same as value
+    // and then can get as $config
+    config: function(name, config) {
+        this.value("$config." + name , config);
     },
 
     /*instance: function(name, instantiableName, provider) {
@@ -148,7 +152,7 @@ Module.prototype = {
         this.services = ObjectUtils.extend(dependencyServices, this.services);
     },
 
-    _register: function(name, dependencies, provider, type) {
-        this.services[name] = new Service(name, dependencies, provider, type);
+    _register: function(name, dependencies, provider, isPrivate, type) {
+        this.services[name] = new Service(name, dependencies, provider, isPrivate, type);
     }
 };
