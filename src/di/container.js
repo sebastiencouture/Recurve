@@ -1,43 +1,95 @@
 "use strict";
 
-function createContainer() {
+function createContainer(modules) {
     var instances = [];
+    var services = {};
+    var decorators = {};
 
-    function getServices(modules) {
-        var services = {};
+    forEach(modules, function(module) {
+        module.resolveDependencies();
 
-        forEach(modules, function(module) {
-            services = extend(services, module.services);
+        services = extend(services, module.getServices());
+        decorators = extend(decorators, module.getDecorators());
+    });
+
+    function invoke(dependencies, method, context) {
+        var dependencyInstances = dependencies.map(function(dependency) {
+            return get(dependency);
         });
 
-        return services;
+        method.apply(context, dependencyInstances);
+    }
+
+    function invokeAll() {
+        forEach(services, function(service, name){
+           get(name);
+        });
+    }
+
+    function instantiate(dependencies, Type) {
+        var dependencyInstances = dependencies.map(function(dependency) {
+            return get(dependency);
+        });
+
+        var instance = Object.create(Type.prototype);
+        instance = Type.apply(instance, dependencyInstances) || instance;
+
+        return instance;
+    }
+
+    var resolving = [];
+
+    function get(name) {
+        if (instances[name]) {
+            return instances[name];
+        }
+
+        var service = services[name];
+        assert(service, "no service exists with the name {0}", name);
+
+        if (0 <= resolving.indexOf(name)) {
+            var dependencyStack = resolving.join(" -> ");
+            resolving = [];
+
+            assert(false, "circular dependency detected: " + dependencyStack);
+        }
+
+        resolving.push(name);
+
+        if ("type" === service.type) {
+            instances[name] = instantiate(service.dependencies, service.value);
+        }
+        else if ("factory" === service.type) {
+            instances[name] = invoke(service.dependencies, service.value);
+        }
+        else {
+            instances[name] = service.value;
+        }
+
+        decorate(name);
+
+        resolving.pop(name);
+
+        return instances[name];
+    }
+
+    function decorate(name) {
+        var decorator = decorators[name];
+        if (!decorator) {
+            return;
+        }
+
+        var dependencyInstances = decorator.dependencies.map(function(dependency) {
+            return get(dependency);
+        });
+
+        instances[name] = decorator.value.apply(null, [instances[name]].concat(dependencyInstances));
     }
 
     return {
-        inject: function(modules) {
-            var services = getServices(modules);
-
-            forEach(services, function(service) {
-                service.resolve(services, instances);
-            }, this);
-        },
-
-        injectOnly: function(modules, serviceNames) {
-            var services = getServices(modules);
-
-            forEach(serviceNames, function(name) {
-                var service = services[name];
-                assert(service, "{0} is not a known service", name);
-
-                service.resolve(services, instances);
-            }, this);
-        },
-
-        get: function(serviceName) {
-            var instance = instances[serviceName];
-            assert(instance, "no service instance for {0} exists in the container", serviceName);
-
-            return instance;
-        }
+        invoke: invoke,
+        invokeAll: invokeAll,
+        instantiate: instantiate,
+        get: get
     };
 }

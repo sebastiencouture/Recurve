@@ -23,16 +23,16 @@ function publishApi(recurve) {
     });
 
     // TODO TBD create the core module
-    recurve.module = createModule("rc");
+    recurve.module = createModule();
 
-    recurve.createModule = function(name, dependentModules) {
+    recurve.createModule = function(dependentModules) {
         // core module is always include, but does not need to be explicitly specified
         if (dependentModules &&
             -1 == dependentModules.indexOf(recurve.module)) {
             dependentModules.unshift(recurve.module);
         }
 
-        return createModule(name, dependentModules);
+        return createModule(dependentModules);
     };
 
     recurve.createContainer = createContainer;

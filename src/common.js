@@ -267,7 +267,7 @@ function isNumber(value) {
 }
 
 function extend(dest, src) {
-    if (!src) {
+    if (!dest || !src) {
         return;
     }
 
