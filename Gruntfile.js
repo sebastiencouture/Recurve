@@ -1,65 +1,53 @@
-"use strict";
-
-var banner =
-    '/*!\n<%= pkg.name %>.js - v<%= pkg.version %>\n' +
-    'Created by <%= pkg.author %> on <%=grunt.template.today("yyyy-mm-dd") %>.\n\n' +
-    '<%= pkg.repository.url %>\n\n' +
-    '<%= license %> \n' +
-    '*/';
-var minBanner = '/*! <%= pkg.name %>.js - v<%= pkg.version %> - by <%= pkg.author %> ' +
-    '<%= grunt.template.today("yyyy-mm-dd") %> */';
-
+/*global module:false*/
 module.exports = function(grunt) {
+    var banner =
+        '/*!\n<%= pkg.name %>.js - v<%= pkg.version %>\n' +
+            'Created by <%= pkg.author %> on <%=grunt.template.today("yyyy-mm-dd") %>.\n\n' +
+            '<%= pkg.repository.url %>\n\n' +
+            '<%= license %> \n' +
+            '*/';
+    var minBanner = '/*! <%= pkg.name %>.js - v<%= pkg.version %> - by <%= pkg.author %> ' +
+        '<%= grunt.template.today("yyyy-mm-dd") %> */';
+
+    require('load-grunt-tasks')(grunt);
+    var files = require('./files').files;
+
     grunt.initConfig({
         pkg: grunt.file.readJSON("package.json"),
         license: grunt.file.read("LICENSE"),
+        buildDir: "build",
+        distDir: "dist",
 
-        browserify: {
-            recurve: {
-                src: ["src/*.js"],
-                dest: "build/recurve.js"
-            },
-
-            recurveSourceMap: {
-                src: ["src/*.js"],
-                dest: "build/recurve-sourcemap.js",
-                options: {
-                    bundleOptions: {
-                        debug: true
-                    }
-                }
-            },
-
-            karma: {
-                src: ["tests/*.test.js"],
-                dest: "build/tests.js",
-                options: {
-                    bundleOptions: {
-                        debug: true
-                    }
-                }
-            }
-        },
+        clean: [ "<%= distDir %>" ],
 
         concat: {
             options: {
                 stripBanners: true,
-                banner: banner
+                banner: banner + "\n\n(function(window){\n",
+                footer: "\npublishApi(recurve)\n})(window);"
             },
 
-            recurve: {
-                src: ['build/recurve.js'],
-                dest: 'dist/recurve.js'
+            build: {
+                src: files.recurveSrc,
+                dest: "<%= buildDir %>/recurve.js"
             },
 
-            recurveSourceMap: {
-                src: ['build/recurve-sourcemap.js'],
-                dest: 'dist/recurve-sourcemap.js'
-            },
+            release: {
+                src: "<%= buildDir %>/recurve.js",
+                dest: "dist/<%= pkg.name %>.js"
+            }
+        },
 
-            karma: {
-                src: ['build/tests.js'],
-                dest: 'dist/tests.js'
+        release: {
+            files: ["<%= pkg.name %>.js", "<%= pkg.name %>.min.js"],
+            src: "<%= buildDir %>/<%= pkg.name %>.js",
+            dest: "<%= distDir %>/<%= pkg.name %>.js"
+        },
+
+        jshint: {
+            all: ['Gruntfile.js', 'src/**/*.js', '<%= buildDir %>/<%= pkg.name %>.js'],
+            options: {
+                eqnull: true
             }
         },
 
@@ -70,7 +58,7 @@ module.exports = function(grunt) {
 
             recurve: {
                 files: {
-                    "dist/recurve.min.js": ["build/recurve.js"]
+                    "<%= distDir %>/<%= pkg.name %>.min.js": ["<%= buildDir %>/<%= pkg.name %>.js"]
                 }
             }
         },
@@ -84,30 +72,8 @@ module.exports = function(grunt) {
         },
 
         watch: {
-            browserify: {
-                files: ["src/**/*.*", "tests/**/*.*"],
-                tasks: ["browserify"]
-            },
-
-            browserifyKarma: {
-                files: ["src/**/*.*", "tests/**/*.*"],
-                tasks: ["browserify:karma"]
-            },
-
-            karma: {
-                files: ["build/tests.js", "karma.conf.js"],
-                tasks: ["karma:unit:run"]
-            }
-        },
-
-        concurrent: {
-            options: {
-                logConcurrentOutput: true
-            },
-
-            dev: {
-                tasks: ["watch:browserifyKarma", "watch:karma"]
-            }
+            files: ["src/**/*.js", "test/**/*.js"],
+            tasks: ["build", "karma:unit:run"]
         },
 
         connect: {
@@ -117,16 +83,9 @@ module.exports = function(grunt) {
         }
     });
 
-    grunt.loadNpmTasks("grunt-karma");
-    grunt.loadNpmTasks("grunt-browserify");
-    grunt.loadNpmTasks("grunt-contrib-watch");
-    grunt.loadNpmTasks("grunt-contrib-connect");
-    grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.loadNpmTasks('grunt-contrib-concat');
-    grunt.loadNpmTasks('grunt-concurrent');
-
-    grunt.registerTask("default", ["browserify:recurve", "browserify:karma", "connect", "karma", "concurrent:dev"]);
-    //grunt.registerTask("dev", ["browserify:recurve", "browserify:karma", "connect", "karma", "concurrent:dev"]);
-    grunt.registerTask("test", ["karma:unit:run"]);
-    grunt.registerTask("dist", ["browserify", "karma", "concat", "uglify"]);
+    grunt.registerTask("default", ["build", "jshint", "karma"]);
+    grunt.registerTask("build", "Perform a normal build", ["concat", "uglify"]);
+    grunt.registerTask("dist", "Perform a clean build", ["clean", "build"]);
+    grunt.registerTask("dev", "Run dev server and watch for changes", ["build", "connect", "karma", "watch"]);
+    grunt.registerTask("test", "Run tests once", ["karma:unit:run"]);
 };

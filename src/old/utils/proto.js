@@ -128,3 +128,46 @@ module.exports = createType({
         return createType(prototype);
     }
 });
+
+function isFunction(value) {
+    return value && "function" == typeof value;
+}
+
+function extend(properties) {
+    var supertype = properties._parent = this.prototype;
+    var prototype = new supertype.instance;
+
+    for (key in properties) {
+        addPrototype(key, properties[key], prototype[key]);
+    }
+
+    function addPrototype(key, property, superProperty) {
+        if (!isFunction(property) ||
+            !isFunction(superProperty)) {
+            prototype[key] = property;
+        }
+        else
+        {
+            // Create function with ref to base method
+            prototype[key] = function() {
+                this._super = superProperty;
+                return property.apply(this, arguments);
+            };
+        }
+    }
+
+    return createType(prototype);
+}
+
+function createType(prototype) {
+    prototype.constructor = prototype.constructor || function() {};
+    var constructor = prototype.constructor;
+    var instance = prototype.instance = function() {};
+
+    constructor.prototype = instance.prototype = prototype;
+    constructor.extend = extend;
+
+    return constructor;
+}
+
+module.exports = createType;

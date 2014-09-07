@@ -42,7 +42,7 @@ module.exports = {
         else {
             element.removeEventListener(event, callback);
         }
-    },
+    }
 };
 
 function elementSupportsEvent(element, name) {

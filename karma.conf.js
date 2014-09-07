@@ -3,10 +3,10 @@
 // Generated on 2014-08-03 using
 // generator-karma 0.8.3
 
-module.exports = function(config) {
-  'use strict';
+module.exports = function(karma) {
+  var files = require('../files').files;
 
-  config.set({
+  karma.set({
     // enable / disable watching file and executing tests whenever any file changes
     autoWatch: false,
 
@@ -17,9 +17,7 @@ module.exports = function(config) {
     frameworks: ['jasmine'],
 
     // list of files / patterns to load in the browser
-    files: [
-        'build/tests.js'
-    ],
+    files: [ files.recurveSrc, files.test ],
 
     // list of files / patterns to exclude
     exclude: [],
