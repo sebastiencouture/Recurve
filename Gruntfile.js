@@ -10,7 +10,7 @@ module.exports = function(grunt) {
         '<%= grunt.template.today("yyyy-mm-dd") %> */';
 
     require('load-grunt-tasks')(grunt);
-    var files = require('./files').files;
+    var files = require('./files.js').files;
 
     grunt.initConfig({
         pkg: grunt.file.readJSON("package.json"),
@@ -24,7 +24,7 @@ module.exports = function(grunt) {
             options: {
                 stripBanners: true,
                 banner: banner + "\n\n(function(window){\n",
-                footer: "\npublishApi(recurve)\n})(window);"
+                footer: "\npublishApi(recurve);\n})(window);"
             },
 
             build: {

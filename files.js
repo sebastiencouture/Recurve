@@ -12,7 +12,7 @@ var recurveFiles = {
     ],
 
     "test": [
-        "test/*Spec.js"
+        "test/**/*.spec.js"
     ]
 };
 

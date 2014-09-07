@@ -5,33 +5,56 @@ function createModule(dependentModules) {
     var decorators = {};
 
     return {
-        exports: function(names) {
-
-        },
-
         // returns getter(...)
         factory: function(name, dependencies, factory) {
+            assert(name, "factory service requires a name");
+            assert(isFunction(factory), "factory services requires a function provider");
+
             services[name] = {dependencies: dependencies, value: factory, type: "factory"};
+            return this;
         },
 
         // returns new type(...)
-        type: function(name, dependencies, type) {
-            services[name] = {dependencies: dependencies, value: type, type: "type"};
+        type: function(name, dependencies, Type) {
+            assert(name, "type service requires a name");
+            assert(isFunction(Type), "type service requires a function constructor provider");
+
+            services[name] = {dependencies: dependencies, value: Type, type: "type"};
+            return this;
+        },
+
+        // returns factory with method create(...additional args passed into constructor)
+        typeFactory: function(name, dependencies, Type) {
+            assert(name,  "typeFactory service requires a name");
+            assert(isFunction(Type), "typeFactory service requires a function constructor provider");
+
+            services[name] = {dependencies: dependencies, value: Type, type: "typeFactory"};
+            return this;
         },
 
         // returns value
         value: function(name, value) {
+            assert(name, "value service requires a name");
+
             services[name] = {value: value, type: "value"};
+            return this;
         },
 
         // decorator for factory, type, or value
         decorator: function(name, dependencies, decorator) {
-            decorators[name] = {dependencies: dependencies, value: decorator};
+            assert(name,  "decorator service requires a name");
+            assert(isFunction(decorator), "decorator service requires a function provider");
+
+            decorators[name] = {dependencies: dependencies, value: decorator, type: "decorator"};
+            return this;
         },
 
         // same as value
         config: function(name, config) {
+            assert(name, "config service requires a name");
+
             this.value("config." + name , config);
+            return this;
         },
 
         resolveDependencies: function() {

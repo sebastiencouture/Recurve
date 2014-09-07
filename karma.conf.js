@@ -4,7 +4,7 @@
 // generator-karma 0.8.3
 
 module.exports = function(karma) {
-  var files = require('../files').files;
+  var files = require('./files.js').files;
 
   karma.set({
     // enable / disable watching file and executing tests whenever any file changes
@@ -17,7 +17,7 @@ module.exports = function(karma) {
     frameworks: ['jasmine'],
 
     // list of files / patterns to load in the browser
-    files: [ files.recurveSrc, files.test ],
+    files: [].concat(files.recurveSrc, files.test),
 
     // list of files / patterns to exclude
     exclude: [],
@@ -53,7 +53,7 @@ module.exports = function(karma) {
 
     // level of logging
     // possible values: LOG_DISABLE || LOG_ERROR || LOG_WARN || LOG_INFO || LOG_DEBUG
-    logLevel: config.LOG_DEBUG
+    logLevel: karma.LOG_DEBUG
 
     // Uncomment the following lines if you are using grunt's server to run the tests
     // proxies: {

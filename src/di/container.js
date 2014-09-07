@@ -26,13 +26,17 @@ function createContainer(modules) {
         });
     }
 
-    function instantiate(dependencies, Type) {
+    function instantiate(dependencies, Type, additionalArgs) {
+        if (undefined === additionalArgs) {
+            additionalArgs = [];
+        }
+
         var dependencyInstances = dependencies.map(function(dependency) {
             return get(dependency);
         });
 
         var instance = Object.create(Type.prototype);
-        instance = Type.apply(instance, dependencyInstances) || instance;
+        instance = Type.apply(instance, dependencyInstances.concat(additionalArgs)) || instance;
 
         return instance;
     }
@@ -58,6 +62,13 @@ function createContainer(modules) {
 
         if ("type" === service.type) {
             instances[name] = instantiate(service.dependencies, service.value);
+        }
+        else if ("typeFactory" === service.type) {
+            instances[name] = {
+                create: function() {
+                    return instantiate(service.dependencies, service.value, argumentsToArray(arguments));
+                }
+            };
         }
         else if ("factory" === service.type) {
             instances[name] = invoke(service.dependencies, service.value);
