@@ -23,37 +23,18 @@ function removeAt(array, index) {
     }
 }
 
-function replaceItem(array, item) {
-    if (!array) {
-        return;
-    }
-
-    var index = array.indexOf(item);
-    if (-1 < index) {
-        array[index] = item;
-    }
-}
-
 function isEmpty(value) {
     return !value || 0 === value.length;
 }
 
 function argumentsToArray(args, sliceCount) {
+    if (undefined === sliceCount) {
+        sliceCount = 0;
+    }
+
     return sliceCount < args.length ? Array.prototype.slice.call(args, sliceCount) : [];
 }
 
-///
-
-function performanceNow() {
-    return performance && performance.now ? performance.now() : Date.now();
-}
-
-function addDaysFromNow(days) {
-    var date = new Date();
-    date.setDate(date.getDate() + days);
-
-    return date;
-}
 
 ///
 

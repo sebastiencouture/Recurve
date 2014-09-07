@@ -1,4 +1,91 @@
+"use strict";
+
 describe("common", function(){
+    describe("removeItem", function() {
+        it("should handle null", function(){
+            removeItem();
+        });
+
+        it("should remove item", function() {
+            var array = ["a", "b"];
+            removeItem(array, "a");
+
+            expect(array).toEqual(["b"]);
+        });
+
+        it("should handle item doesn't exist", function(){
+            var array = ["a", "b"];
+            removeItem(array, "c");
+
+            expect(array).toEqual(["a", "b"]);
+        });
+    });
+
+    describe("removeAt", function() {
+        it("should handle null", function(){
+            removeAt();
+        });
+
+        it("should remove at", function() {
+            var array = ["a", "b"];
+            removeAt(array, 1);
+
+            expect(array).toEqual(["a"]);
+        });
+
+        it("should handle invalid index", function(){
+            var array = ["a", "b"];
+            removeItem(array, -1);
+
+            expect(array).toEqual(["a", "b"]);
+        });
+    });
+
+    describe("isEmpty", function(){
+        it("should handle null", function(){
+            expect(isEmpty()).toBe(true);
+        });
+
+        it("should handle empty array", function(){
+            expect(isEmpty([])).toBe(true);
+        });
+
+        it("should handle array with values", function() {
+            expect(isEmpty([1])).toBe(false);
+        });
+    });
+
+    describe("argumentsToArray", function(){
+        var array;
+        function test(){
+            console.log(arguments);
+            array = argumentsToArray(arguments);
+        }
+
+        beforeEach(function(){
+            array = null;
+        });
+
+        it("should convert empty arguments", function(){
+            test();
+            expect(array).toEqual([]);
+        });
+
+        it("should convert non empty arguments", function(){
+            test("a", "b");
+            expect(array).toEqual(["a", "b"]);
+        });
+
+        it("should convert non empty arguments", function(){
+            function testSliceFirst(){
+                array = argumentsToArray(arguments, 1);
+            }
+
+            testSliceFirst("a", "b");
+            expect(array).toEqual(["b"]);
+        });
+    });
+
     describe("isObject", function() {
         var object;
 

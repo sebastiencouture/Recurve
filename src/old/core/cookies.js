@@ -44,7 +44,7 @@ function Cookies() {
                 }
 
                 if (ObjectUtils.isNumber(options.expires)) {
-                    options.expires = DateUtils.addDaysFromNow(options.expires);
+                    options.expires = addDaysFromNow(options.expires);
                 }
 
                 var cookie = encodeURIComponent(key) + "=" + serialize(value);
@@ -155,4 +155,11 @@ function parse(value) {
     catch(e) {
         return value;
     }
+}
+
+function addDaysFromNow(days) {
+    var date = new Date();
+    date.setDate(date.getDate() + days);
+
+    return date;
 }

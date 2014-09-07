@@ -1,5 +1,6 @@
-describe("module", function(){
+"use strict";
 
+describe("module", function(){
     var module;
 
     beforeEach(function(){

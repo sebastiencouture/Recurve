@@ -71,7 +71,7 @@ var Timer = Proto.define([
                 this._$window.console.time(message);
             }
             else {
-                this._startTime = DateUtils.performanceNow();
+                this._startTime = performanceNow();
             }
 
             this._message = message;
@@ -82,7 +82,7 @@ var Timer = Proto.define([
                 this._$window.console.timeEnd(this._message);
             }
             else {
-                this._$log.info(this._message + ": " + (DateUtils.performanceNow() - this._startTime) + " ms");
+                this._$log.info(this._message + ": " + (performanceNow() - this._startTime) + " ms");
             }
 
             if (description) {
@@ -95,3 +95,7 @@ var Timer = Proto.define([
         }
     }
 ]);
+
+function performanceNow() {
+    return performance && performance.now ? performance.now() : Date.now();
+}
