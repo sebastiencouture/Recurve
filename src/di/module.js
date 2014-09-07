@@ -1,6 +1,10 @@
 "use strict";
 
 function createModule(dependentModules) {
+    if (!isArray(dependentModules)) {
+        dependentModules = [dependentModules];
+    }
+
     var services = {};
     var decorators = {};
 
@@ -61,7 +65,7 @@ function createModule(dependentModules) {
             var dependencyServices = {};
             var dependencyDecorators = {};
 
-            forEach(dependentModules, function(module){
+            forEach(dependentModules, function(module) {
                 forEach(module.getServices(), function(service, name){
                     dependencyServices[name] = service;
                 });
