@@ -38,12 +38,6 @@ module.exports = function(grunt) {
             }
         },
 
-        release: {
-            files: ["<%= pkg.name %>.js", "<%= pkg.name %>.min.js"],
-            src: "<%= buildDir %>/<%= pkg.name %>.js",
-            dest: "<%= distDir %>/<%= pkg.name %>.js"
-        },
-
         jshint: {
             all: ['Gruntfile.js', 'src/**/*.js', '<%= buildDir %>/<%= pkg.name %>.js'],
             options: {
@@ -73,7 +67,7 @@ module.exports = function(grunt) {
 
         watch: {
             files: ["src/**/*.js", "test/**/*.js"],
-            tasks: ["build", "karma:unit:run"]
+            tasks: ["concat:build", "karma:unit:run"]
         },
 
         connect: {
@@ -86,6 +80,6 @@ module.exports = function(grunt) {
     grunt.registerTask("default", ["build", "jshint", "karma"]);
     grunt.registerTask("build", "Perform a normal build", ["concat", "uglify"]);
     grunt.registerTask("dist", "Perform a clean build", ["clean", "build"]);
-    grunt.registerTask("dev", "Run dev server and watch for changes", ["build", "connect", "karma", "watch"]);
+    grunt.registerTask("dev", "Run dev server and watch for changes", ["concat:build", "connect", "karma", "watch"]);
     grunt.registerTask("test", "Run tests once", ["karma:unit:run"]);
 };
