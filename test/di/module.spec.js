@@ -4,7 +4,7 @@ describe("module", function(){
     var module;
 
     beforeEach(function(){
-        module = createModule();
+        module = module();
     });
 
     describe("factory", function() {
@@ -64,8 +64,8 @@ describe("module", function(){
         var b;
 
         beforeEach(function(){
-            a = createModule();
-            b = createModule(a);
+            a = module();
+            b = module(a);
         });
 
         it("should resolve services", function(){

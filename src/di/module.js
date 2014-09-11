@@ -1,89 +1,131 @@
 "use strict";
 
-function createModule(dependentModules) {
+function module(dependentModules) {
     if (!isArray(dependentModules)) {
         dependentModules = [dependentModules];
     }
 
     var services = {};
     var decorators = {};
+    var exportNames = [];
+
+    function exports(names) {
+        exportNames = names;
+    }
+
+    // returns getter(...)
+    function factory(name, dependencies, factory) {
+        assert(name, "factory service requires a name");
+        assert(isFunction(factory), "factory services requires a function provider");
+
+        services[name] = {dependencies: dependencies, value: factory, type: "factory"};
+        return this;
+    }
+
+    // returns new type(...)
+    function type(name, dependencies, Type) {
+        assert(name, "type service requires a name");
+        assert(isFunction(Type), "type service requires a function constructor provider");
+
+        services[name] = {dependencies: dependencies, value: Type, type: "type"};
+        return this;
+    }
+
+    // returns factory with method create(...additional args passed into constructor)
+    function typeFactory(name, dependencies, Type) {
+        assert(name,  "typeFactory service requires a name");
+        assert(isFunction(Type), "typeFactory service requires a function constructor provider");
+
+        services[name] = {dependencies: dependencies, value: Type, type: "typeFactory"};
+        return this;
+    }
+
+    // returns value
+    function value(name, value) {
+        assert(name, "value service requires a name");
+
+        services[name] = {value: value, type: "value"};
+        return this;
+    }
+
+    // decorator for factory, type, or value
+    function decorator(name, dependencies, decorator) {
+        assert(name,  "decorator service requires a name");
+        assert(isFunction(decorator), "decorator service requires a function provider");
+
+        decorators[name] = {dependencies: dependencies, value: decorator, type: "decorator"};
+        return this;
+    }
+
+    // Same as value
+    function config(name, config) {
+        assert(name, "config service requires a name");
+
+        this.value("config." + name , config);
+        return this;
+    }
+
+    function exported() {
+        var exportedServices = {};
+        var exportedDecorators = {};
+
+        forEach(dependentModules, function(module) {
+            var exported = module.exported();
+
+            exportedServices = extend(exportedServices, exported.services);
+            exportedDecorators = extend(exportedDecorators, exported.decorators);
+        });
+
+        exportedServices = extend(exportedServices, services);
+        exportedDecorators = extend(exportedDecorators, decorators);
+
+        // Create pseudo private services, they are still public; however,
+        // there is no reasonable way to access these services outside of the module
+        forEach(exportNames, function(name) {
+            var uuid = generateUUID();
+            updateName(uuid, name, exportedServices, exportedDecorators);
+        });
+
+        return {
+            services: exportedServices,
+            decorators: exportedServices
+        }
+    }
+
+    function updateName(newName, oldName, exportedServices, exportedDecorators) {
+        var service = exportedServices[oldName];
+        if (service) {
+            delete exportedServices[oldName];
+            exportedServices[newName] = service;
+            updateDependencies(service);
+        }
+
+        var decorator = exportedDecorators[oldName];
+        if (decorator) {
+            delete exportedDecorators[oldName];
+            exportedDecorators[newName] = decorator;
+            updateDependencies(decorator);
+        }
+
+        function updateDependencies(item) {
+            item.dependencies = clone(item.dependencies);
+
+            forEach(item.dependencies, function(dependency, index){
+                if (isEqual(dependency, oldName)) {
+                    item.dependencies[index] = newName;
+                }
+            });
+        }
+    }
 
     return {
-        // returns getter(...)
-        factory: function(name, dependencies, factory) {
-            assert(name, "factory service requires a name");
-            assert(isFunction(factory), "factory services requires a function provider");
-
-            services[name] = {dependencies: dependencies, value: factory, type: "factory"};
-            return this;
-        },
-
-        // returns new type(...)
-        type: function(name, dependencies, Type) {
-            assert(name, "type service requires a name");
-            assert(isFunction(Type), "type service requires a function constructor provider");
-
-            services[name] = {dependencies: dependencies, value: Type, type: "type"};
-            return this;
-        },
-
-        // returns factory with method create(...additional args passed into constructor)
-        typeFactory: function(name, dependencies, Type) {
-            assert(name,  "typeFactory service requires a name");
-            assert(isFunction(Type), "typeFactory service requires a function constructor provider");
-
-            services[name] = {dependencies: dependencies, value: Type, type: "typeFactory"};
-            return this;
-        },
-
-        // returns value
-        value: function(name, value) {
-            assert(name, "value service requires a name");
-
-            services[name] = {value: value, type: "value"};
-            return this;
-        },
-
-        // decorator for factory, type, or value
-        decorator: function(name, dependencies, decorator) {
-            assert(name,  "decorator service requires a name");
-            assert(isFunction(decorator), "decorator service requires a function provider");
-
-            decorators[name] = {dependencies: dependencies, value: decorator, type: "decorator"};
-            return this;
-        },
-
-        // same as value
-        config: function(name, config) {
-            assert(name, "config service requires a name");
-
-            this.value("config." + name , config);
-            return this;
-        },
-
-        resolveDependencies: function() {
-            var dependencyServices = {};
-            var dependencyDecorators = {};
-
-            forEach(dependentModules, function(module) {
-                forEach(module.getServices(), function(service, name){
-                    dependencyServices[name] = service;
-                });
-                forEach(module.getDecorators(), function(decorator, name){
-                    dependencyDecorators[name] = decorator;
-                });
-            });
-
-            services = extend(dependencyServices, services);
-            decorators = extend(dependencyDecorators, decorators);
-        },
-
-        getServices: function() {
-            return services;
-        },
-
-        getDecorators: function() {
-            return decorators;
-        }
+        exports: exports,
+        factory: factory,
+        type: type,
+        typeFactory: typeFactory,
+        value: value,
+        decorator: decorator,
+        config: config,
+        exported: exported
     };
 }

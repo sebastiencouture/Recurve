@@ -2,83 +2,6 @@
 
 var recurve = window.recurve || (window.recurve = {});
 
-function removeItem(array, item) {
-    if (!array) {
-        return;
-    }
-
-    var index = array.indexOf(item);
-    if (-1 < index) {
-        array.splice(index, 1);
-    }
-}
-
-function removeAt(array, index) {
-    if (!array) {
-        return;
-    }
-
-    if (0 <= index && array.length > index) {
-        array.splice(index, 1);
-    }
-}
-
-function isEmpty(value) {
-    return !value || 0 === value.length;
-}
-
-function argumentsToArray(args, sliceCount) {
-    if (undefined === sliceCount) {
-        sliceCount = 0;
-    }
-
-    return sliceCount < args.length ? Array.prototype.slice.call(args, sliceCount) : [];
-}
-
-
-///
-
-function createElement(name, attributes) {
-    var element = document.createElement(name);
-
-    forEach(attributes, function(value, key) {
-        element.setAttribute(key, value);
-    });
-
-    return element;
-}
-
-function addEventListener(element, event, callback) {
-    // http://pieisgood.org/test/script-link-events/
-    // TODO TBD link tags don't support any type of load callback on old WebKit (Safari 5)
-    function readyStateHandler() {
-        if (isEqualIgnoreCase("loaded", element.readyState) ||
-            isEqualIgnoreCase("complete", element.readyState)) {
-            callback({type: "load"});
-        }
-    }
-
-    // IE8 :T
-    if ("load" === event &&
-        elementSupportsEvent(element, "onreadystatechange")) {
-        element.onreadystatechange = readyStateHandler;
-    }
-    else {
-        element.addEventListener(event, callback);
-    }
-}
-
-function removeEventListener(element, event, callback) {
-    if ("load" === event &&
-        elementSupportsEvent(element, "onreadystatechange")) {
-        element.onreadystatechange = null;
-    }
-    else {
-        element.removeEventListener(event, callback);
-    }
-}
-
-///
 
 function forEach(obj, iterator, context) {
     if (!obj || !iterator) {
@@ -110,7 +33,7 @@ function forEach(obj, iterator, context) {
 
 function find(obj, property, value) {
     if (!obj) {
-        return;
+        return null;
     }
 
     if (isArray(obj)) {
@@ -162,6 +85,7 @@ function areEqual(value, other) {
         return false;
     }
 
+
     if (isArray(value)) {
         if (value.length == other.length) {
             for (var index = 0; index < value.length; index++) {
@@ -206,6 +130,10 @@ function areEqual(value, other) {
     return false;
 }
 
+function isEmpty(value) {
+    return !value || 0 === value.length;
+}
+
 function isNaN(value) {
     // NaN is never equal to itself, interesting :)
     return value !== value;
@@ -232,24 +160,24 @@ function isArray(value) {
 }
 
 function isFunction(value) {
-    return "function" == typeof value;
+    return "[object Function]" === toString.call(value);
 }
 
 function isDate(value) {
-    return value instanceof Date;
+    return "[object Date]" === toString.call(value);
 }
 
 function isFile(value) {
-    return "[object File]" === String(value);
+    return "[object File]" === toString.call(value);
 }
 
 function isNumber(value) {
-    return "number" == typeof value;
+    return "[object Number]" === toString.call(value);
 }
 
 function extend(dest, src) {
     if (!dest || !src) {
-        return;
+        return dest;
     }
 
     for (var key in src) {
@@ -265,7 +193,7 @@ function clone(object) {
         return object;
     }
 
-    return isArray(object) ? object.splice() : extend({}, object);
+    return isArray(object) ? object.slice() : extend({}, object);
 }
 
 function toJson(obj) {
@@ -356,44 +284,6 @@ function formatMonthDayYear(date) {
         "{0}/{1}/{2}", month, day, year);
 }
 
-function formatYearRange(start, end) {
-    var value = "";
-
-    if (start && end) {
-        value = start + " - " + end;
-    }
-    else if (start) {
-        value = start;
-    }
-    else {
-        value = end;
-    }
-
-    return value;
-}
-
-function capitalizeFirstCharacter(value) {
-    if (!value) {
-        return null;
-    }
-
-    return value.charAt(0).toUpperCase()  + value.slice(1);
-}
-
-function hasValue(value) {
-    return value && 0 < value.length;
-}
-
-function linesOf(value) {
-    var lines;
-
-    if (value) {
-        lines = value.split("\n");
-    }
-
-    return lines;
-}
-
 function isEqual(str, value, ignoreCase) {
     if (!str || !value) {
         return str == value;
@@ -457,14 +347,79 @@ function generateUUID() {
 
 ///
 
-function urlLastPath(value) {
-    if (!value) {
+function removeItem(array, item) {
+    if (!array || !item) {
         return;
     }
 
-    var split = value.split("/");
-    return 0 < split.length ? split[split.length-1] : null;
+    var index = array.indexOf(item);
+    if (-1 < index) {
+        array.splice(index, 1);
+    }
 }
+
+function removeAt(array, index) {
+    if (!array || !index) {
+        return;
+    }
+    if (0 <= index && array.length > index) {
+        console.log("splice!!!!");
+        array.splice(index, 1);
+    }
+}
+
+function argumentsToArray(args, sliceCount) {
+    if (undefined === sliceCount) {
+        sliceCount = 0;
+    }
+
+    return sliceCount < args.length ? Array.prototype.slice.call(args, sliceCount) : [];
+}
+
+
+///
+
+function createElement(name, attributes) {
+    var element = document.createElement(name);
+
+    forEach(attributes, function(value, key) {
+        element.setAttribute(key, value);
+    });
+
+    return element;
+}
+
+function addEventListener(element, event, callback) {
+    // http://pieisgood.org/test/script-link-events/
+    // TODO TBD link tags don't support any type of load callback on old WebKit (Safari 5)
+    function readyStateHandler() {
+        if (isEqualIgnoreCase("loaded", element.readyState) ||
+            isEqualIgnoreCase("complete", element.readyState)) {
+            callback({type: "load"});
+        }
+    }
+
+    // IE8 :T
+    if ("load" === event &&
+        elementSupportsEvent(element, "onreadystatechange")) {
+        element.onreadystatechange = readyStateHandler;
+    }
+    else {
+        element.addEventListener(event, callback);
+    }
+}
+
+function removeEventListener(element, event, callback) {
+    if ("load" === event &&
+        elementSupportsEvent(element, "onreadystatechange")) {
+        element.onreadystatechange = null;
+    }
+    else {
+        element.removeEventListener(event, callback);
+    }
+}
+
+////
 
 function addParametersToUrl(url, parameters) {
     if (!url || !parameters) {
@@ -518,6 +473,7 @@ function removeParameterFromUrl(url, parameter) {
 
 ///
 
+// TODO TBD this could just be moved to $http
 function globalEval($window, src) {
     if (!src) {
         return;

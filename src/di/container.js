@@ -1,16 +1,22 @@
 "use strict";
 
-function createContainer(modules) {
+function container(modules) {
     var instances = [];
     var services = {};
     var decorators = {};
 
     forEach(modules, function(module) {
-        module.resolveDependencies();
+        var exported = module.exported();
 
-        services = extend(services, module.getServices());
-        decorators = extend(decorators, module.getDecorators());
+        services = extend(services, exported.services);
+        decorators = extend(decorators, exported.decorator);
     });
+
+    function load() {
+        forEach(services, function(service, name){
+            get(name);
+        });
+    }
 
     function invoke(dependencies, method, context) {
         var dependencyInstances = dependencies.map(function(dependency) {
@@ -18,12 +24,6 @@ function createContainer(modules) {
         });
 
         method.apply(context, dependencyInstances);
-    }
-
-    function invokeAll() {
-        forEach(services, function(service, name){
-           get(name);
-        });
     }
 
     function instantiate(dependencies, Type, additionalArgs) {
@@ -60,31 +60,32 @@ function createContainer(modules) {
 
         resolving.push(name);
 
+        var instance;
         if ("type" === service.type) {
-            instances[name] = instantiate(service.dependencies, service.value);
+            instance = instantiate(service.dependencies, service.value);
         }
         else if ("typeFactory" === service.type) {
-            instances[name] = {
+            instance = {
                 create: function() {
                     return instantiate(service.dependencies, service.value, argumentsToArray(arguments));
                 }
             };
         }
         else if ("factory" === service.type) {
-            instances[name] = invoke(service.dependencies, service.value);
+            instance = invoke(service.dependencies, service.value);
         }
         else {
-            instances[name] = service.value;
+            instance = service.value;
         }
 
-        decorate(name);
+        instances[name] = decorate(name, instance);
 
         resolving.pop(name);
 
         return instances[name];
     }
 
-    function decorate(name) {
+    function decorate(name, instance) {
         var decorator = decorators[name];
         if (!decorator) {
             return;
@@ -94,12 +95,12 @@ function createContainer(modules) {
             return get(dependency);
         });
 
-        instances[name] = decorator.value.apply(null, [instances[name]].concat(dependencyInstances));
+        return decorator.value.apply(null, [instance].concat(dependencyInstances));
     }
 
     return {
+        load: load,
         invoke: invoke,
-        invokeAll: invokeAll,
         instantiate: instantiate,
         get: get
     };
