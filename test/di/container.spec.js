@@ -4,6 +4,10 @@ describe("container", function(){
     var containerA;
     var moduleA;
 
+    beforeEach(function(){
+        moduleA = module();
+    });
+
     describe("invoke", function() {
         it("should resolve factory", function(){
 
@@ -36,7 +40,6 @@ describe("container", function(){
             containerA = container(moduleA);
 
             containerA.invoke(["c"], function(c){
-                console.log(c);
                 expect(c).toEqual("a=1");
             })
         });

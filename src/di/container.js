@@ -83,7 +83,7 @@ function container(modules) {
         }
 
         instances[name] = decorate(name, instance);
-        console.log(name + ":" + instance);
+
         resolving.pop();
 
         return instances[name];
