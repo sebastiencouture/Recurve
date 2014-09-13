@@ -140,7 +140,7 @@ RequestHandler.prototype = {
     },
 
     expectCallCountToBe: function(count) {
-        recurve.assert.strictEqual(count, this.count,
+        recurve.assert(count === this.count,
             "request handler {0}:{1} call count does not match expected {2} != {3}",
             this._url, this._method, this.count, count);
     },
@@ -148,7 +148,7 @@ RequestHandler.prototype = {
     checkExpectations: function(options) {
         recurve.forEach(this._expectations, function(expectation) {
             if (expectation.exactMatch) {
-                recurve.assert.deepEqual(expectation.options, options,
+                recurve.assert(ObjectUtils.areEqual(expectation.options, options),
                     this._assertDescription(expectation.options, options));
             }
             else {
@@ -166,7 +166,7 @@ RequestHandler.prototype = {
                 this._checkExpectationPartialMatch(expectedValue, actualValue);
             }
             else {
-                recurve.assert.strictEqual(expectedValue, actualValue,
+                recurve.assert(expectedValue === actualValue,
                     this._assertDescription(expectedValue, actualValue));
             }
         }, this);

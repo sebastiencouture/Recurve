@@ -2,7 +2,7 @@
 
 function module(dependentModules) {
     if (!isArray(dependentModules)) {
-        dependentModules = [dependentModules];
+        dependentModules = dependentModules ? [dependentModules] : [];
     }
 
     var services = {};
@@ -81,15 +81,36 @@ function module(dependentModules) {
 
         // Create pseudo private services, they are still public; however,
         // there is no reasonable way to access these services outside of the module
-        forEach(exportNames, function(name) {
-            var uuid = generateUUID();
-            updateName(uuid, name, exportedServices, exportedDecorators);
-        });
+        if (!isEmpty(exportNames)) {
+            var names = privateNames(exportedServices, exportedDecorators);
+
+            forEach(names, function(name) {
+                var uuid = generateUUID();
+                updateName(uuid, name, exportedServices, exportedDecorators);
+            });
+        }
 
         return {
             services: exportedServices,
-            decorators: exportedServices
+            decorators: exportedDecorators
         }
+    }
+
+    function privateNames(exportedServices, exportedDecorators) {
+        var allNames = [];
+        forEach(exportedServices, function(service, name){
+            allNames.push(name);
+        });
+
+        forEach(exportedDecorators, function(decorator, name) {
+            if(0 > allNames.indexOf(name)) {
+                allNames.push(name);
+            }
+        });
+
+        return allNames.filter(function(name){
+            return 0 > exportNames.indexOf(name);
+        });
     }
 
     function updateName(newName, oldName, exportedServices, exportedDecorators) {
@@ -111,7 +132,7 @@ function module(dependentModules) {
             item.dependencies = clone(item.dependencies);
 
             forEach(item.dependencies, function(dependency, index){
-                if (isEqual(dependency, oldName)) {
+                if (dependency == oldName) {
                     item.dependencies[index] = newName;
                 }
             });

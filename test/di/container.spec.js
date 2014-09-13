@@ -17,7 +17,11 @@ describe("container", function(){
 
     });
 
-    it("should detect circular dependencies", function(){
+    describe("circular dependencies", function(){
+
+    });
+
+    describe("exports", function(){
 
     });
 });

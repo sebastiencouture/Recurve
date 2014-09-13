@@ -2,7 +2,6 @@
 
 var ObjectUtils = require("../../utils/object.js");
 var StringUtils = require("../../utils/string.js");
-var WindowUtils = require("../../utils/window.js");
 var assert = require("../../utils/assert.js");
 
 module.exports = Xhr;
@@ -103,7 +102,7 @@ Xhr.Prototype = {
         var data = this._getData();
 
         if (StringUtils.isEqualIgnoreCase("script", this._options.dataType)) {
-            WindowUtils.globalEval(this.$window, data);
+            globalEval(this.$window, data);
         }
 
         this._complete(true, data);
@@ -151,3 +150,20 @@ Xhr.Prototype = {
         return data;
     }
 };
+
+function globalEval($window, src) {
+    if (!src) {
+        return;
+    }
+
+    // https://weblogs.java.net/blog/driscoll/archive/2009/09/08/eval-javascript-global-context
+    if ($window.execScript) {
+        $window.execScript(src);
+    }
+
+    var func = function() {
+        $window.eval.call($window.src);
+    };
+
+    func();
+}

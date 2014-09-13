@@ -534,14 +534,345 @@ describe("common", function(){
         });
 
         it("should throw an error for numbers", function(){
-
+            expect(function(){toJson(1)}).toThrow(new Error("not an object to convert to JSON"));
         });
 
         it("should throw an error for string literals", function(){
-
+            expect(function(){toJson("1")}).toThrow(new Error("not an object to convert to JSON"));
         });
     });
 
+    describe("fromJson", function(){
+        it("should parse string", function(){
+            var str = '{"a":1,"b":2}';
+            var obj = fromJson(str);
+
+            expect(obj).toEqual({a:1, b:2});
+        });
+
+        it("should return same value for number", function(){
+            expect(fromJson(1)).toEqual(1);
+        });
+
+        it("should return same value for array", function(){
+            expect(fromJson([1, 2])).toEqual([1, 2]);
+        });
+
+        it("should return same value for object", function(){
+            expect(fromJson({a:1, b:2})).toEqual({a:1, b:2});
+        });
+
+        it("should return null for null", function(){
+            expect(fromJson(null)).toEqual(null);
+        });
+
+        it("should return undefined for undefined", function(){
+            expect(fromJson(undefined)).toEqual(undefined);
+        });
+
+        it("should throw error for invalid string", function(){
+            var str = "{a:b";
+            expect(function(){fromJson(str)}).toThrow();
+        })
+    });
+
+    describe("toFromData", function(){
+        it("should convert string", function(){
+            var obj = {a:1, b:2, c:3};
+            expect(toFormData(obj)).toEqual("a=1&b=2&c=3");
+        });
+
+        it("should encode object keys", function(){
+            var obj = {"#":1, "%":2, c:3};
+            expect(toFormData(obj)).toEqual("%23=1&%25=2&c=3");
+        });
+
+        it("should encode object values", function(){
+            var obj = {a:"#", b:"%", c:3};
+            expect(toFormData(obj)).toEqual("a=%23&b=%25&c=3");
+        });
+
+        it("should encode spaces", function(){
+            var obj = {a:"z x"};
+            expect(toFormData(obj)).toEqual("a=z%20x");
+        });
+
+        it("should not encode -,_,.,!,~,*,',(,)", function(){
+            var obj = {a:"-_.!~*'()"};
+            expect(toFormData(obj)).toEqual("a=-_.!~*'()");
+        });
+
+        it("should return null for number", function(){
+            expect(toFormData(1)).toEqual(null);
+        });
+
+        it("should return null for array", function(){
+            expect(toFormData([1, 2])).toEqual(null);
+        });
+
+        it("should return null for null", function(){
+            expect(toFormData(null)).toEqual(null);
+        });
+
+        it("should return null for undefined", function(){
+            expect(toFormData()).toEqual(null);
+        });
+    });
+
+    describe("format", function(){
+        it("should format single argument", function(){
+            expect(format("test {0}", "wow")).toEqual("test wow");
+        });
+
+        it("should format multiple arguments", function(){
+            expect(format("test {0}:{1}", "wow", 1)).toEqual("test wow:1");
+        });
+
+        it("should format out of order", function(){
+            expect(format("test {1}:{0}", "wow", 1)).toEqual("test 1:wow");
+        });
+
+        it("should do nothing if doesn't include format identifiers", function(){
+            expect(format("test")).toEqual("test");
+        });
+
+        it("should return same string if no values provides", function(){
+            expect(format("test {0}:{1}")).toEqual("test {0}:{1}");
+        });
+
+        it("should not replace for invalid indices", function(){
+            expect(format("test {5}", "wow")).toEqual("test {5}");
+        });
+
+        it("should return null for null", function(){
+            expect(format(null)).toEqual(null);
+        });
+
+        it("should return null for undefined", function(){
+            expect(format()).toEqual(null);
+        })
+    });
+
+    describe("pad", function(){
+        it("should pad string with count and value", function(){
+            expect(pad("1", 3, "4")).toEqual("441");
+        });
+
+        it("should pad numbers", function(){
+            expect(pad(1, 3, "4")).toEqual("441");
+        });
+
+        it("should pad with pad value as number", function(){
+            expect(pad(1, 3, 4)).toEqual("441");
+        });
+
+        it("should pad with 0 by default", function(){
+            expect(pad(1, 3)).toEqual("001");
+        });
+
+        it("should pad 0", function(){
+            expect(pad(0, 2, 1)).toEqual("10");
+        });
+
+        it("should not pad if already at correct length", function(){
+            expect(pad(111, 3, 4)).toEqual("111");
+        });
+
+        // TODO TBD how to handle negative pad values?
+        it("should include '-' for negative numbers in pad count", function(){
+            expect(pad(1, 2, -1)).toEqual("-11");
+        });
+
+        it("should return same value for negative pad count", function(){
+            expect(pad(1, -2, 4)).toEqual("1");
+        });
+
+        it("should return null for null", function(){
+            expect(pad(null, 3, 4)).toEqual(null);
+        });
+
+        it("should return null for undefined", function(){
+            expect(pad(undefined, 3, 4)).toEqual(null);
+        });
+    });
+
+    describe("formatTime", function(){
+        it("should format with Date", function(){
+            var date = new Date(2014, 9, 2, 0, 30, 1, 1);
+            expect(formatTime(date)).toEqual("00:30:01:01");
+        });
+
+        it("should format current date for undefined", function(){
+            var now = new Date();
+            expect(formatTime()).toEqual(formatTime(now));
+        });
+
+        it("should not format number", function(){
+            expect(formatTime(2)).toEqual(null);
+        });
+
+        it("should not format non date object", function(){
+            expect(formatTime({a:1})).toEqual(null);
+        });
+
+        it("should not format null", function(){
+            expect(formatTime(null)).toEqual(null);
+        });
+    });
+
+    describe("formatMonthDayYear", function(){
+        it("should format with Date", function(){
+            var date = new Date(2014, 2, 15);
+            expect(formatMonthDayYear(date)).toEqual("3/15/2014");
+        });
+
+        it("should format current date for undefined", function(){
+            var now = new Date();
+            expect(formatMonthDayYear()).toEqual(formatMonthDayYear(now));
+        });
+
+        it("should not format number", function(){
+            expect(formatMonthDayYear(1)).toEqual(null);
+        });
+
+        it("should not format non date object", function(){
+            expect(formatMonthDayYear({a:1})).toEqual(null);
+        });
+
+        it("should not format null", function(){
+            expect(formatMonthDayYear(null)).toEqual(null);
+        });
+    });
+
+    // Internal method only intended to be used with strings
+    describe("isEqualIgnoreCase", function(){
+        if("should be equal with different case", function(){
+            expect(isEqualIgnoreCase("example", "eXamPle")).toEqual(true);
+        });
+
+        it("should not be equal if one null", function(){
+            expect(isEqualIgnoreCase("a", null)).toEqual(false);
+        });
+
+        it("should not be equal if one undefined", function(){
+            expect(isEqualIgnoreCase("a", undefined)).toEqual(false);
+        });
+
+        it("should be equal if both null", function(){
+            expect(isEqualIgnoreCase(null, null)).toEqual(true);
+        });
+
+        it("should be equal if both undefined", function(){
+            expect(isEqualIgnoreCase()).toEqual(true);
+        });
+    });
+
+    // Internal method only intended to be used with strings
+    describe("contains", function(){
+        it("should contain with matching case", function(){
+            expect(contains("example Test str", "Test")).toEqual(true);
+        });
+
+        it("should not contain if case doesn't match", function(){
+            expect(contains("example test str", "Test")).toEqual(false);
+        })
+
+        it("should contain ignoring case", function(){
+            expect(contains("example test str", "Test", true)).toEqual(true);
+        });
+
+        it("should not contain for null", function(){
+            expect(contains(null, "a")).toEqual(false);
+        });
+
+        it("should not contain for undefined", function(){
+            expect(contains(undefined, "a")).toEqual(false);
+        });
+
+        it("should not contain for null search value", function(){
+            expect(contains("a", null)).toEqual(false);
+        });
+
+        it("should not contain for undefined search value", function(){
+            expect(contains("a")).toEqual(false);
+        });
+    });
+
+    // Internal method only intended to be used with strings
+    describe("beforeSeparator", function(){
+        it("should find before string separator", function(){
+            expect(beforeSeparator("example=2", "=")).toEqual("example");
+        });
+
+        it("should find before first separator", function(){
+            expect(beforeSeparator("example=2&test=3", "=")).toEqual("example");
+        });
+
+        it("should find before number separator", function(){
+            expect(beforeSeparator("example2test", 2)).toEqual("example");
+        });
+
+        it("should not find for null separator", function(){
+            expect(beforeSeparator("example=2", null)).toEqual(null);
+        });
+
+        it("should not find for undefined separator", function(){
+            expect(beforeSeparator("example=2", undefined)).toEqual(null);
+        });
+
+        it("should not find for null string", function(){
+            expect(beforeSeparator(null, "=")).toEqual(null);
+        });
+
+        it("should not find for undefined string", function(){
+            expect(beforeSeparator(undefined, "=")).toEqual(null);
+        });
+    });
+
+    // Internal method only intended to be used with strings
+    describe("afterSeparator", function(){
+        it("should find after string separator", function(){
+            expect(afterSeparator("example=2", "=")).toEqual("2");
+        });
+
+        it("should find after first separator", function(){
+            expect(afterSeparator("example=2&test=3", "=")).toEqual("2&test=3");
+        });
+
+        it("should find after number separator", function(){
+            expect(afterSeparator("example2test", 2)).toEqual("test");
+        });
+
+        it("should not find for null separator", function(){
+            expect(afterSeparator("example=2", null)).toEqual(null);
+        });
+
+        it("should not find for undefined separator", function(){
+            expect(afterSeparator("example=2", undefined)).toEqual(null);
+        });
+
+        it("should not find for null string", function(){
+            expect(afterSeparator(null, "=")).toEqual(null);
+        });
+
+        it("should not find for undefined string", function(){
+            expect(afterSeparator(undefined, "=")).toEqual(null);
+        });
+    });
+
+    describe("generateUUID", function(){
+        it("should have form 'xxxxxxxx-xxxx-xxxx-yxxx-xxxxxxxxxxxx'", function(){
+            expect(generateUUID()).toMatch(/[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}/);
+        });
+
+        // Not much of a test :)
+        it("should not produce identical UUIDs", function(){
+            var a = generateUUID();
+            var b = generateUUID();
+
+            expect(a).not.toEqual(b);
+        });
+    });
 
     describe("removeItem", function() {
         var array;
@@ -643,6 +974,125 @@ describe("common", function(){
 
             expect(element.tagName).toBe("BUTTON");
             expect(element.hasAttribute("onclick")).toBe(true);
+        });
+    });
+
+    describe("addParametersToUrl", function(){
+        it("should separate the first parameter with ?", function(){
+            expect(addParametersToUrl("www.test.com", {a:1})).toEqual("www.test.com?a=1");
+        });
+
+        it("should separate others with &", function(){
+            expect(addParametersToUrl("www.test.com?a=1", {b:2, c:3})).toEqual("www.test.com?a=1&b=2&c=3");
+        });
+
+        it("should encode parameter keys", function(){
+            expect(addParametersToUrl("www.test.com", {"$":1})).toEqual("www.test.com?%24=1");
+        });
+
+        it("should encode parameter values", function(){
+            expect(addParametersToUrl("www.test.com", {a: "$"})).toEqual("www.test.com?a=%24");
+        });
+
+        it("should encode ?/& in key and values", function(){
+            expect(addParametersToUrl("www.test.com", {"?&": "&?", a: 2})).toEqual("www.test.com?%3F%26=%26%3F&a=2");
+        });
+
+        it("should convert date parameter to ISO", function(){
+            expect(addParametersToUrl("www.test.com", {a:new Date(2014,1,1)})).toEqual("www.test.com?a=2014-02-01T08%3A00%3A00.000Z");
+        });
+
+        it("should convert object to JSON", function(){
+            expect(addParametersToUrl("www.test.com", {a: {b:2}})).toEqual("www.test.com?a=%7B%22b%22%3A2%7D");
+        });
+
+        it("should add none for non object key/values", function(){
+            expect(addParametersToUrl("www.test.com", 1)).toEqual("www.test.com");
+        });
+
+        it("should add none for null", function(){
+            expect(addParametersToUrl("www.test.com", null)).toEqual("www.test.com");
+        });
+
+        it("should add none for undefined", function(){
+            expect(addParametersToUrl("www.test.com", undefined)).toEqual("www.test.com");
+        });
+    });
+
+    describe("removeParameterFromUrl", function(){
+        it("should remove parameter", function(){
+            expect(removeParameterFromUrl("www.test.com?b=2", "b")).toEqual("www.test.com");
+        });
+
+        it("should only remove that parameter", function(){
+            expect(removeParameterFromUrl("www.test.com?a=1&b=2&c=3", "b")).toEqual("www.test.com?a=1&c=3");
+        });
+
+        it("should remove with encoded parameter", function(){
+            expect(removeParameterFromUrl("www.test.com?%24=1", "$")).toEqual("www.test.com");
+        });
+
+        it("should change & to ? upon removing first parameter", function(){
+            expect(removeParameterFromUrl("www.test.com?a=1&b=2&c=3", "a")).toEqual("www.test.com?b=2&c=3");
+
+        });
+
+        it("should do nothing if doesn't exist", function(){
+            expect(removeParameterFromUrl("www.test.com?c=1&d=2", "a")).toEqual("www.test.com?c=1&d=2");
+        });
+
+        it("should do nothing for null", function(){
+            expect(removeParameterFromUrl("www.test.com?c=1&d=2", null)).toEqual("www.test.com?c=1&d=2");
+        });
+
+        it("should do nothing for undefined", function(){
+            expect(removeParameterFromUrl("www.test.com?c=1&d=2", undefined)).toEqual("www.test.com?c=1&d=2");
+        });
+    });
+
+    describe("assert", function(){
+        it("should throw for false", function(){
+            expect(function(){assert(false)}).toThrow();
+        });
+
+        it("should throw for null", function(){
+            expect(function(){assert(null)}).toThrow();
+        });
+
+        it("should throw for undefined", function(){
+            expect(function(){assert(undefined)}).toThrow();
+        });
+
+        it("should throw for 0", function(){
+            expect(function(){assert(0)}).toThrow();
+        });
+
+        it("should throw for an empty string", function(){
+            expect(function(){assert("")}).toThrow();
+        });
+
+        it("should not throw for true", function(){
+            assert(true);
+        });
+
+        it("should not throw for an object", function(){
+            assert({a:1});
+        });
+
+        it("should not throw for an empty object", function(){
+           assert({});
+        });
+
+        it("should throw an error", function(){
+            expect(function(){assert(false)}).toThrow(new Error(null));
+        });
+
+        it("should include message", function(){
+            expect(function(){assert(false, "message")}).toThrow(new Error("message"));
+        });
+
+        it("should format message", function(){
+            expect(function(){assert(false, "message: {0} {1}", "a", 1)}).toThrow(new Error("message: a 1"));
         });
     });
 });

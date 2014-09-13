@@ -131,7 +131,21 @@ function areEqual(value, other) {
 }
 
 function isEmpty(value) {
-    return !value || 0 === value.length;
+    if(!value) {
+        return true;
+    }
+
+    if(isArray(value) || isString(value) || isArguments(value)) {
+        return 0 === value.length;
+    }
+
+    for (var key in value) {
+        if (value.hasOwnProperty(key)) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 function isNaN(value) {
@@ -152,11 +166,15 @@ function isError(value) {
 }
 
 function isObject(value) {
-    return value === Object(value);
+    return value === Object(value) || isFunction(value);
 }
 
 function isArray(value) {
     return value instanceof Array;
+}
+
+function isArguments(value) {
+    return value && value.hasOwnProperty("callee") && value.hasOwnProperty("length");
 }
 
 function isFunction(value) {
@@ -205,20 +223,15 @@ function toJson(obj) {
 }
 
 function fromJson(str) {
-    if (!str) {
-        return null;
-    }
-
-    return JSON.parse(str);
+    return isString(str) ? JSON.parse(str) : str;
 }
 
 function toFormData(obj) {
-    if (!obj) {
+    if (!isObject(obj) || isArray(obj)) {
         return null;
     }
 
     var values = [];
-
     forEach(obj, function(value, key) {
         values.push(encodeURIComponent(key) + "=" + encodeURIComponent(value));
     });
@@ -243,7 +256,12 @@ function format(value) {
     return value;
 }
 
+// TODO TBD how to handle negative pad values? probably doesn't matter
 function pad(value, padCount, padValue) {
+    if (!value && 0 != value) {
+        return null;
+    }
+
     if (undefined === padValue) {
         padValue = "0";
     }
@@ -262,6 +280,10 @@ function formatTime(date) {
         date = new Date();
     }
 
+    if (!isDate(date)) {
+        return null;
+    }
+
     var hours = pad(date.getHours(), 2);
     var minutes = pad(date.getMinutes(), 2);
     var seconds = pad(date.getSeconds(), 2);
@@ -272,8 +294,12 @@ function formatTime(date) {
 }
 
 function formatMonthDayYear(date) {
-    if (!date) {
-        return "";
+    if (undefined === date) {
+        date = new Date();
+    }
+
+    if (!isDate(date)) {
+        return null;
     }
 
     var month = pad(date.getMonth() + 1);
@@ -284,36 +310,33 @@ function formatMonthDayYear(date) {
         "{0}/{1}/{2}", month, day, year);
 }
 
-function isEqual(str, value, ignoreCase) {
-    if (!str || !value) {
-        return str == value;
+// Only intended to be used with strings
+function isEqualIgnoreCase(value, other) {
+    if (!value || !other) {
+        return value === other;
+    }
+
+    value = str.toLowerCase();
+    other = other.toLowerCase();
+
+    return value === other;
+}
+
+// Only intended to be used with strings
+function contains(value, other, ignoreCase) {
+    if (!value || !other) {
+        return value === other;
     }
 
     if (ignoreCase) {
-        str = str.toLowerCase();
         value = value.toLowerCase();
+        other = other.toLowerCase();
     }
 
-    return str == value;
+    return 0 <= value.indexOf(other);
 }
 
-function isEqualIgnoreCase(str, value) {
-    return isEqual(str, value, true);
-}
-
-function contains(str, value, ignoreCase) {
-    if (!str || !value) {
-        return str == value;
-    }
-
-    if (ignoreCase) {
-        str = str.toLowerCase();
-        value = value.toLowerCase();
-    }
-
-    return 0 <= str.indexOf(value);
-}
-
+// Only intended to be used with strings
 function beforeSeparator(str, separator) {
     if (!str || !separator) {
         return null;
@@ -323,6 +346,7 @@ function beforeSeparator(str, separator) {
     return -1 < index ? str.substring(0, index) : null;
 }
 
+// Only intended to be used with strings
 function afterSeparator(str, separator) {
     if (!str || !separator) {
         return null;
@@ -332,14 +356,14 @@ function afterSeparator(str, separator) {
     return -1 < index ? str.substring(index + 1) : null;
 }
 
-
+// RFC4122 version 4 compliant
 function generateUUID() {
     // http://stackoverflow.com/a/8809472
     var now = Date.now();
     var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(character) {
         var random = (now + Math.random()*16)%16 | 0;
         now = Math.floor(now/16);
-        return (character=='x' ? random : (random&0x7|0x8)).toString(16);
+        return (character=='x' ? random : (random&0x3|0x8)).toString(16);
     });
 
     return uuid;
@@ -363,7 +387,6 @@ function removeAt(array, index) {
         return;
     }
     if (0 <= index && array.length > index) {
-        console.log("splice!!!!");
         array.splice(index, 1);
     }
 }
@@ -423,7 +446,7 @@ function removeEventListener(element, event, callback) {
 
 function addParametersToUrl(url, parameters) {
     if (!url || !parameters) {
-        return;
+        return url;
     }
 
     var seperator = contains(url, "?") ? "&" : "?";
@@ -440,8 +463,8 @@ function addParametersToUrl(url, parameters) {
             }
         }
 
-        url += seperator +  encodeURIComponent(key) + encodeURIComponent(parameters[key]);
-        seperator = "?";
+        url += seperator +  encodeURIComponent(key) + "=" + encodeURIComponent(value);
+        seperator = "&";
     }
 
     return url;
@@ -449,14 +472,14 @@ function addParametersToUrl(url, parameters) {
 
 function removeParameterFromUrl(url, parameter) {
     if (!url || !parameter) {
-        return;
+        return url;
     }
 
-    var search = parameter + "=";
+    var search = encodeURIComponent(parameter) + "=";
     var startIndex = url.indexOf(search);
 
-    if (-1 === index) {
-        return;
+    if (-1 === startIndex) {
+        return url;
     }
 
     var endIndex = url.indexOf("&", startIndex);
@@ -468,34 +491,18 @@ function removeParameterFromUrl(url, parameter) {
         url = url.substr(0, Math.max(startIndex - 1, 0));
     }
 
+    if (!contains(url, "?")) {
+        url = url.replace("&", "?");
+    }
+
     return url;
-}
-
-///
-
-// TODO TBD this could just be moved to $http
-function globalEval($window, src) {
-    if (!src) {
-        return;
-    }
-
-    // https://weblogs.java.net/blog/driscoll/archive/2009/09/08/eval-javascript-global-context
-    if ($window.execScript) {
-        $window.execScript(src);
-    }
-
-    var func = function() {
-        $window.eval.call($window.src);
-    };
-
-    func();
 }
 
 
 ///
 
 function assert(condition, message) {
-    if (condition) {
+    if (!!condition) {
         return;
     }
 
@@ -504,39 +511,3 @@ function assert(condition, message) {
 
     throw new Error(message);
 };
-
-assert = extend(assert, {
-    ok: function(condition, message) {
-        assert.apply(this, arguments);
-    },
-
-    equal: function(actual, expected, message) {
-        var args = argumentsToArray(arguments, 2);
-        assert.apply(this, [actual == expected].concat(args));
-    },
-
-    notEqual: function(actual, expected, message) {
-        var args = argumentsToArray(arguments, 2);
-        assert.apply(this, [actual != expected].concat(args));
-    },
-
-    strictEqual: function(actual, expected, message) {
-        var args = argumentsToArray(arguments, 2);
-        assert.apply(this, [actual === expected].concat(args));
-    },
-
-    strictNotEqual: function(actual, expected, message) {
-        var args = argumentsToArray(arguments, 2);
-        assert.apply(this, [actual !== expected].concat(args));
-    },
-
-    deepEqual: function(actual, expected, message) {
-        var args = argumentsToArray(arguments, 2);
-        assert.apply(this, [ObjectUtils.areEqual(actual, expected)].concat(args));
-    },
-
-    deepNotEqual: function(actual, expected, message) {
-        var args = argumentsToArray(arguments, 2);
-        assert.apply(this, [!ObjectUtils.areEqual(actual, expected)].concat(args));
-    }
-});

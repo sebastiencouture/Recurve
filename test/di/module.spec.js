@@ -1,105 +1,161 @@
 "use strict";
 
 describe("module", function(){
-    var module;
+    var moduleA;
+    var moduleB;
 
     beforeEach(function(){
-        module = module();
+        moduleA = module();
+        moduleB = module(moduleA);
     });
 
     describe("factory", function() {
-        it("should require name and function provider", function() {
-            expect(function(){module.factory()}).toThrow();
-            expect(function(){module.factory("a")}).toThrow();
+        it("should create a service", function() {
+            function factory(){
+            }
 
-            module.factory("a", null, function(){});
+            moduleA.factory("a", null, factory);
+            var service = moduleA.exported().services["a"];
+            expect(service).toEqual({type: "factory", dependencies: null, value: factory});
+        });
+
+        it("should require a name", function(){
+            expect(function(){moduleA.factory()}).toThrow();
+        });
+
+        it("should require a provider function", function(){
+            expect(function(){moduleA.factory("a", null, 1)}).toThrow();
         });
     });
 
     describe("value", function() {
-        it("should require name", function() {
-            expect(function(){module.value()}).toThrow();
+        it("should create a service", function(){
+            moduleA.value("a", 1);
 
-            module.value("a", 1);
+            var service = moduleA.exported().services["a"];
+            expect(service).toEqual({type: "value", value: 1});
+        });
+
+        it("should require a name", function() {
+            expect(function(){moduleA.value()}).toThrow();
         });
     });
 
     describe("type", function() {
-        it("should require name and function constructor provider", function() {
-            expect(function(){module.type()}).toThrow();
-            expect(function(){module.type("test")}).toThrow();
+        it("should create a service", function() {
+            function Type(){
+            }
 
-            module.type("a", null, function(){});
+            moduleA.type("a", null, Type);
+            var service = moduleA.exported().services["a"];
+            expect(service).toEqual({type: "type", dependencies: null, value: Type});
+        });
+
+        it("should require a name", function(){
+            expect(function(){moduleA.type()}).toThrow();
+        });
+
+        it("should require a provider function", function(){
+            expect(function(){moduleA.type("a", null, 1)}).toThrow();
         });
     });
 
     describe("typeFactory", function(){
-        it("should require name and function constructor provider", function() {
-            expect(function(){module.typeFactory()}).toThrow();
-            expect(function(){module.typeFactory("test")}).toThrow();
+        it("should create a service", function() {
+            function Type(){
+            }
 
-            module.typeFactory("a", null, function(){});
+            moduleA.typeFactory("a", null, Type);
+            var service = moduleA.exported().services["a"];
+            expect(service).toEqual({type: "typeFactory", dependencies: null, value: Type});
+        });
+
+        it("should require a name", function(){
+            expect(function(){moduleA.typeFactory()}).toThrow();
+        });
+
+        it("should require a provider function", function(){
+            expect(function(){moduleA.typeFactory("a", null, 1)}).toThrow();
         });
     });
 
     describe("config", function(){
-        it("should require name", function() {
-            expect(function(){module.config()}).toThrow();
+        it("should create a service", function(){
+            moduleA.config("a", 1);
 
-            module.config("a", 1);
+            var service = moduleA.exported().services["config.a"];
+            expect(service).toEqual({type: "value", value: 1});
+        });
+
+        it("should prefix name with 'config.'", function(){
+            moduleA.config("a", 1);
+
+            var services = moduleA.exported().services;
+
+            expect(services["config.a"]).toBeDefined();
+            expect(services["a"]).not.toBeDefined();
+        });
+
+        it("should require a name", function() {
+            expect(function(){moduleA.config()}).toThrow();
         });
     });
 
     describe("decorator", function(){
-        it("should require name", function() {
-            expect(function(){module.decorator()}).toThrow();
-            expect(function(){module.decorator("test")}).toThrow();
+        it("should create a decorator", function() {
+            function decorator(){
+            }
 
-            module.decorator("a", null, function(){});
+            moduleA.decorator("a", null, decorator);
+            var service = moduleA.exported().decorators["a"];
+            expect(service).toEqual({type: "decorator", dependencies: null, value: decorator});
+        });
+
+        it("should require a name", function(){
+            expect(function(){moduleA.decorator()}).toThrow();
+        });
+
+        it("should require a provider function", function(){
+            expect(function(){moduleA.decorator("a", null, 1)}).toThrow();
         });
     });
 
     describe("resolve dependent service/decorators", function(){
-        var a;
-        var b;
-
-        beforeEach(function(){
-            a = module();
-            b = module(a);
-        });
-
         it("should resolve services", function(){
-            a.value("valueA", 1);
-            b.value("valueB", 2);
+            moduleA.value("valueA", 1);
+            moduleB.value("valueB", 2);
 
-            b.resolveDependencies();
+            var servicesA = moduleA.exported().services;
+            var servicesB = moduleB.exported().services;
 
-            expect(a.getServices()["valueA"]).toBeDefined();
-            expect(a.getServices()["valueB"]).not.toBeDefined();
-            expect(b.getServices()["valueA"]).toBeDefined();
-            expect(b.getServices()["valueB"]).toBeDefined();
+            expect(servicesA["valueA"]).toBeDefined();
+            expect(servicesA["valueB"]).not.toBeDefined();
+            expect(servicesB["valueA"]).toBeDefined();
+            expect(servicesB["valueB"]).toBeDefined();
         });
 
         it("should resolve service overrides", function(){
-            a.value("valueA", 1);
-            b.value("valueA", 2);
+            moduleA.value("valueA", 1);
+            moduleB.value("valueA", 2);
 
-            b.resolveDependencies();
+            var servicesA = moduleA.exported().services;
+            var servicesB = moduleB.exported().services;
 
-            expect(a.getServices()["valueA"]).toEqual({type: "value", value: 1});
-            expect(b.getServices()["valueA"]).toEqual({type: "value", value: 2});
+            expect(servicesA["valueA"]).toEqual({type: "value", value: 1});
+            expect(servicesB["valueA"]).toEqual({type: "value", value: 2});
         });
 
         it("should resolve decorators", function(){
-            a.decorator("decoratorA", null, function(){});
-            b.decorator("decoratorB", null, function(){});
+            moduleA.decorator("decoratorA", null, function(){});
+            moduleB.decorator("decoratorB", null, function(){});
 
-            b.resolveDependencies();
+            var decoratorsA = moduleA.exported().decorators;
+            var decoratorsB = moduleB.exported().decorators;
 
-            expect(a.getDecorators()["decoratorA"]).toBeDefined();
-            expect(a.getDecorators()["decoratorB"]).not.toBeDefined();
-            expect(b.getDecorators()["decoratorA"]).toBeDefined();
-            expect(b.getDecorators()["decoratorB"]).toBeDefined();
+            expect(decoratorsA["decoratorA"]).toBeDefined();
+            expect(decoratorsA["decoratorB"]).not.toBeDefined();
+            expect(decoratorsB["decoratorA"]).toBeDefined();
+            expect(decoratorsB["decoratorB"]).toBeDefined();
         });
 
         it("should resolve decorator overrides", function(){
@@ -110,18 +166,101 @@ describe("module", function(){
 
             }
 
-            a.decorator("decoratorA", null, decoratorA);
-            b.decorator("decoratorA", null, decoratorB);
+            moduleA.decorator("decoratorA", null, decoratorA);
+            moduleB.decorator("decoratorA", null, decoratorB);
 
-            b.resolveDependencies();
+            var decoratorsA = moduleA.exported().decorators;
+            var decoratorsB = moduleB.exported().decorators;
 
-            expect(a.getDecorators()["decoratorA"]).toEqual({type: "decorator", dependencies: null, value: decoratorA});
-            expect(b.getDecorators()["decoratorA"]).toEqual({type: "decorator", dependencies: null, value: decoratorB});
+            expect(decoratorsA["decoratorA"]).toEqual({type: "decorator", dependencies: null, value: decoratorA});
+            expect(decoratorsB["decoratorA"]).toEqual({type: "decorator", dependencies: null, value: decoratorB});
+        });
+    });
+
+    describe("exports", function(){
+        it("should only export public services", function(){
+            moduleA.value("a", 1);
+            moduleA.value("b", 2);
+
+            moduleA.exports(["a"]);
+
+            var services = moduleA.exported().services;
+
+            expect(services["a"]).toBeDefined();
+            expect(services["b"]).not.toBeDefined();
+        });
+
+        it("should only export public decorators", function(){
+            moduleA.decorator("a", null, function(){});
+            moduleA.decorator("b", null, function(){});
+
+            moduleA.exports(["a"]);
+
+            var decorators = moduleA.exported().decorators;
+
+            expect(decorators["a"]).toBeDefined();
+            expect(decorators["b"]).not.toBeDefined();
+        });
+
+        it("dependent module private services should not be public in parent", function(){
+            moduleA.value("a", 1);
+            moduleA.value("b", 2);
+
+            moduleA.exports(["a"]);
+
+            var services = moduleB.exported().services;
+
+            expect(services["a"]).toBeDefined();
+            expect(services["b"]).not.toBeDefined();
+        });
+
+        it("dependent module private decorators should not be public in parent", function(){
+            moduleA.decorator("a", null, function(){});
+            moduleA.decorator("b", null, function(){});
+
+            moduleA.exports(["a"]);
+
+            var decorators = moduleB.exported().decorators;
+
+            expect(decorators["a"]).toBeDefined();
+            expect(decorators["b"]).not.toBeDefined();
+        });
+
+        it("dependent module public services should not be public if made private in parent", function(){
+            moduleA.value("a", 1);
+            moduleA.value("b", 2);
+
+            moduleA.exports(["a", "b"]);
+            moduleB.exports(["a"]);
+
+            var servicesA = moduleA.exported().services;
+            var servicesB = moduleB.exported().services;
+
+            expect(servicesA["a"]).toBeDefined();
+            expect(servicesA["b"]).toBeDefined();
+            expect(servicesB["a"]).toBeDefined();
+            expect(servicesB["b"]).not.toBeDefined();
+        });
+
+        it("dependent module public decorators should not be public if made private in parent", function(){
+            moduleA.decorator("a", null, function(){});
+            moduleA.decorator("b", null, function(){});
+
+            moduleA.exports(["a", "b"]);
+            moduleB.exports(["a"]);
+
+            var decoratorsA = moduleA.exported().decorators;
+            var decoratorsB = moduleB.exported().decorators;
+
+            expect(decoratorsA["a"]).toBeDefined();
+            expect(decoratorsA["b"]).toBeDefined();
+            expect(decoratorsB["a"]).toBeDefined();
+            expect(decoratorsB["b"]).not.toBeDefined();
         });
     });
 
     it("should enable chaining", function() {
-        module.factory("a", null, function(){}).
+        moduleA.factory("a", null, function(){}).
             value("b", {}).
             type("c", null, function(){}).
             typeFactory("d", null, function(){}).
