@@ -511,6 +511,49 @@ describe("container", function(){
     });
 
     describe("exports", function(){
+        it("instances of private services should not be accessible", function(){
+            moduleA.value("a", 1);
+            moduleA.value("b", 2);
 
+            moduleA.exports(["a"]);
+
+            containerA = container(moduleA);
+
+            expect(containerA.get("a")).toEqual(1);
+            expect(function(){
+                containerA.get("b");
+            }).toThrow(new Error("no service exists with the name b"));
+        });
+
+        describe("private service as dependency", function(){
+            var moduleB;
+            var containerB;
+
+            beforeEach(function(){
+                moduleA.value("a", 1);
+                moduleA.factory("b", ["a"], function(a){
+                    return a + 1;
+                });
+
+                moduleA.exports(["b"]);
+
+                moduleB = module(moduleA);
+                moduleB.factory("c", ["a"], function(a){
+                    return a + 1;
+                });
+
+                containerB = container(moduleB);
+            });
+
+            it("should allow to be used within a module", function(){
+                expect(containerB.get("b")).toEqual(2);
+            });
+
+            it("should not allow to be used outside of a module", function(){
+                expect(function() {
+                    containerB.get("c");
+                }).toThrow(new Error("no service exists with the name a"));
+            });
+        });
     });
 });
