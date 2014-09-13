@@ -1,6 +1,10 @@
 "use strict";
 
 function container(modules) {
+    if (!isArray(modules)) {
+        modules = [modules];
+    }
+
     var instances = [];
     var services = {};
     var decorators = {};
@@ -23,7 +27,7 @@ function container(modules) {
             return get(dependency);
         });
 
-        method.apply(context, dependencyInstances);
+        return method.apply(context, dependencyInstances);
     }
 
     function instantiate(dependencies, Type, additionalArgs) {
@@ -79,8 +83,8 @@ function container(modules) {
         }
 
         instances[name] = decorate(name, instance);
-
-        resolving.pop(name);
+        console.log(name + ":" + instance);
+        resolving.pop();
 
         return instances[name];
     }
@@ -88,7 +92,7 @@ function container(modules) {
     function decorate(name, instance) {
         var decorator = decorators[name];
         if (!decorator) {
-            return;
+            return instance;
         }
 
         var dependencyInstances = decorator.dependencies.map(function(dependency) {
