@@ -13,7 +13,7 @@ function container(modules) {
     var services = {};
     var decorators = {};
 
-    forEach(modules, function(module) {
+    forEach(modules.reverse(), function(module) {
         var exported = module.exported();
 
         services = extend(services, exported.services);
@@ -47,10 +47,6 @@ function container(modules) {
     var resolving = [];
 
     function get(name) {
-        if (!name) {
-            return null;
-        }
-
         if (instances[name]) {
             return instances[name];
         }

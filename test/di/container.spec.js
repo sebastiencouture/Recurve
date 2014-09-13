@@ -424,46 +424,90 @@ describe("container", function(){
             moduleB = module();
         });
 
-        it("should override decorators for a service", function(){
+        it("should override services based on module order", function(){
+            moduleA.value("a", 1);
+            moduleB.value("a", 2);
 
+            container([moduleA, moduleB]).invoke(["a"], function(a){
+                expect(a).toEqual(1);
+            });
+
+            container([moduleB, moduleA]).invoke(["a"], function(a){
+                expect(a).toEqual(2);
+            });
         });
 
-        it("should override services", function(){
+        it("should override decorators for a service based on module order", function(){
+            moduleA.value("a", 1);
+            moduleA.decorator("a", null, function(){
+               return 2;
+            });
+            moduleB.decorator("a", null, function(){
+                return 3;
+            });
 
+            container([moduleA, moduleB]).invoke(["a"], function(a){
+                expect(a).toEqual(2);
+            });
+
+            container([moduleB, moduleA]).invoke(["a"], function(a){
+                expect(a).toEqual(3);
+            });
         });
     });
 
     describe("get", function(){
         it("should return instance", function(){
+            moduleA.value("a", 1);
+            containerA = container(moduleA);
 
+            expect(containerA.get("a")).toEqual(1);
         });
 
         it("should always return same instance", function(){
+            moduleA.value("a", function(){});
+            containerA = container(moduleA);
 
+            expect(containerA.get("a")).toBe(containerA.get("a"));
         });
 
-        it("should return null if doesn't exist", function(){
-
+        it("should throw error if doesn't exist", function(){
+            expect(function(){
+                container(moduleA).get("a")
+            }).toThrow(new Error("no service exists with the name a"));
         });
 
-        it("should return null for null", function(){
-
+        it("should throw error for null", function(){
+            expect(function(){
+                container(moduleA).get(null)
+            }).toThrow(new Error("no service exists with the name null"));
         });
 
-        it("should return null for undefined", function(){
-
-        });
-    });
-
-    // TODO TBD dont know if this can be tested
-    describe("load", function() {
-        it("should load all instances", function(){
-
+        it("should throw error undefined", function(){
+            expect(function(){
+                container(moduleA).get(undefined)
+            }).toThrow(new Error("no service exists with the name undefined"));
         });
     });
 
     describe("circular dependencies", function(){
+        it("should detect", function(){
+            //       a
+            //     /  \
+            //    b --> c
+            //          \
+            //           d
+            // ... d depends on b
 
+            moduleA.factory("a", ["b", "c"], function(){return 1;});
+            moduleA.factory("b", ["c"], function(){return 1;});
+            moduleA.factory("c", ["d"], function(){return 1;});
+            moduleA.factory("d", ["b"], function(){return 1;});
+
+            expect(function(){
+                container(moduleA).load();
+            }).toThrow(new Error("circular dependency detected: a -> b -> c -> d"));
+        });
     });
 
     describe("exports", function(){
