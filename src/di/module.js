@@ -18,6 +18,8 @@ function module(dependentModules) {
         assert(name, "factory service requires a name");
         assert(isFunction(factory), "factory services requires a function provider");
 
+        updateDependencyNames(name, dependencies);
+
         services[name] = {dependencies: dependencies, value: factory, type: "factory"};
         return this;
     }
@@ -27,6 +29,8 @@ function module(dependentModules) {
         assert(name, "type service requires a name");
         assert(isFunction(Type), "type service requires a function constructor provider");
 
+        updateDependencyNames(name, dependencies);
+
         services[name] = {dependencies: dependencies, value: Type, type: "type"};
         return this;
     }
@@ -35,6 +39,8 @@ function module(dependentModules) {
     function typeFactory(name, dependencies, Type) {
         assert(name,  "typeFactory service requires a name");
         assert(isFunction(Type), "typeFactory service requires a function constructor provider");
+
+        updateDependencyNames(name, dependencies);
 
         services[name] = {dependencies: dependencies, value: Type, type: "typeFactory"};
         return this;
@@ -52,6 +58,8 @@ function module(dependentModules) {
     function decorator(name, dependencies, decorator) {
         assert(name,  "decorator service requires a name");
         assert(isFunction(decorator), "decorator service requires a function provider");
+
+        updateDependencyNames(name, dependencies);
 
         decorators[name] = {dependencies: dependencies, value: decorator, type: "decorator"};
         return this;
@@ -94,6 +102,14 @@ function module(dependentModules) {
             services: exportedServices,
             decorators: exportedDecorators
         }
+    }
+
+    function updateDependencyNames(name, dependencies){
+        forEach(dependencies, function(dependency, index){
+            if (0 === dependency.indexOf("$config")){
+                dependencies[index] = "config." + name;
+            }
+        });
     }
 
     function privateNames(exportedServices, exportedDecorators) {

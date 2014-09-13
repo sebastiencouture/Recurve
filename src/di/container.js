@@ -1,9 +1,13 @@
 "use strict";
 
 function container(modules) {
+    assert(modules, "no modules specified for container");
+
     if (!isArray(modules)) {
         modules = [modules];
     }
+
+    assert(modules.length, "no modules specified for container");
 
     var instances = [];
     var services = {};
@@ -13,7 +17,7 @@ function container(modules) {
         var exported = module.exported();
 
         services = extend(services, exported.services);
-        decorators = extend(decorators, exported.decorator);
+        decorators = extend(decorators, exported.decorators);
     });
 
     function load() {
@@ -23,10 +27,7 @@ function container(modules) {
     }
 
     function invoke(dependencies, method, context) {
-        var dependencyInstances = dependencies.map(function(dependency) {
-            return get(dependency);
-        });
-
+        var dependencyInstances = getDependencyInstances(dependencies);
         return method.apply(context, dependencyInstances);
     }
 
@@ -35,9 +36,7 @@ function container(modules) {
             additionalArgs = [];
         }
 
-        var dependencyInstances = dependencies.map(function(dependency) {
-            return get(dependency);
-        });
+        var dependencyInstances = getDependencyInstances(dependencies);
 
         var instance = Object.create(Type.prototype);
         instance = Type.apply(instance, dependencyInstances.concat(additionalArgs)) || instance;
@@ -48,6 +47,10 @@ function container(modules) {
     var resolving = [];
 
     function get(name) {
+        if (!name) {
+            return null;
+        }
+
         if (instances[name]) {
             return instances[name];
         }
@@ -83,6 +86,7 @@ function container(modules) {
         }
 
         instances[name] = decorate(name, instance);
+        assert(undefined !== instances[name], "decorator {0} must return an instance", name);
 
         resolving.pop();
 
@@ -95,17 +99,25 @@ function container(modules) {
             return instance;
         }
 
-        var dependencyInstances = decorator.dependencies.map(function(dependency) {
-            return get(dependency);
-        });
+        var dependencyInstances = getDependencyInstances(decorator.dependencies);
 
         return decorator.value.apply(null, [instance].concat(dependencyInstances));
+    }
+
+    function getDependencyInstances(dependencies) {
+        var instances = [];
+        if (dependencies){
+            instances = dependencies.map(function(dependency) {
+                return get(dependency);
+            });
+        }
+
+        return instances;
     }
 
     return {
         load: load,
         invoke: invoke,
-        instantiate: instantiate,
         get: get
     };
 }
