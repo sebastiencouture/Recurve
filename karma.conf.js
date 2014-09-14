@@ -17,7 +17,7 @@ module.exports = function(karma) {
     frameworks: ['jasmine'],
 
     // list of files / patterns to load in the browser
-    files: [].concat(files.recurveSrc, files.test),
+    files: [].concat(files.recurveSrc, "build/recurve.js", files.recurveModules.mock, files.test),
 
     // list of files / patterns to exclude
     exclude: [],

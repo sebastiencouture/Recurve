@@ -1,8 +1,5 @@
 "use strict";
 
-var Module = require("../di/module.js");
-var Container = require("../di/container.js");
-
 (function() {
     recurve.mock = {};
 

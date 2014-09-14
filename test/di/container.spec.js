@@ -429,11 +429,11 @@ describe("container", function(){
             moduleB.value("a", 2);
 
             container([moduleA, moduleB]).invoke(["a"], function(a){
-                expect(a).toEqual(1);
+                expect(a).toEqual(2);
             });
 
             container([moduleB, moduleA]).invoke(["a"], function(a){
-                expect(a).toEqual(2);
+                expect(a).toEqual(1);
             });
         });
 
@@ -447,11 +447,11 @@ describe("container", function(){
             });
 
             container([moduleA, moduleB]).invoke(["a"], function(a){
-                expect(a).toEqual(2);
+                expect(a).toEqual(3);
             });
 
             container([moduleB, moduleA]).invoke(["a"], function(a){
-                expect(a).toEqual(3);
+                expect(a).toEqual(2);
             });
         });
     });

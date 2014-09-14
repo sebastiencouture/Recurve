@@ -5,11 +5,15 @@ var recurveFiles = {
         "src/common.js",
         "src/recurve.js",
         "src/di/container.js",
-        "src/di/module.js"
+        "src/di/module.js",
+        "src/core/signalFactory.js"
     ],
 
-    "recurveModules" : [
-    ],
+    "recurveModules" : {
+        "mock" : [
+            "src/mock/mock.js"
+        ]
+    },
 
     "test": [
         "test/**/*.spec.js"

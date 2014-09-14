@@ -13,7 +13,13 @@ function container(modules) {
     var services = {};
     var decorators = {};
 
-    forEach(modules.reverse(), function(module) {
+    // TODO TBD will this override dependent modules incorrectly
+    // A -> B
+    // C -> B
+    // module order [A,B]... B for C will override everything of A that is overridden
+    // ... Need to load dependent modules only once!
+
+    forEach(modules, function(module) {
         var exported = module.exported();
 
         services = extend(services, exported.services);
