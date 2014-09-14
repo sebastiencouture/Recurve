@@ -932,8 +932,11 @@ describe("common", function(){
             expect(array).toEqual(["a", "b"]);
         });
 
-        it("should not throw error for undefined/null array", function(){
+        it("should not throw error for undefined array", function(){
             removeAt(undefined);
+        });
+
+        it("should not throw error for null array", function(){
             removeAt(null);
         });
     });
