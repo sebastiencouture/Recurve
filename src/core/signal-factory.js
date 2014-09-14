@@ -1,31 +1,9 @@
 "use strict";
 
 function addSignalService(module) {
-    function SignalListener(callback, context, onlyOnce) {
-        this.callback = callback;
-        this.context = context;
-        this.onlyOnce = onlyOnce;
-    }
+    module.factory("$signalFactory", null, factory);
 
-    SignalListener.prototype = {
-        isSame: function(callback, context) {
-            if (!context) {
-                return this.callback === callback;
-            }
-
-            return this.callback === callback && this.context === context;
-        },
-
-        isSameContext: function(context) {
-            return this.context === context;
-        },
-
-        trigger: function(args) {
-            this.callback.apply(this.context, args);
-        }
-    };
-
-    module.factory("$signalFactory", null, function(){
+    function factory() {
         return {
             create: function() {
                 var listeners = [];
@@ -124,5 +102,29 @@ function addSignalService(module) {
                 };
             }
         }
-    });
+    }
+
+    function SignalListener(callback, context, onlyOnce) {
+        this.callback = callback;
+        this.context = context;
+        this.onlyOnce = onlyOnce;
+    }
+
+    SignalListener.prototype = {
+        isSame: function(callback, context) {
+            if (!context) {
+                return this.callback === callback;
+            }
+
+            return this.callback === callback && this.context === context;
+        },
+
+        isSameContext: function(context) {
+            return this.context === context;
+        },
+
+        trigger: function(args) {
+            this.callback.apply(this.context, args);
+        }
+    };
 }

@@ -6,7 +6,8 @@ var recurveFiles = {
         "src/recurve.js",
         "src/di/container.js",
         "src/di/module.js",
-        "src/core/signal-factory.js"
+        "src/core/signal-factory.js",
+        "src/core/event-emitter-factory.js"
     ],
 
     "recurveModules" : {

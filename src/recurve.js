@@ -23,17 +23,18 @@ function publishApi(recurve) {
     });
 
     // TODO TBD create the core module
-    recurve.$module = module();
+    var recurveModule = recurve.$module = module();
 
-    addSignalService(recurve.$module);
+    addSignalService(recurveModule);
+    addEventEmitterService(recurveModule);
 
     recurve.module = function(dependentModules) {
         // TODO TBD core module is always include, but does not need to be explicitly specified
         // maybe require to be specified
         dependentModules = dependentModules || [];
 
-        if (-1 === dependentModules.indexOf(recurve.$module)) {
-            dependentModules.unshift(recurve.$module);
+        if (-1 === dependentModules.indexOf(recurveModule)) {
+            dependentModules.unshift(recurveModule);
         }
 
         return module(dependentModules);
