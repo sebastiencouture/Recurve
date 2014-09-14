@@ -527,7 +527,6 @@ describe("container", function(){
 
         describe("private service as dependency", function(){
             var moduleB;
-            var containerB;
 
             beforeEach(function(){
                 moduleA.value("a", 1);
@@ -542,17 +541,40 @@ describe("container", function(){
                     return a + 1;
                 });
 
-                containerB = container(moduleB);
+                containerA = container(moduleB);
             });
 
-            it("should allow to be used within a module", function(){
-                expect(containerB.get("b")).toEqual(2);
+            it("should allow to be used within module", function(){
+                expect(containerA.get("b")).toEqual(2);
             });
 
-            it("should not allow to be used outside of a module", function(){
+            it("should not allow to be used outside of module", function(){
                 expect(function() {
-                    containerB.get("c");
+                    containerA.get("c");
                 }).toThrow(new Error("no service exists with the name a"));
+            });
+
+            it("should allow to be private in one and public in another", function() {
+                moduleA.exports(["a", "b"]);
+                moduleB.exports(["b", "c"]);
+
+                // Make sure service "a" made private in module B is still available
+                // in this module since we did not make it private in module A
+                var moduleC = module(moduleA);
+                moduleC.factory("d", ["a"], function(a){
+                    return a + 1;
+                });
+
+                moduleC.exports("d");
+
+                containerA = container([moduleB, moduleC]);
+
+                expect(function() {
+                    containerA.get("a");
+                }).toThrow(new Error("no service exists with the name a"));
+                expect(containerA.get("b")).toEqual(2);
+                expect(containerA.get("c")).toEqual(2);
+                expect(containerA.get("d")).toEqual(2);
             });
         });
     });

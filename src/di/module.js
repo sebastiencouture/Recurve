@@ -134,24 +134,46 @@ function module(dependentModules) {
         if (service) {
             delete exportedServices[oldName];
             exportedServices[newName] = service;
-            updateDependencies(service);
         }
 
         var decorator = exportedDecorators[oldName];
         if (decorator) {
             delete exportedDecorators[oldName];
             exportedDecorators[newName] = decorator;
-            updateDependencies(decorator);
         }
 
+        forEach(exportedServices, function(service, key){
+            var cloned = updateDependencies(service);
+            if (cloned) {
+                exportedServices[key] = cloned;
+            }
+        });
+
+        forEach(exportedDecorators, function(decorator, key){
+            var cloned = updateDependencies(decorator);
+            if (cloned) {
+                exportedDecorators[key] = cloned;
+            }
+        });
+
         function updateDependencies(item) {
-            item.dependencies = clone(item.dependencies);
+            var cloned;
 
             forEach(item.dependencies, function(dependency, index){
                 if (dependency == oldName) {
-                    item.dependencies[index] = newName;
+                    cloned = {};
+                    cloned.dependencies = clone(item.dependencies);
+                    cloned.name = item.name;
+                    cloned.value = item.value;
+                    cloned.type = item.type;
+
+                    cloned.dependencies[index] = newName;
+
+                    return false;
                 }
             });
+
+            return cloned;
         }
     }
 
