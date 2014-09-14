@@ -383,7 +383,7 @@ function removeItem(array, item) {
 }
 
 function removeAt(array, index) {
-    if (!array || !index) {
+    if (!array || null === index) {
         return;
     }
     if (0 <= index && array.length > index) {

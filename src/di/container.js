@@ -13,18 +13,39 @@ function container(modules) {
     var services = {};
     var decorators = {};
 
-    // TODO TBD will this override dependent modules incorrectly
-    // A -> B
-    // C -> B
-    // module order [A,B]... B for C will override everything of A that is overridden
-    // ... Need to load dependent modules only once!
+    loadModules();
 
-    forEach(modules, function(module) {
-        var exported = module.exported();
+    function loadModules() {
+        // Only load each module once
+        var allModules = [];
+        getAllModules(modules, allModules);
+        allModules = uniqueModules(allModules);
 
-        services = extend(services, exported.services);
-        decorators = extend(decorators, exported.decorators);
-    });
+        forEach(allModules, function(module) {
+            var exported = module.exported();
+
+            services = extend(services, exported.services);
+            decorators = extend(decorators, exported.decorators);
+        });
+    }
+
+    function getAllModules(modules, all) {
+        forEach(modules, function(module){
+            getAllModules(module.getDependentModules(), all);
+            all.push(module);
+        });
+    }
+
+    function uniqueModules(modules) {
+        var unique = [];
+        forEach(modules, function(module) {
+           if (-1 === unique.indexOf(module)) {
+               unique.push(module);
+           }
+        });
+
+        return unique;
+    }
 
     function load() {
         forEach(services, function(service, name){

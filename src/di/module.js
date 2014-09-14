@@ -74,27 +74,16 @@ function module(dependentModules) {
     }
 
     function exported() {
-        var exportedServices = {};
-        var exportedDecorators = {};
-
-        forEach(dependentModules, function(module) {
-            var exported = module.exported();
-
-            exportedServices = extend(exportedServices, exported.services);
-            exportedDecorators = extend(exportedDecorators, exported.decorators);
-        });
-
-        exportedServices = extend(exportedServices, services);
-        exportedDecorators = extend(exportedDecorators, decorators);
+        var exportedServices = extend({}, services);
+        var exportedDecorators = extend({}, decorators);
 
         // Create pseudo private services, they are still public; however,
         // there is no reasonable way to access these services outside of the module
         if (!isEmpty(exportNames)) {
-            var names = privateNames(exportedServices, exportedDecorators);
+            var names = privateNames();
 
             forEach(names, function(name) {
-                var uuid = generateUUID();
-                updateName(uuid, name, exportedServices, exportedDecorators);
+                updateNameForExport(name, exportedServices, exportedDecorators);
             });
         }
 
@@ -102,6 +91,10 @@ function module(dependentModules) {
             services: exportedServices,
             decorators: exportedDecorators
         }
+    }
+
+    function getDependentModules() {
+        return dependentModules;
     }
 
     function updateDependencyNames(name, dependencies){
@@ -112,15 +105,17 @@ function module(dependentModules) {
         });
     }
 
-    function privateNames(exportedServices, exportedDecorators) {
+    function privateNames() {
         var allNames = [];
-        forEach(exportedServices, function(service, name){
+        forEach(services, function(service, name){
             allNames.push(name);
         });
 
-        forEach(exportedDecorators, function(decorator, name) {
-            if(0 > allNames.indexOf(name)) {
-                allNames.push(name);
+        // Sanity check to ensure all export names map to a service
+        // (exports can't include dependent module services)
+        forEach(exportNames, function(exportName){
+            if (-1 === allNames.indexOf(exportName)) {
+                assert(false, "export name {0} doesn't map to a service", exportName);
             }
         });
 
@@ -129,7 +124,9 @@ function module(dependentModules) {
         });
     }
 
-    function updateName(newName, oldName, exportedServices, exportedDecorators) {
+    function updateNameForExport(oldName, exportedServices, exportedDecorators) {
+        var newName = generateUUID();
+
         var service = exportedServices[oldName];
         if (service) {
             delete exportedServices[oldName];
@@ -157,8 +154,11 @@ function module(dependentModules) {
         });
 
         function updateDependencies(item) {
-            var cloned;
+            var cloned = null;
 
+            // Clone the service/decorator in this case since the new private name
+            // is tied to the export. We don't want the dependencies altered for
+            // further exports
             forEach(item.dependencies, function(dependency, index){
                 if (dependency == oldName) {
                     cloned = {};
@@ -185,6 +185,7 @@ function module(dependentModules) {
         value: value,
         decorator: decorator,
         config: config,
-        exported: exported
+        exported: exported,
+        getDependentModules: getDependentModules
     };
 }

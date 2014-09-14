@@ -31,7 +31,7 @@ describe("container", function(){
         });
     });
 
-    describe("resolve/invoke with a module", function() {
+    describe("invoke", function() {
         it("should resolve factory", function(){
             moduleA.factory("a", null, function(a){
                 return 1;
@@ -417,7 +417,7 @@ describe("container", function(){
         });
     });
 
-    describe("resolve/invoke with multiple modules", function(){
+    describe("invoke with multiple modules", function(){
         var moduleB;
 
         beforeEach(function(){
@@ -511,23 +511,31 @@ describe("container", function(){
     });
 
     describe("exports", function(){
-        it("instances of private services should not be accessible", function(){
+        var moduleB;
+
+        it("should override services", function(){
             moduleA.value("a", 1);
-            moduleA.value("b", 2);
+            moduleB = module(moduleA);
+            moduleB.value("a", 2);
 
-            moduleA.exports(["a"]);
+            expect(container(moduleB).get("a")).toEqual(2);
+        });
 
-            containerA = container(moduleA);
+        it("should override decorators", function(){
+            moduleA.value("a", 1);
+            moduleA.decorator("a", null, function($delegate){
+                return 10 * $delegate;
+            });
 
-            expect(containerA.get("a")).toEqual(1);
-            expect(function(){
-                containerA.get("b");
-            }).toThrow(new Error("no service exists with the name b"));
+            moduleB = module(moduleA);
+            moduleB.decorator("a", null, function($delegate){
+                return 20 * $delegate;
+            });
+
+            expect(container(moduleB).get("a")).toEqual(20);
         });
 
         describe("private service as dependency", function(){
-            var moduleB;
-
             beforeEach(function(){
                 moduleA.value("a", 1);
                 moduleA.factory("b", ["a"], function(a){
@@ -553,29 +561,45 @@ describe("container", function(){
                     containerA.get("c");
                 }).toThrow(new Error("no service exists with the name a"));
             });
-
-            it("should allow to be private in one and public in another", function() {
-                moduleA.exports(["a", "b"]);
-                moduleB.exports(["b", "c"]);
-
-                // Make sure service "a" made private in module B is still available
-                // in this module since we did not make it private in module A
-                var moduleC = module(moduleA);
-                moduleC.factory("d", ["a"], function(a){
-                    return a + 1;
-                });
-
-                moduleC.exports("d");
-
-                containerA = container([moduleB, moduleC]);
-
-                expect(function() {
-                    containerA.get("a");
-                }).toThrow(new Error("no service exists with the name a"));
-                expect(containerA.get("b")).toEqual(2);
-                expect(containerA.get("c")).toEqual(2);
-                expect(containerA.get("d")).toEqual(2);
-            });
         });
+
+        it("should throw an error on attempting to export dependent module service", function(){
+            moduleA.value("a", 1);
+            moduleA.value("b", 2);
+
+            moduleA.exports(["a"]);
+
+            moduleB = module(moduleA);
+            moduleB.value("c", 3);
+
+            moduleB.exports(["b"]);
+
+            expect(function(){
+                container(moduleB).load()
+            }).toThrow(new Error("export name b doesn't map to a service"));
+        });
+    });
+
+    it("should export a module only once", function(){
+        moduleA.value("a", 1);
+        moduleA.value("b", 2);
+
+        var moduleB = module(moduleA);
+        moduleB.value("a", 4);
+
+        var moduleC = module(moduleA);
+
+        containerA = container([moduleB, moduleC]);
+
+        // This is pretty indirect testing, but the reason for exporting a module only once is to ensure any services overridden
+        // in a module are not lost when another module is included and has a dependency on the module that has overridden
+        // services
+        //
+        // If modules weren't loaded only once...
+        // B -> A
+        // C -> A
+        // module order [B,C]... A for C will override everything of A that is overridden since A will be loaded over top
+        // of B since C was added last
+        expect(containerA.get("a")).toEqual(4);
     });
 });

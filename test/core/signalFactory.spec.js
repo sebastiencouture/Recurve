@@ -26,16 +26,16 @@ describe("signalFactory", function(){
     });
 
     it("should add with arguments", function() {
-        function onTrigger(name, location) {
+        function onTrigger(a, b) {
             expect(arguments.length).toEqual(2);
-            expect(name).toMatch("Sebastien");
-            expect(location).toMatch("New Westminster");
+            expect(a).toEqual("a");
+            expect(b).toEqual("b");
 
             triggered = true;
         }
 
         signal.on(onTrigger, this);
-        signal.trigger("Sebastien", "New Westminster");
+        signal.trigger("a", "b");
 
         expect(triggered).toBe(true);
     });
@@ -87,12 +87,10 @@ describe("signalFactory", function(){
         expect(triggerCount).toEqual(1);
     });
 
-    // TODO TBD update to expect it to throw an error?
     it("should handle null callbacks", function() {
-        signal.on(null, this);
-        signal.trigger();
-
-        expect(triggered).toBe(false);
+        expect(function(){
+            signal.on(null, this);
+        }).toThrow(new Error("callback must exist"));
     });
 
     it("should use correct context on callback", function() {

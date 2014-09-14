@@ -120,64 +120,49 @@ describe("module", function(){
         });
     });
 
-    describe("resolve dependent service/decorators", function(){
-        it("should resolve services", function(){
+    describe("export", function(){
+        it("should export services", function(){
             moduleA.value("valueA", 1);
-            moduleB.value("valueB", 2);
 
-            var servicesA = moduleA.exported().services;
-            var servicesB = moduleB.exported().services;
-
-            expect(servicesA["valueA"]).toBeDefined();
-            expect(servicesA["valueB"]).not.toBeDefined();
-            expect(servicesB["valueA"]).toBeDefined();
-            expect(servicesB["valueB"]).toBeDefined();
+            var services = moduleA.exported().services;
+            expect(services["valueA"]).toBeDefined();
         });
 
-        it("should resolve service overrides", function(){
-            moduleA.value("valueA", 1);
-            moduleB.value("valueA", 2);
-
-            var servicesA = moduleA.exported().services;
-            var servicesB = moduleB.exported().services;
-
-            expect(servicesA["valueA"]).toEqual({type: "value", value: 1});
-            expect(servicesB["valueA"]).toEqual({type: "value", value: 2});
-        });
-
-        it("should resolve decorators", function(){
+        it("should export decorators", function(){
             moduleA.decorator("decoratorA", null, function(){});
-            moduleB.decorator("decoratorB", null, function(){});
 
-            var decoratorsA = moduleA.exported().decorators;
-            var decoratorsB = moduleB.exported().decorators;
-
-            expect(decoratorsA["decoratorA"]).toBeDefined();
-            expect(decoratorsA["decoratorB"]).not.toBeDefined();
-            expect(decoratorsB["decoratorA"]).toBeDefined();
-            expect(decoratorsB["decoratorB"]).toBeDefined();
+            var decorators = moduleA.exported().decorators;
+            expect(decorators["decoratorA"]).toBeDefined();
         });
 
-        it("should resolve decorator overrides", function(){
-            function decoratorA(){
+        it("should only export public services", function(){
+            moduleA.value("a", 1);
+            moduleA.value("b", 2);
 
-            }
-            function decoratorB(){
+            moduleA.exports(["a"]);
 
-            }
+            var services = moduleA.exported().services;
 
-            moduleA.decorator("decoratorA", null, decoratorA);
-            moduleB.decorator("decoratorA", null, decoratorB);
+            expect(services["a"]).toBeDefined();
+            expect(services["b"]).not.toBeDefined();
+        });
 
-            var decoratorsA = moduleA.exported().decorators;
-            var decoratorsB = moduleB.exported().decorators;
+        it("should only export public decorators", function(){
+            moduleA.value("a", 1);
+            moduleA.value("b", 2);
+            moduleA.decorator("a", null, function(){});
+            moduleA.decorator("b", null, function(){});
 
-            expect(decoratorsA["decoratorA"]).toEqual({type: "decorator", dependencies: null, value: decoratorA});
-            expect(decoratorsB["decoratorA"]).toEqual({type: "decorator", dependencies: null, value: decoratorB});
+            moduleA.exports(["a"]);
+
+            var decorators = moduleA.exported().decorators;
+
+            expect(decorators["a"]).toBeDefined();
+            expect(decorators["b"]).not.toBeDefined();
         });
     });
 
-    describe("exports", function(){
+    /*describe("exports", function(){
         it("should only export public services", function(){
             moduleA.value("a", 1);
             moduleA.value("b", 2);
@@ -257,7 +242,7 @@ describe("module", function(){
             expect(decoratorsB["a"]).toBeDefined();
             expect(decoratorsB["b"]).not.toBeDefined();
         });
-    });
+    });*/
 
     it("should enable chaining", function() {
         moduleA.factory("a", null, function(){}).
