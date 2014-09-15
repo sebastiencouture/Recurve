@@ -61,7 +61,13 @@ describe("$eventEmitterFactory", function(){
         });
 
         it("should call same callback for multiple events", function(){
+            eventEmitter.on("a", triggerHandler);
+            eventEmitter.on("b", triggerHandler);
 
+            eventEmitter.trigger("a");
+            eventEmitter.trigger("b");
+
+            expect(triggerCount).toEqual(2);
         });
 
         it("should allow multiple events for same callback to be specified at once", function(){

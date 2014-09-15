@@ -535,6 +535,27 @@ describe("container", function(){
             expect(container(moduleB).get("a")).toEqual(20);
         });
 
+        it("should not override private services in another module", function(){
+            moduleA.value("a", 1);
+            moduleA.factory("b", ["a"], function(a){
+                return a;
+            });
+            moduleA.exports(["b"]);
+
+            moduleB = module(moduleA);
+            moduleB.value("a", 2);
+
+            containerA = container(moduleA);
+            var containerB = container(moduleB);
+
+            expect(containerA.get("b")).toEqual(1);
+            expect(function(){
+                containerA.get("a");
+            }).toThrow();
+            expect(containerB.get("a")).toEqual(2);
+            expect(containerB.get("b")).toEqual(1);
+        });
+
         describe("private service as dependency", function(){
             beforeEach(function(){
                 moduleA.value("a", 1);
