@@ -57,7 +57,7 @@ describe("$eventEmitterFactory", function(){
         });
 
         it("should call callbacks for multiple events", function(){
-            
+
         });
 
         it("should call same callback for multiple events", function(){
@@ -127,6 +127,7 @@ describe("$eventEmitterFactory", function(){
         });
     });
 
+    // TODO TBD are a lot of these redundant? repeated from "on" tests
     describe("once", function() {
         it("should call callback for event", function(){
             eventEmitter.once("a", triggerHandler);
