@@ -57,7 +57,7 @@ describe("$eventEmitterFactory", function(){
         });
 
         it("should call callbacks for multiple events", function(){
-
+            
         });
 
         it("should call same callback for multiple events", function(){
@@ -242,6 +242,18 @@ describe("$eventEmitterFactory", function(){
     });
 
     describe("off", function(){
+        function triggerAHandler() {
+            triggerCount++;
+        }
+
+        function triggerBHandler() {
+            triggerCount++;
+        }
+
+        function triggerCHandler() {
+            triggerCount++;
+        }
+
         it("should remove callback for an event", function(){
             eventEmitter.on("a", triggerHandler);
             eventEmitter.off("a", triggerHandler);
@@ -250,19 +262,17 @@ describe("$eventEmitterFactory", function(){
             expect(triggered).toBe(false);
         });
 
+        it("should not remove other callbacks for other events", function(){
+            eventEmitter.on("a", triggerHandler);
+            eventEmitter.on("b", triggerHandler);
+            eventEmitter.off("a", triggerHandler);
+            eventEmitter.trigger("a");
+            eventEmitter.trigger("b");
+
+            expect(triggerCount).toEqual(1);
+        })
+
         it("should remove all with same context for an event", function(){
-            function triggerAHandler() {
-                triggerCount++;
-            }
-
-            function triggerBHandler() {
-                triggerCount++;
-            }
-
-            function triggerCHandler() {
-                triggerCount++;
-            }
-
             eventEmitter.on("a", triggerAHandler, this);
             eventEmitter.on("a", triggerBHandler, this);
             eventEmitter.on("a", triggerCHandler, {});
@@ -273,15 +283,24 @@ describe("$eventEmitterFactory", function(){
         });
 
         it("should remove all with same context for all events", function(){
+            eventEmitter.on("a", triggerAHandler, this);
+            eventEmitter.on("b", triggerBHandler, this);
+            eventEmitter.on("c", triggerCHandler, {});
+            eventEmitter.off(null, null, this);
+            eventEmitter.trigger("a");
+            eventEmitter.trigger("b");
+            eventEmitter.trigger("c");
 
+            expect(triggerCount).toEqual(1);
         });
 
-        it("should remove none if no callback or context", function(){
+        it("should remove all when no event, callback and context", function(){
+            eventEmitter.on("a", triggerHandler, this);
+            eventEmitter.on("b", triggerHandler, {});
+            eventEmitter.off();
+            eventEmitter.trigger("a");
 
-        });
-
-        it("should remove all when no callback and context", function(){
-
+            expect(triggered).toEqual(false);
         });
     });
 
@@ -299,15 +318,33 @@ describe("$eventEmitterFactory", function(){
         });
     });
 
-    it("should disable", function(){
+    describe("clear", function(){
+        it("should remove all callbacks", function(){
+            eventEmitter.on("a", triggerHandler, this);
+            eventEmitter.on("b", triggerHandler, {});
+            eventEmitter.clear();
+            eventEmitter.trigger("a");
+            eventEmitter.trigger("b");
 
+            expect(triggered).toEqual(false);
+        });
+    });
+
+    it("should disable", function(){
+        eventEmitter.on("a", triggerHandler, this);
+        eventEmitter.disable();
+        eventEmitter.trigger("a");
+
+        expect(triggered).toEqual(false);
     });
 
     it("should re-enable", function(){
+        eventEmitter.on("a", triggerHandler, this);
+        eventEmitter.disable();
+        eventEmitter.trigger("a");
+        eventEmitter.disable(false);
+        eventEmitter.trigger("a");
 
-    });
-
-    it("should remove all callbacks", function(){
-
+        expect(triggerCount).toEqual(1);
     });
 });

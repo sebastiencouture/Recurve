@@ -57,7 +57,7 @@ function addEventEmitterService(module) {
                                 signals = {};
                             }
                             else {
-                                ObjectUtils.forEach(signals, function(signal) {
+                                forEach(signals, function(signal) {
                                     signal.off(callback, context);
                                 });
                             }
