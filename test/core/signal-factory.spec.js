@@ -1,6 +1,6 @@
 "use strict";
 
-describe("signalFactory", function(){
+describe("$signalFactory", function(){
     var signal;
     var triggered;
     var triggerCount;
@@ -12,6 +12,12 @@ describe("signalFactory", function(){
 
         triggered = false;
         triggerCount = 0;
+    });
+
+    it("should have a create method", function(){
+        $invoke(["$signalFactory"], function($signalFactory){
+            expect($signalFactory.create).toBeDefined();
+        });
     });
 
     it("should add with no arguments", function() {

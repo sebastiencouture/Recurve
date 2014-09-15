@@ -12,7 +12,8 @@ function addEventEmitterService(module) {
                 function createSignal(event) {
                     var signal = getSignal(event);
                     if (!signal) {
-                        signals[event] = $signalFactory.create();
+                        signal = $signalFactory.create();
+                        signals[event] = signal;
                     }
 
                     return signal;
@@ -24,6 +25,7 @@ function addEventEmitterService(module) {
 
                 return {
                     on: function(event, callback, context) {
+                        assert(event, "event must exist");
                         assert(callback, "callback must exist");
 
                         var signal = createSignal(event);
@@ -31,6 +33,7 @@ function addEventEmitterService(module) {
                     },
 
                     once: function(event, callback, context) {
+                        assert(event, "event must exist");
                         assert(callback, "callback must exist");
 
                         var signal = createSignal(event);
@@ -45,7 +48,7 @@ function addEventEmitterService(module) {
                             else {
                                 var signal = getSignal(event);
                                 if (signal) {
-                                    signal.remove(callback, context);
+                                    signal.off(callback, context);
                                 }
                             }
                         }
@@ -55,20 +58,22 @@ function addEventEmitterService(module) {
                             }
                             else {
                                 ObjectUtils.forEach(signals, function(signal) {
-                                    signal.remove(callback, context);
+                                    signal.off(callback, context);
                                 });
                             }
                         }
                     },
 
                     trigger: function(event) {
+                        assert(event, "event must exist");
+
                         if (disabled) {
                             return;
                         }
 
                         var signal = getSignal(event);
                         if (signal) {
-                            var args = ArrayUtils.argumentsToArray(arguments, 1);
+                            var args = argumentsToArray(arguments, 1);
                             signal.trigger.apply(signal, args);
                         }
                     },
