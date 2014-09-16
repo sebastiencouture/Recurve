@@ -58,19 +58,6 @@ function container(modules) {
         return method.apply(context, dependencyInstances);
     }
 
-    function instantiate(dependencies, Type, additionalArgs) {
-        if (undefined === additionalArgs) {
-            additionalArgs = [];
-        }
-
-        var dependencyInstances = getDependencyInstances(dependencies);
-
-        var instance = Object.create(Type.prototype);
-        instance = Type.apply(instance, dependencyInstances.concat(additionalArgs)) || instance;
-
-        return instance;
-    }
-
     var resolving = [];
 
     function get(name) {
@@ -90,23 +77,7 @@ function container(modules) {
 
         resolving.push(name);
 
-        var instance;
-        if ("type" === service.type) {
-            instance = instantiate(service.dependencies, service.value);
-        }
-        else if ("typeFactory" === service.type) {
-            instance = {
-                create: function() {
-                    return instantiate(service.dependencies, service.value, argumentsToArray(arguments));
-                }
-            };
-        }
-        else if ("factory" === service.type) {
-            instance = invoke(service.dependencies, service.value);
-        }
-        else {
-            instance = service.value;
-        }
+        var instance = invoke(service.dependencies, service.value);
 
         instances[name] = decorate(name, instance);
         assert(undefined !== instances[name], "decorator {0} must return an instance", name);

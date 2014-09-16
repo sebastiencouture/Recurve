@@ -1,6 +1,6 @@
 "use strict";
 
-describe("$eventEmitterFactory", function(){
+describe("$eventEmitter", function(){
     var eventEmitter;
     var triggered;
     var triggerCount;
@@ -11,17 +11,17 @@ describe("$eventEmitterFactory", function(){
     }
 
     beforeEach(function() {
-        $invoke(["$eventEmitterFactory"], function($eventEmitterFactory){
-            eventEmitter = $eventEmitterFactory.create();
+        $invoke(["$eventEmitter"], function($eventEmitter){
+            eventEmitter = $eventEmitter();
         });
 
         triggered = false;
         triggerCount = 0;
     });
 
-    it("should have a create method", function(){
-        $invoke(["$eventEmitterFactory"], function($eventEmitterFactory){
-            expect($eventEmitterFactory.create).toBeDefined();
+    it("should be invokable", function(){
+        $invoke(["$eventEmitter"], function($eventEmitter){
+            expect($eventEmitter).toBeDefined();
         });
     });
 
@@ -57,7 +57,30 @@ describe("$eventEmitterFactory", function(){
         });
 
         it("should call callbacks for multiple events", function(){
+            var aTriggered = false;
+            var bTriggered = false;
 
+            function triggerAHandler() {
+                triggerCount++;
+                aTriggered = true;
+            }
+
+            function triggerBHandler() {
+                triggerCount++;
+                bTriggered = true;
+            }
+
+            eventEmitter.on("a", triggerAHandler);
+            eventEmitter.on("b", triggerBHandler);
+
+            eventEmitter.trigger("a");
+            expect(aTriggered).toEqual(true);
+            expect(triggerCount).toEqual(1);
+
+            triggerCount = 0;
+            eventEmitter.trigger("b");
+            expect(bTriggered).toEqual(true);
+            expect(triggerCount).toEqual(1);
         });
 
         it("should call same callback for multiple events", function(){
@@ -71,7 +94,16 @@ describe("$eventEmitterFactory", function(){
         });
 
         it("should allow multiple events for same callback to be specified at once", function(){
+            eventEmitter.on("a b c", triggerHandler);
 
+            eventEmitter.trigger("a");
+            expect(triggerCount).toEqual(1);
+
+            eventEmitter.trigger("b");
+            expect(triggerCount).toEqual(2);
+
+            eventEmitter.trigger("c");
+            expect(triggerCount).toEqual(3);
         });
 
         it("should call callback with context", function(){
@@ -133,7 +165,7 @@ describe("$eventEmitterFactory", function(){
         });
     });
 
-    // TODO TBD are a lot of these redundant? repeated from "on" tests
+    // TODO TBD repeated "on" tests
     describe("once", function() {
         it("should call callback for event", function(){
             eventEmitter.once("a", triggerHandler);
@@ -166,15 +198,53 @@ describe("$eventEmitterFactory", function(){
         });
 
         it("should call callbacks for multiple events", function(){
+            var aTriggered = false;
+            var bTriggered = false;
 
+            function triggerAHandler() {
+                triggerCount++;
+                aTriggered = true;
+            }
+
+            function triggerBHandler() {
+                triggerCount++;
+                bTriggered = true;
+            }
+
+            eventEmitter.once("a", triggerAHandler);
+            eventEmitter.once("b", triggerBHandler);
+
+            eventEmitter.trigger("a");
+            expect(aTriggered).toEqual(true);
+            expect(triggerCount).toEqual(1);
+
+            triggerCount = 0;
+            eventEmitter.trigger("b");
+            expect(bTriggered).toEqual(true);
+            expect(triggerCount).toEqual(1);
         });
 
         it("should call same callback for multiple events", function(){
+            eventEmitter.once("a", triggerHandler);
+            eventEmitter.once("b", triggerHandler);
 
+            eventEmitter.trigger("a");
+            eventEmitter.trigger("b");
+
+            expect(triggerCount).toEqual(2);
         });
 
         it("should allow multiple events for same callback to be specified at once", function(){
+            eventEmitter.once("a b c", triggerHandler);
 
+            eventEmitter.trigger("a");
+            expect(triggerCount).toEqual(1);
+
+            eventEmitter.trigger("b");
+            expect(triggerCount).toEqual(2);
+
+            eventEmitter.trigger("c");
+            expect(triggerCount).toEqual(3);
         });
 
         it("should only call once", function(){
@@ -266,7 +336,7 @@ describe("$eventEmitterFactory", function(){
             eventEmitter.off("a", triggerHandler);
             eventEmitter.trigger("a");
 
-            expect(triggered).toBe(false);
+            expect(triggered).toEqual(false);
         });
 
         it("should not remove other callbacks for other events", function(){
@@ -277,7 +347,7 @@ describe("$eventEmitterFactory", function(){
             eventEmitter.trigger("b");
 
             expect(triggerCount).toEqual(1);
-        })
+        });
 
         it("should remove all with same context for an event", function(){
             eventEmitter.on("a", triggerAHandler, this);
@@ -301,10 +371,19 @@ describe("$eventEmitterFactory", function(){
             expect(triggerCount).toEqual(1);
         });
 
-        it("should remove all when no event, callback and context", function(){
+        it("should remove all for undefined event, callback and context", function(){
             eventEmitter.on("a", triggerHandler, this);
             eventEmitter.on("b", triggerHandler, {});
             eventEmitter.off();
+            eventEmitter.trigger("a");
+
+            expect(triggered).toEqual(false);
+        });
+
+        it("should remove all for null event, callback and context", function(){
+            eventEmitter.on("a", triggerHandler, this);
+            eventEmitter.on("b", triggerHandler, {});
+            eventEmitter.off(null, null, null);
             eventEmitter.trigger("a");
 
             expect(triggered).toEqual(false);
@@ -320,7 +399,7 @@ describe("$eventEmitterFactory", function(){
 
         it("should throw error for undefined event", function(){
             expect(function(){
-                eventEmitter.trigger(null);
+                eventEmitter.trigger(undefined);
             }).toThrow(new Error("event must exist"));
         });
     });

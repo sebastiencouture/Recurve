@@ -15,43 +15,50 @@ function module(dependentModules) {
 
     // returns getter(...)
     function factory(name, dependencies, factory) {
-        assert(name, "factory service requires a name");
+        assert(name, "service requires a name");
         assert(isFunction(factory), "factory services requires a function provider");
 
         updateDependencyNames(name, dependencies);
 
-        services[name] = {dependencies: dependencies, value: factory, type: "factory"};
+        services[name] = {dependencies: dependencies, value: factory};
         return this;
     }
 
     // returns new type(...)
     function type(name, dependencies, Type) {
-        assert(name, "type service requires a name");
-        assert(isFunction(Type), "type service requires a function constructor provider");
+        // guess it to be a function constructor... why "new" sucks!
+        assert(isFunction(Type), "factory services requires a function constructor");
 
-        updateDependencyNames(name, dependencies);
+        return this.factory(name, dependencies, function(){
+            var instance = Object.create(Type.prototype);
+            instance = Type.apply(instance, argumentsToArray(arguments)) || instance;
 
-        services[name] = {dependencies: dependencies, value: Type, type: "type"};
-        return this;
+            return instance;
+        });
     }
 
-    // returns factory with method create(...additional args passed into constructor)
+    // returns factory with method to create instances of type:
+    // factory(...additional args passed into constructor)
     function typeFactory(name, dependencies, Type) {
-        assert(name,  "typeFactory service requires a name");
-        assert(isFunction(Type), "typeFactory service requires a function constructor provider");
+        // guess it to be a function constructor... why "new" sucks!
+        assert(isFunction(Type), "factory services requires a function constructor");
 
-        updateDependencyNames(name, dependencies);
+        return this.factory(name, dependencies, function(){
+            var factoryArgs = argumentsToArray(arguments);
+            return function() {
+                var instance = Object.create(Type.prototype);
+                instance = Type.apply(instance, factoryArgs.concat(argumentsToArray(arguments))) || instance;
 
-        services[name] = {dependencies: dependencies, value: Type, type: "typeFactory"};
-        return this;
+                return instance
+            }
+        });
     }
 
     // returns value
     function value(name, value) {
-        assert(name, "value service requires a name");
-
-        services[name] = {value: value, type: "value"};
-        return this;
+        return this.factory(name, null, function(){
+            return value;
+        });
     }
 
     // decorator for factory, type, or value
@@ -61,7 +68,7 @@ function module(dependentModules) {
 
         updateDependencyNames(name, dependencies);
 
-        decorators[name] = {dependencies: dependencies, value: decorator, type: "decorator"};
+        decorators[name] = {dependencies: dependencies, value: decorator};
         return this;
     }
 
@@ -69,8 +76,7 @@ function module(dependentModules) {
     function config(name, config) {
         assert(name, "config service requires a name");
 
-        this.value("config." + name , config);
-        return this;
+        return this.value("config." + name , config);
     }
 
     function exported() {

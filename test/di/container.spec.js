@@ -17,15 +17,15 @@ describe("container", function(){
             container(moduleA);
         });
 
-        it("should thrown an error for null", function(){
+        it("should throw an error for null", function(){
             expect(function(){container(null)}).toThrow(new Error("no modules specified for container"));
         });
 
-        it("should thrown an error for undefined", function(){
+        it("should throw an error for undefined", function(){
             expect(function(){container(undefined)}).toThrow(new Error("no modules specified for container"));
         });
 
-        it("should thrown an error for empty array", function(){
+        it("should throw an error for empty array", function(){
             expect(function(){container([])}).toThrow(new Error("no modules specified for container"));
 
         });
@@ -114,10 +114,9 @@ describe("container", function(){
 
             containerA = container(moduleA);
             containerA.invoke(["animalFactory"], function(animalFactory) {
-                expect(isFunction(animalFactory)).toEqual(false);
-                expect(animalFactory.create).toBeDefined();
+                expect(isFunction(animalFactory)).toEqual(true);
 
-                var animal = animalFactory.create();
+                var animal = animalFactory();
 
                 expect(isFunction(animal)).toEqual(false);
                 expect(animal.doSomething).toBeDefined();
@@ -138,7 +137,7 @@ describe("container", function(){
 
             containerA = container(moduleA);
             containerA.invoke(["animalFactory"], function(animalFactory) {
-                var animal = animalFactory.create("pony");
+                var animal = animalFactory("pony");
 
                 expect(isFunction(animal)).toEqual(false);
                 expect(animal.describe).toBeDefined();
@@ -161,7 +160,7 @@ describe("container", function(){
 
             containerA = container(moduleA);
             containerA.invoke(["animalFactory"], function(animalFactory) {
-                var animal = animalFactory.create();
+                var animal = animalFactory();
                 expect(animal.describe()).toEqual("my name is pony");
             });
         });
@@ -182,7 +181,7 @@ describe("container", function(){
 
             containerA = container(moduleA);
             containerA.invoke(["animalFactory"], function(animalFactory) {
-                var animal = animalFactory.create("pony");
+                var animal = animalFactory("pony");
                 expect(animal.describe()).toEqual("cat:pony");
             });
         });
@@ -275,7 +274,7 @@ describe("container", function(){
 
             moduleA.typeFactory("b", null, Animal);
             moduleA.factory("a", ["b"], function(b){
-                return b.create().doSomething();
+                return b().doSomething();
             });
 
             containerA = container(moduleA);
