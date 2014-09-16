@@ -8,7 +8,8 @@ var recurveFiles = {
         "src/di/module.js",
         "src/core/signal.js",
         "src/core/event-emitter.js",
-        "src/core/window.js"
+        "src/core/window.js",
+        "src/core/cache.js"
     ],
 
     "recurveModules" : {
