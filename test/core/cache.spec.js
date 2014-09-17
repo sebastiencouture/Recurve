@@ -23,6 +23,14 @@ describe("$cache", function() {
             expect(isFunction(cache)).toEqual(false);
         });
 
+        it("should return same instance", function(){
+            expect($cache("a")).toBe($cache("a"));
+        });
+
+        it("should return different instance for each name", function(){
+            expect($cache("a")).not.toBe($cache("b"));
+        });
+
         it("should throw error for null name", function(){
             expect(function(){
                 $cache(null);
@@ -33,14 +41,6 @@ describe("$cache", function() {
             expect(function(){
                 $cache(undefined);
             }).toThrow(new Error("cache name must be specified"));
-        });
-
-        it("should return same instance", function(){
-            expect($cache("a")).toBe($cache("a"));
-        });
-
-        it("should return different instance for each name", function(){
-            expect($cache("a")).not.toBe($cache("b"));
         });
     });
 
@@ -82,18 +82,18 @@ describe("$cache", function() {
     });
 
     describe("remove", function(){
-        it("should do nothing for null key", function(){
-            cache.remove(null);
-        });
-
-        it("should throw error for undefined key", function(){
-            cache.remove(undefined);
-        });
-
         it("should remove", function(){
             cache.set("a", 1);
             cache.remove("a");
             expect(cache.get("a")).toEqual(null);
+        });
+
+        it("should do nothing for null key", function(){
+            cache.remove(null);
+        });
+
+        it("should do nothing for undefined key", function(){
+            cache.remove(undefined);
         });
     });
 
@@ -150,8 +150,24 @@ describe("$cache", function() {
             cache.set("a", 1, 1);
             cache.set("b", 2, 10);
             cache.set("c", 3, 1);
-            
+
+            expect(cache.get("a")).toBeDefined();
+            expect(cache.get("b")).toBeDefined();
+            expect(cache.get("c")).toBeDefined();
+
             cache.setCountLimit(2);
+
+            expect(cache.get("a")).toBeDefined();
+            expect(cache.get("b")).not.toBeDefined();
+            expect(cache.get("c")).toBeDefined();
+        });
+
+        it("should evict first in as tie breaker for most costly past limit", function(){
+            cache.setCountLimit(2);
+
+            cache.set("a", 1, 1);
+            cache.set("b", 2, 10);
+            cache.set("c", 3, 10);
 
             expect(cache.get("a")).toBeDefined();
             expect(cache.get("b")).not.toBeDefined();
@@ -170,19 +186,84 @@ describe("$cache", function() {
         });
 
         it("should evict most costly past limit", function(){
+            cache.setTotalCostLimit(5);
 
+            cache.set("a", 1, 4);
+            cache.set("b", 2, 1);
+            cache.set("c", 3, 3);
+
+            expect(cache.get("a")).not.toBeDefined();
+            expect(cache.get("b")).toBeDefined();
+            expect(cache.get("c")).toBeDefined();
         });
 
         it("should evict upon setting new limit", function(){
+            cache.set("a", 1, 4);
+            cache.set("b", 2, 1);
+            cache.set("c", 3, 3);
 
+            expect(cache.get("a")).toBeDefined();
+            expect(cache.get("b")).toBeDefined();
+            expect(cache.get("c")).toBeDefined();
+
+            cache.setTotalCostLimit(5);
+
+            expect(cache.get("a")).not.toBeDefined();
+            expect(cache.get("b")).toBeDefined();
+            expect(cache.get("c")).toBeDefined();
+        });
+
+        it("should evict first in as tie breaker for most costly past limit", function(){
+            cache.setTotalCostLimit(4);
+
+            cache.set("a", 1, 2);
+            cache.set("b", 2, 2);
+            cache.set("c", 3, 1);
+
+            expect(cache.get("a")).not.toBeDefined();
+            expect(cache.get("b")).toBeDefined();
+            expect(cache.get("c")).toBeDefined();
         });
     });
 
-    it("should evict first in as tie breaker for most costly past limit", function(){
+    it("should allow iteration of all key/values", function(){
+        cache.set("a", 1, 2);
+        cache.set("b", 2, 2);
+        cache.set("c", 3, 1);
 
+        var pairs = [];
+        cache.forEach(function(value, key) {
+            pairs.push({value: value, key: key});
+        });
+
+        expect(pairs.length).toEqual(3);
+        expect(pairs[0]).toEqual({value: {value: 1, cost: 2}, key: "a"});
+        expect(pairs[1]).toEqual({value: {value: 2, cost: 2}, key: "b"});
+        expect(pairs[2]).toEqual({value: {value: 3, cost: 1}, key: "c"});
     });
 
-    it("should allow iteration of all key/values", function(){
+    it("should destroy cache", function(){
+        var a = $cache("a");
+        a.set("a", 1);
 
+        $cache.destroy("a");
+
+        expect(a).not.toBe($cache("a"));
+        expect(a.get("a")).not.toBeDefined();
+    });
+
+    it("should destroy all caches", function(){
+        var a = $cache("a");
+        a.set("a", 1);
+
+        var b = $cache("b");
+        b.set("a", 1);
+
+        $cache.destroyAll();
+
+        expect(a).not.toBe($cache("a"));
+        expect(a.get("a")).not.toBeDefined();
+        expect(b).not.toBe($cache("b"));
+        expect(b.get("a")).not.toBeDefined();
     });
 });

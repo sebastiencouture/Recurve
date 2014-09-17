@@ -78,10 +78,7 @@ function addCacheService(module) {
             };
 
             function currentTotalCost() {
-                // TODO TBD should we cache total cost and current count?
-                // ... any performance worries for potentially huge caches??
                 var totalCost = 0;
-
                 forEach(cache, function(value) {
                     totalCost += value.cost;
                 });
@@ -103,8 +100,8 @@ function addCacheService(module) {
             }
 
             function shouldEvict() {
-                return countLimit < currentCount() ||
-                    totalCostLimit < currentTotalCost();
+                return (0 < countLimit && countLimit < currentCount()) ||
+                    (0 < totalCostLimit && totalCostLimit < currentTotalCost());
             }
 
             function evictMostCostly() {
@@ -114,9 +111,11 @@ function addCacheService(module) {
                 forEach(cache, function(value, key) {
                     if (!maxKey) {
                         maxKey = key;
+                        maxCost = value.cost;
                     }
                     else if (maxCost < value.cost) {
                         maxKey = key;
+                        maxCost = value.cost;
                     }
                     else {
                         // do nothing - continue

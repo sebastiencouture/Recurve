@@ -29,6 +29,8 @@ function publishApi(recurve) {
     addEventEmitterService(recurveModule);
     addWindowService(recurveModule);
     addCacheService(recurveModule);
+    addLogService(recurveModule);
+    addLogConsoleService(recurveModule);
 
     recurve.module = function(dependentModules) {
         // TODO TBD core module is always include, but does not need to be explicitly specified

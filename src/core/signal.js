@@ -29,7 +29,7 @@ function addSignalService(module) {
                         return;
                     }
 
-                    listeners.push(new SignalListener(callback, context));
+                    listeners.push(signalListener(callback, context));
                 },
 
                 once: function(callback, context) {
@@ -39,7 +39,7 @@ function addSignalService(module) {
                         return;
                     }
 
-                    listeners.push(new SignalListener(callback, context, true));
+                    listeners.push(signalListener(callback, context, true));
                 },
 
                 off: function(callback, context) {
@@ -107,13 +107,19 @@ function addSignalService(module) {
         }
     };
 
-    function SignalListener(callback, context, onlyOnce) {
-        this.callback = callback;
-        this.context = context;
-        this.onlyOnce = onlyOnce;
+    function signalListener(callback, context, onlyOnce) {
+        return Object.create(signalListenerPrototype).init(callback, context, onlyOnce);
     }
 
-    SignalListener.prototype = {
+    var signalListenerPrototype = {
+        init: function(callback, context, onlyOnce) {
+            this.callback = callback;
+            this.context = context;
+            this.onlyOnce = onlyOnce;
+
+            return this;
+        },
+
         isSame: function(callback, context) {
             if (!context) {
                 return this.callback === callback;

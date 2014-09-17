@@ -9,7 +9,9 @@ var recurveFiles = {
         "src/core/signal.js",
         "src/core/event-emitter.js",
         "src/core/window.js",
-        "src/core/cache.js"
+        "src/core/cache.js",
+        "src/core/log/log.js",
+        "src/core/log/log-console.js"
     ],
 
     "recurveModules" : {

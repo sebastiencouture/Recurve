@@ -27,7 +27,7 @@
         window.$include = recurve.mock.include = function(module, callback) {
             recurve.assert(currentSpec, "expected a current spec to exist");
 
-            var mockModule = recurve.module(module);
+            var mockModule = recurve.module([module]);
             currentSpec.includeModules.push(mockModule);
 
             if (callback) {
@@ -38,10 +38,12 @@
         window.$invoke = recurve.mock.invoke = function(dependencies, callback) {
             recurve.assert(currentSpec, "expected a current spec to exist");
 
-            if (!currentSpec.container) {
+            // TODO TBD
+            /*if (!currentSpec.container) {
                 currentSpec.container = recurve.container(currentSpec.includeModules);
-            }
+            }*/
 
+            currentSpec.container = recurve.container(currentSpec.includeModules);
             currentSpec.container.invoke(dependencies, callback);
         };
     }
