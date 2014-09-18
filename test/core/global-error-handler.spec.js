@@ -5,6 +5,11 @@ describe("$globalErrorHandler", function(){
     var $window;
 
     beforeEach(function(){
+        // TODO TBD get rid of once implement mock $window/console
+        $include(null, function($mockable) {
+            $mockable.value("$window", {});
+        });
+
         $invoke(["$globalErrorHandler", "$window"], function(globalErrorHandler, window){
             $globalErrorHandler = globalErrorHandler;
             $window = window;
@@ -18,42 +23,74 @@ describe("$globalErrorHandler", function(){
 
     it("should trigger", function() {
         var called = false;
-        var args;
-
         $globalErrorHandler.errored.on(function(){
             called = true;
-            args = arguments;
-        })
+        });
 
-        $globalErrorHandler.handleError(new Error("test"));
+        $window.onerror("test");
 
-        expect(args).toEqual("");
         expect(called).toEqual(true);
     });
 
     it("should log", function(){
-
+        // TODO TBD once create mock for logging
     });
 
     describe("error description", function(){
+        it("should log message", function(){
+            var args;
+            $globalErrorHandler.errored.on(function(){
+                args = arguments;
+            });
 
-    });
+            $window.onerror("test");
 
-    describe("browser handle", function(){
-        it("should prevent", function(){
-
+            expect(args[0]).toEqual("message: test");
         });
 
-        it("should allow", function(){
+        it("should log filename", function(){
+            var args;
+            $globalErrorHandler.errored.on(function(){
+                args = arguments;
+            });
 
+            $window.onerror("test", "test.jpg");
+
+            expect(args[0]).toEqual("message: test, filename: test.jpg");
+        });
+
+        it("should log line (including 0)", function(){
+            var args;
+            $globalErrorHandler.errored.on(function(){
+                args = arguments;
+            });
+
+            $window.onerror("test", "test.jpg", 0);
+
+            expect(args[0]).toEqual("message: test, filename: test.jpg, line: 0");
+        });
+
+        it("should log stack", function(){
+            var args;
+            $globalErrorHandler.errored.on(function(){
+                args = arguments;
+            });
+
+            $window.onerror("test", "test.jpg", 0, 1, {stack: "stack"});
+
+            expect(args[0]).toEqual("message: test, filename: test.jpg, line: 0, stack: stack");
         });
     });
 
     it("should disable", function(){
+        var called = false;
+        $globalErrorHandler.errored.on(function(){
+            called = true;
+        });
 
-    });
+        $globalErrorHandler.disable()
+        $window.onerror("test");
 
-    describe("handleError", function(){
-
+        expect(called).toEqual(false);
     });
 });

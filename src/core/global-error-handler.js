@@ -8,37 +8,32 @@ function addGlobalErrorHandlerService(module){
 
         $window.onerror = errorHandler;
 
-        function describe(error) {
-            if (!error) {
-                return null;
-            }
-
-            var description;
-
-            if (isString(error)) {
-                description = error;
-            }
-            else if (isError(error)) {
-                description = error.message + "\n" + (error.stack ? error.stack : "");
-            }
-            else if (isObject(error)) {
-                description = toJson(error);
-            }
-            else
-            {
-                description = error.toString();
-            }
-
-            return description;
-        }
-
-        function log(error, description) {
+        function log(description, error) {
             if (error) {
-                $log.error(error, description);
+                $log.error(description, error);
             }
             else {
                 $log.error(description);
             }
+        }
+
+        function describe(message, filename, line, error) {
+            var description = "";
+
+            if (message) {
+                description = "message: " + message;
+            }
+            if (filename) {
+                description += ", filename: " + filename;
+            }
+            if (0 <= line) {
+                description += ", line: " + line;
+            }
+            if (error && error.stack) {
+                description += ", stack: " + error.stack;
+            }
+
+            return description;
         }
 
         function errorHandler(message, filename, line, column, error) {
@@ -46,13 +41,10 @@ function addGlobalErrorHandlerService(module){
                 return;
             }
 
-            var description = format("message: {0}, file: {1}, line: {2}", message, filename ? filename : "", line ? line : "");
-            if (error) {
-                description += format(", stack: {0}", error.stack);
-            }
+            var description = describe(message, filename, line, error);
 
-            log(error, description);
-            errored.trigger(error, description);
+            log(description, error);
+            errored.trigger(description, error);
 
             return preventBrowserHandle;
         }
@@ -64,22 +56,6 @@ function addGlobalErrorHandlerService(module){
                 }
 
                 disabled = value;
-            },
-
-            /**
-             * Handle error as would be done for uncaught global error
-             *
-             * @param error, any type of error (string, object, Error)
-             */
-            handleError: function(error) {
-                if (disabled) {
-                    return;
-                }
-
-                var description = describe(error);
-
-                log(error, description);
-                errored.trigger(error, description);
             },
 
             errored: errored

@@ -485,7 +485,7 @@ describe("container", function(){
         it("should throw error undefined", function(){
             expect(function(){
                 container(moduleA).get(undefined)
-            }).toThrow(new Error("no service exists with the name undefined"));
+            }).toThrow(new Error("no service exists with the name {0}"));
         });
     });
 

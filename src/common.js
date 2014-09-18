@@ -261,14 +261,10 @@ function format(value) {
         return null;
     }
 
-    Array.prototype.shift.apply(arguments);
-
-    for (var index = 0; index < arguments.length; index++) {
-        var search = "{" + index + "}";
-        value = value.replace(search, arguments[index]);
-    }
-
-    return value;
+    var args = argumentsToArray(arguments, 1);
+    return value.replace(/{(\d+)}/g, function(match, number) {
+        return typeof args[number] != 'undefined' ? args[number] : match;
+    });
 }
 
 function pad(value, padCount, padValue) {
