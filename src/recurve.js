@@ -6,6 +6,7 @@ function publishApi(recurve) {
         extend: extend,
         clone: clone,
         find: find,
+        protectedInvoke: protectedInvoke,
         areEqual: areEqual,
         isNaN: isNaN,
         isSameType: isSameType,
@@ -31,6 +32,7 @@ function publishApi(recurve) {
     addCacheService(recurveModule);
     addLogService(recurveModule);
     addLogConsoleService(recurveModule);
+    addGlobalErrorHandlerService(recurveModule);
 
     recurve.module = function(dependentModules) {
         // TODO TBD core module is always include, but does not need to be explicitly specified

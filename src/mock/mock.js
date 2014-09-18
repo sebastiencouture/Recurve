@@ -24,8 +24,12 @@
             currentSpec = null;
         });
 
+        // TODO TBD maybe make it so if first argument is callback then just create a module
+        // instead of needing to do $include(null, callback);
         window.$include = recurve.mock.include = function(module, callback) {
             recurve.assert(currentSpec, "expected a current spec to exist");
+
+            module = module || recurve.module();
 
             var mockModule = recurve.module([module]);
             currentSpec.includeModules.push(mockModule);

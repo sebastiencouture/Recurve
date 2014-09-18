@@ -239,6 +239,21 @@ function toFormData(obj) {
     return values.join("&");
 }
 
+/**
+ * Wrap method in try..catch and handle error without raising uncaught error
+ *
+ * @param fn
+ * @param [, arg2, ..., argN], list of arguments for method
+ */
+function protectedInvoke(fn) {
+    try {
+        var args = ArrayUtils.argumentsToArray(arguments, 1);
+        fn.apply(null, args);
+    }
+    catch (error) {
+    }
+}
+
 ///
 
 function format(value) {
@@ -256,7 +271,6 @@ function format(value) {
     return value;
 }
 
-// TODO TBD how to handle negative pad values? probably doesn't matter
 function pad(value, padCount, padValue) {
     if (!value && 0 != value) {
         return null;
@@ -273,6 +287,18 @@ function pad(value, padCount, padValue) {
     }
 
     return value;
+}
+
+function startsWith(str, value) {
+    return str && 0 == str.indexOf(value);
+}
+
+function endsWith(str, value) {
+    if (!str || !value) {
+        return false;
+    }
+
+    return str.length >= value.length && value == str.substr(str.length - value.length);
 }
 
 function formatTime(date) {

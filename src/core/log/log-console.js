@@ -9,7 +9,7 @@ function addLogConsoleService(module) {
                 };
             }
 
-            var logger = $window.console[type] || $window.console.log;
+            var logger = $window.console[type] || $window.console.log || function(){};
             var hasApply = false;
 
             // IE 8/9
@@ -26,12 +26,15 @@ function addLogConsoleService(module) {
                 };
             }
 
-            return function(argA, argB) {
-                if (argB) {
-                    logger(argA, argB);
+            return function(description, message, obj) {
+                if (message && obj) {
+                    logger(description, message, obj);
+                }
+                else if (message) {
+                    logger(description, message);
                 }
                 else {
-                    logger(argA);
+                    logger(description);
                 }
             }
         }
@@ -70,7 +73,7 @@ function addLogConsoleService(module) {
             error: log("error"),
 
             clear: function() {
-                $window.console && $window.console.clear();
+                $window.console && $window.console.clear && $window.console.clear();
             }
         }
     });

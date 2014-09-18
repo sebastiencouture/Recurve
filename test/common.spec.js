@@ -696,6 +696,62 @@ describe("common", function(){
         });
     });
 
+    describe("startsWith", function(){
+        it("should return true if does", function(){
+            expect(startsWith("test string", "test")).toEqual(true);
+        });
+
+        it("should be case sensitive", function(){
+            expect(startsWith("Test string", "test")).toEqual(false);
+        });
+
+        it("should include spaces in check", function(){
+            expect(startsWith("test string", "test s")).toEqual(true);
+            expect(startsWith("test string", "test  s")).toEqual(false);
+        });
+
+        it("should return false if doesn't", function(){
+            expect(startsWith("test string", "tt")).toEqual(false);
+        });
+
+        it("should return false for null", function(){
+            expect(startsWith("test string", null)).toEqual(false);
+        });
+
+        it("should return false for undefined", function(){
+            expect(startsWith("test string")).toEqual(false);
+
+        });
+    });
+
+    describe("endsWith", function(){
+        it("should return true if does", function(){
+            expect(endsWith("test string", "ing")).toEqual(true);
+        });
+
+        it("should be case sensitive", function(){
+            expect(endsWith("test striNg", "ing")).toEqual(false);
+        });
+
+        it("should include spaces in check", function(){
+            expect(endsWith("test string", "t string")).toEqual(true);
+            expect(endsWith("test string", "test  s")).toEqual(false);
+        });
+
+        it("should return false if doesn't", function(){
+            expect(endsWith("test string", "t string t")).toEqual(false);
+        });
+
+        it("should return false for null", function(){
+            expect(endsWith("test string", null)).toEqual(false);
+        });
+
+        it("should return false for undefined", function(){
+            expect(endsWith("test string")).toEqual(false);
+
+        });
+    });
+
     describe("formatTime", function(){
         it("should format with Date", function(){
             var date = new Date(2014, 9, 2, 0, 30, 1, 1);
@@ -1097,5 +1153,15 @@ describe("common", function(){
         it("should format message", function(){
             expect(function(){assert(false, "message: {0} {1}", "a", 1)}).toThrow(new Error("message: a 1"));
         });
+    });
+
+    describe("protectedInvoke", function(){
+       it("should not throw an error", function(){
+            expect(function(){
+                protectedInvoke(function(){
+                    throw new Error("a");
+                });
+            }).not.toThrow();
+       })
     });
 });
