@@ -5,7 +5,9 @@
     setupForJasmineMocha();
 
     function addMockModules(){
-        recurve.mock.$module = recurve.module();
+        var mockModule = recurve.mock.$module = recurve.module();
+
+        addMockLogService(mockModule);
     }
 
     function setupForJasmineMocha() {

@@ -2,6 +2,7 @@
 
 describe("$globalErrorHandler", function(){
     var $globalErrorHandler;
+    var $log;
     var $window;
 
     beforeEach(function(){
@@ -10,8 +11,9 @@ describe("$globalErrorHandler", function(){
             $mockable.value("$window", {});
         });
 
-        $invoke(["$globalErrorHandler", "$window"], function(globalErrorHandler, window){
+        $invoke(["$globalErrorHandler", "$log", "$window"], function(globalErrorHandler, log, window){
             $globalErrorHandler = globalErrorHandler;
+            $log = log;
             $window = window;
         });
     });
@@ -32,8 +34,11 @@ describe("$globalErrorHandler", function(){
         expect(called).toEqual(true);
     });
 
-    it("should log", function(){
-        // TODO TBD once create mock for logging
+    it("should log to log.error", function() {
+        $log.clear();
+        $window.onerror("test");
+
+        expect($log.logs.error[0][0]).toEqual("message: test");
     });
 
     describe("error description", function(){

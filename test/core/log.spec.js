@@ -28,7 +28,9 @@ describe("$log", function() {
         targetMessages = [];
         consoleLogs = [];
 
-        $include(null, function($mockable){
+        $include(null, function($mockable) {
+            addLogService($mockable);
+
             $mockable.value("$window", {
                 console: {
                     log: function(){

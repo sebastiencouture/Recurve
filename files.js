@@ -17,6 +17,7 @@ var recurveFiles = {
 
     "recurveModules" : {
         "mock" : [
+            "src/mock/mock-log.js",
             "src/mock/mock.js"
         ]
     },
