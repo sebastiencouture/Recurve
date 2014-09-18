@@ -35,7 +35,6 @@ describe("$globalErrorHandler", function(){
     });
 
     it("should log to log.error", function() {
-        $log.clear();
         $window.onerror("test");
 
         expect($log.logs.error[0][0]).toEqual("message: test");
