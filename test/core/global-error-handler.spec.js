@@ -6,11 +6,6 @@ describe("$globalErrorHandler", function(){
     var $window;
 
     beforeEach(function(){
-        // TODO TBD get rid of once implement mock $window/console
-        $include(null, function($mockable) {
-            $mockable.value("$window", {});
-        });
-
         $invoke(["$globalErrorHandler", "$log", "$window"], function(globalErrorHandler, log, window){
             $globalErrorHandler = globalErrorHandler;
             $log = log;

@@ -12,7 +12,9 @@ var recurveFiles = {
         "src/core/cache.js",
         "src/core/log/log.js",
         "src/core/log/log-console.js",
-        "src/core/global-error-handler.js"
+        "src/core/global-error-handler.js",
+        "src/core/performance.js",
+        "src/core/cookies.js"
     ],
 
     "recurveModules" : {

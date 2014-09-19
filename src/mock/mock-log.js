@@ -78,19 +78,6 @@ function addMockLogService(module) {
                 }
 
                 errorDisabled = value;
-            },
-
-            assertEmpty: function() {
-                var errors = [];
-                recurve.forEach(this.logs, function(log, level) {
-                    if (log.length) {
-                        errors.push(recurve.format("log.{0} is not empty!", level));
-                    }
-                });
-
-                if (errors.length) {
-                    recurve.assert(false, "expected logs to be empty: \n" + errors.join("\n"));
-                }
             }
         };
     });

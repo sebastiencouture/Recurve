@@ -178,19 +178,19 @@ function isArguments(value) {
 }
 
 function isFunction(value) {
-    return "[object Function]" === toString.call(value);
+    return "[object Function]" === Object.prototype.toString.call(value);
 }
 
 function isDate(value) {
-    return "[object Date]" === toString.call(value);
+    return "[object Date]" === Object.prototype.toString.call(value);
 }
 
 function isFile(value) {
-    return "[object File]" === toString.call(value);
+    return "[object File]" === Object.prototype.toString.call(value);
 }
 
 function isNumber(value) {
-    return "[object Number]" === toString.call(value);
+    return "[object Number]" === Object.prototype.toString.call(value);
 }
 
 function extend(dest, src) {
