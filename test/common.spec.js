@@ -314,6 +314,30 @@ describe("common", function(){
         })
     });
 
+    describe("isUndefined", function() {
+        it("should detect undefined", function() {
+            expect(isUndefined(undefined)).toEqual(true);
+        });
+
+        it("should detect undefined as no argument", function() {
+            expect(isUndefined()).toEqual(true);
+        });
+
+        it("should not detect number", function() {
+            expect(isUndefined(0)).toEqual(false);
+        });
+
+        it("should not detect boolean", function() {
+            expect(isUndefined(false)).toEqual(false);
+
+        });
+
+        it("should not detect NaN", function() {
+            expect(isUndefined(NaN)).toEqual(false);
+
+        });
+    });
+
     describe("isError", function() {
         var error;
 

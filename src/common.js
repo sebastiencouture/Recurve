@@ -161,6 +161,10 @@ function isString(value) {
     return (value instanceof String || "string" == typeof value);
 }
 
+function isUndefined(value) {
+    return value === void 0;
+}
+
 function isError(value) {
     return value instanceof Error;
 }

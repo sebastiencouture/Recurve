@@ -28,6 +28,10 @@ describe("$cookies", function() {
         clearCookies();
         expect(document.cookie).toEqual("");
 
+        $include(null, function($mockable) {
+            addCookiesService($mockable);
+        });
+
         $invoke(["$cookies"], function(cookies) {
             $cookies = cookies;
         });
@@ -175,7 +179,7 @@ describe("$cookies", function() {
             expect($cookies.remove("a")).toEqual(false);
         });
 
-        // can't really test domain or path :(
+        // can't fully test domain or path, but lets do what we can...
 
         it("should remove with same path specified", function() {
             $cookies.set("a", "b", {path: "/"});
@@ -191,7 +195,7 @@ describe("$cookies", function() {
             expect(document.cookie).toEqual("a=b");
         });
 
-        it("should remove if different domain", function() {
+        it("should not remove if different domain", function() {
             $cookies.set("a", "b");
             $cookies.remove("a", {domain: ".test.com"});
 

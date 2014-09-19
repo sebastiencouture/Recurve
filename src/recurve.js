@@ -11,6 +11,7 @@ function publishApi(recurve) {
         isNaN: isNaN,
         isSameType: isSameType,
         isString: isString,
+        isUndefined: isUndefined,
         isError: isError,
         isObject: isObject,
         isArray: isArray,

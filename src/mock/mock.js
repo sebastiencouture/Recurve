@@ -8,6 +8,7 @@
         var mockModule = recurve.mock.$module = recurve.module();
 
         addMockLogService(mockModule);
+        addMockCookiesService(mockModule);
     }
 
     function setupForJasmineMocha() {
@@ -43,11 +44,6 @@
 
         window.$invoke = recurve.mock.invoke = function(dependencies, callback) {
             recurve.assert(currentSpec, "expected a current spec to exist");
-
-            // TODO TBD
-            /*if (!currentSpec.container) {
-                currentSpec.container = recurve.container(currentSpec.includeModules);
-            }*/
 
             currentSpec.container = recurve.container(currentSpec.includeModules);
             currentSpec.container.invoke(dependencies, callback);
