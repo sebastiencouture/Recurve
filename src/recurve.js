@@ -36,6 +36,7 @@ function publishApi(recurve) {
     addGlobalErrorHandlerService(recurveModule);
     addPerformanceService(recurveModule);
     addCookiesService(recurveModule);
+    addStorageServices(recurveModule);
 
     recurve.module = function(dependentModules) {
         // TODO TBD core module is always include, but does not need to be explicitly specified

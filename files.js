@@ -14,7 +14,8 @@ var recurveFiles = {
         "src/core/log/log-console.js",
         "src/core/global-error-handler.js",
         "src/core/performance.js",
-        "src/core/cookies.js"
+        "src/core/cookies.js",
+        "src/core/storage.js"
     ],
 
     "recurveModules" : {
