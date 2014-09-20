@@ -3,11 +3,6 @@
 describe("common", function(){
 
     describe("forEach", function(){
-        it("should not throw error for null/undefined parameters", function(){
-            forEach();
-            forEach({});
-        });
-
         it("should iterate items in array", function(){
             var array = [1,2,3];
             var items = [];
@@ -62,6 +57,26 @@ describe("common", function(){
             });
 
             expect(values).toEqual([1]);
+        });
+
+        it("should not throw error for null object", function(){
+            forEach(null);
+        });
+
+        it("should not throw error for undefined object", function() {
+            forEach(undefined);
+        })
+
+        it("should throw error for null iterator", function() {
+            expect(function() {
+                forEach({a: 1, b: 2}, null);
+            }).toThrow();
+        });
+
+        it("should throw error for undefined iterator", function() {
+            expect(function() {
+                forEach({a: 1, b: 2}, undefined);
+            }).toThrow();
         });
     });
 

@@ -4,7 +4,7 @@ var recurve = window.recurve || (window.recurve = {});
 
 
 function forEach(obj, iterator, context) {
-    if (!obj || !iterator) {
+    if (!obj) {
         return;
     }
 
@@ -27,8 +27,6 @@ function forEach(obj, iterator, context) {
             }
         }
     }
-
-    return keys;
 }
 
 function find(obj, property, value) {
