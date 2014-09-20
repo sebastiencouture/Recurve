@@ -1,7 +1,7 @@
 "use strict";
 
 function addStorageServices(module) {
-    function storage(provider, config, $cache) {
+    function storage(provider, $config, $cache) {
         function serialize(value) {
             return JSON.stringify(value);
         }
@@ -35,7 +35,7 @@ function addStorageServices(module) {
         }
 
         var supported = isSupported();
-        var cache = config.useCache ? $cache($config.cacheCountLimit) : null;
+        var cache = $config.useCache ? $cache($config.cacheName, $config.cacheCountLimit) : null;
 
         return {
             get: function(key) {
@@ -81,7 +81,7 @@ function addStorageServices(module) {
 
             remove: function(key) {
                 if (!supported) {
-                    return;
+                    return false;
                 }
 
                 if (cache) {
@@ -114,7 +114,7 @@ function addStorageServices(module) {
             getWithExpiration: function(key) {
                 var item = this.get(key);
                 if (!item) {
-                    return null;
+                    return item;
                 }
 
                 var elapsed = Date.now() - item.time;
@@ -144,8 +144,9 @@ function addStorageServices(module) {
         };
     }
 
-    module.factory("$localStorage", ["$window", "$config"], function($window, $config) {
-        return storage($window.localStorage, $config);
+    module.factory("$localStorage", ["$window", "$config", "$cache"], function($window, $config, $cache) {
+        $config.cacheName = "localStorage";
+        return storage($window.localStorage, $config, $cache);
     });
 
     module.config("$localStorage", {
@@ -153,8 +154,9 @@ function addStorageServices(module) {
         cacheCountLimit: 0
     });
 
-    module.factory("$sessionStorage", ["$window", "$config"], function($window, $config) {
-        return storage($window.sessionStorage, $config);
+    module.factory("$sessionStorage", ["$window", "$config", "$cache"], function($window, $config, $cache) {
+        $config.cacheName = "sessionStorage";
+        return storage($window.sessionStorage, $config, $cache);
     });
 
     module.config("$sessionStorage", {
