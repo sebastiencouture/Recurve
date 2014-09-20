@@ -37,6 +37,12 @@ describe("$cookies", function() {
         });
     });
 
+    // Could add last spec to do this but make sure we keep the cookies cleared after running
+    // all specs
+    afterEach(function() {
+        clearCookies();
+    });
+
     it("should be invokable", function() {
         expect($cookies).toBeDefined();
         expect(isFunction($cookies)).toEqual(false);
@@ -48,17 +54,17 @@ describe("$cookies", function() {
             expect($cookies.get("a")).toEqual("b");
         });
 
-        it("should return undefined for unknown key", function() {
+        it("should return null for unknown key", function() {
             document.cookie = "c=b";
-            expect($cookies.get("a")).not.toBeDefined();
+            expect($cookies.get("a")).toEqual(null);
         });
 
-        it("should return undefined for null key", function() {
-            expect($cookies.get(null)).not.toBeDefined();
+        it("should return null for null key", function() {
+            expect($cookies.get(null)).toEqual(null);
         });
 
-        it("should return undefined for undefined key", function() {
-            expect($cookies.get()).not.toBeDefined();
+        it("should return null for undefined key", function() {
+            expect($cookies.get()).toEqual(null);
         });
 
         it("should return empty value", function() {

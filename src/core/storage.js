@@ -1,7 +1,7 @@
 "use strict";
 
 function addStorageServices(module) {
-    function storage(provider, $config, $cache) {
+    function storage(provider, config, $cache, $log) {
         function serialize(value) {
             return JSON.stringify(value);
         }
@@ -20,7 +20,7 @@ function addStorageServices(module) {
                 return false;
             }
 
-            // When Safari is in private browsing mode, storage will still be available
+            // When Safari is in private browsing mode, storage will appear to still be available
             // but it will throw an error when trying to set an item
             var key = "_recurve" + generateUUID();
             try {
@@ -28,47 +28,65 @@ function addStorageServices(module) {
                 provider.removeItem(key);
             }
             catch (e) {
+                $log.warn("storage is not supported")
                 return false;
             }
 
             return true;
         }
 
+        function withExpiration(item) {
+            return item && item.hasOwnProperty("expires") && item.hasOwnProperty("value");
+        }
+
         var supported = isSupported();
-        var cache = $config.useCache ? $cache($config.cacheName, $config.cacheCountLimit) : null;
+        var cache = config.useCache ? $cache(config.cacheName, config.cacheCountLimit) : null;
 
         return {
             get: function(key) {
                 if (!supported) {
-                    return undefined;
+                    return null;
                 }
 
                 var value;
                 if (cache) {
                     value = cache.get(key);
+                }
 
-                    if (value) {
-                        return value;
+                if (!value) {
+                    value = provider.getItem(key);
+                    value = parse(value);
+
+                    if (cache) {
+                        cache.set(key, value);
                     }
                 }
 
-                value = provider.getItem(key);
-                value = parse(value);
-
-                if (cache) {
-                    cache.set(key, value);
+                if (withExpiration(value)) {
+                    if (value.expires < Date.now()) {
+                        this.remove(key);
+                        value = null;
+                    }
+                    else {
+                        value = value.value;
+                    }
                 }
 
                 return value;
             },
 
-            set: function(key, value) {
+            set: function(key, value, expires) {
                 if (!supported) {
                     return;
                 }
 
-                if (undefined === value) {
-                    this.remove(key);
+                if (expires && (isNumber(expires) || isDate(expires))) {
+                    if (isNumber(expires)) {
+                        expires = addDaysFromNow(expires);
+                    }
+
+                    this.set(key, {value: value, expires: expires.getTime()});
+                    return;
                 }
 
                 var serialized = serialize(value);
@@ -88,7 +106,10 @@ function addStorageServices(module) {
                     cache.remove(key);
                 }
 
-                return provider.removeItem(key);
+                var exists = this.exists(key);
+                provider.removeItem(key);
+
+                return exists;
             },
 
             exists: function(key) {
@@ -111,24 +132,6 @@ function addStorageServices(module) {
                 }
             },
 
-            getWithExpiration: function(key) {
-                var item = this.get(key);
-                if (!item) {
-                    return item;
-                }
-
-                var elapsed = Date.now() - item.time;
-                if (item.expiry < elapsed) {
-                    return undefined;
-                }
-
-                return item.value;
-            },
-
-            setWithExpiration: function(key, value, expiry) {
-                this.set(key, {value: value, expiry: expiry, time: Date.now()});
-            },
-
             forEach: function(iterator) {
                 assert(iterator, "iterator must be set");
 
@@ -140,13 +143,17 @@ function addStorageServices(module) {
                     var value = this.get(key);
                     iterator(value, key);
                 }
+            },
+
+            isSupported: function() {
+                return supported;
             }
         };
     }
 
-    module.factory("$localStorage", ["$window", "$config", "$cache"], function($window, $config, $cache) {
-        $config.cacheName = "localStorage";
-        return storage($window.localStorage, $config, $cache);
+    module.factory("$localStorage", ["$window", "$config", "$cache", "$log"], function($window, config, $cache, $log) {
+        config.cacheName = "localStorage";
+        return storage($window.localStorage, config, $cache, $log);
     });
 
     module.config("$localStorage", {
@@ -154,9 +161,9 @@ function addStorageServices(module) {
         cacheCountLimit: 0
     });
 
-    module.factory("$sessionStorage", ["$window", "$config", "$cache"], function($window, $config, $cache) {
-        $config.cacheName = "sessionStorage";
-        return storage($window.sessionStorage, $config, $cache);
+    module.factory("$sessionStorage", ["$window", "$config", "$cache", "$log"], function($window, config, $cache, $log) {
+        config.cacheName = "sessionStorage";
+        return storage($window.sessionStorage, config, $cache, $log);
     });
 
     module.config("$sessionStorage", {

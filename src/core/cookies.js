@@ -36,16 +36,9 @@ function addCookiesService(module) {
             }
         }
 
-        function addDaysFromNow(days) {
-            var date = new Date();
-            date.setDate(date.getDate() + days);
-
-            return date;
-        }
-
         return {
             get: function(key) {
-                var value = undefined;
+                var value = null;
 
                 forEachCookie(function(cookie, name){
                     if (name === key) {
@@ -60,7 +53,7 @@ function addCookiesService(module) {
             },
 
             set: function(key, value, options) {
-                if (undefined === options) {
+                if (isUndefined(options)) {
                     options = {};
                 }
 
@@ -93,7 +86,7 @@ function addCookiesService(module) {
             },
 
             remove: function(key, options) {
-                if (undefined === options) {
+                if (isUndefined(options)) {
                     options = {};
                 }
 

@@ -470,6 +470,15 @@ function removeEventListener(element, event, callback) {
 
 ////
 
+function addDaysFromNow(days) {
+    var date = new Date();
+    date.setDate(date.getDate() + days);
+
+    return date;
+}
+
+////
+
 function addParametersToUrl(url, parameters) {
     if (!url || !parameters) {
         return url;
