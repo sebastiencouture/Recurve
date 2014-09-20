@@ -71,8 +71,6 @@ function addCacheService(module) {
                 },
 
                 forEach: function(iterator, context) {
-                    assert(iterator, "iterator must be set");
-
                     forEach(cache, iterator, context);
                 }
             };

@@ -149,15 +149,13 @@ function addStorageServices(module) {
             },
 
             forEach: function(iterator, context) {
-                assert(iterator, "iterator must be set");
-
                 if (cache) {
                     // need to handle expiration
                     cache.forEach(callIfExists, this);
                 }
                 else if (provider) {
                     for (var key in provider) {
-                        callIfExists(key);
+                        callIfExists.call(this, key);
                     }
                 }
                 else {
