@@ -4,24 +4,35 @@ describe("storage", function() {
 
     describe("$localStorage", spec("$localStorage", window.localStorage));
     describe("$localStorage with cache", spec("$localStorage", window.localStorage, true));
-    describe("$localStorage not supported", specNotSupported("$localStorage"));
+    describe("$localStorage with native not supported", spec("$localStorage", window.localStorage, false, true));
 
     describe("$sessionStorage", spec("$sessionStorage", window.sessionStorage));
     describe("$sessionStorage with cache", spec("$sessionStorage", window.sessionStorage, true));
-    describe("$sessionStorage not supported", specNotSupported("$sessionStorage"));
+    describe("$sessionStorage with native not supported", spec("$sessionStorage", window.sessionStorage, false, true));
 
-    function spec(name, provider, useCache) {
+    function spec(name, provider, cache, disableNative) {
         return function() {
             var $storage;
 
             beforeEach(function(){
-                if (useCache) {
-                    $include(null, function($mockable) {
-                        $mockable.config(name, {
-                            useCache: true
-                        });
+                $include(null, function($mockable) {
+                    $mockable.config(name, {
+                        cache: cache
                     });
-                }
+
+                    if (disableNative) {
+                        $mockable.value("$window", {
+                            localStorage: {
+                                setItem: null,
+                                removeItem: null
+                            },
+                            sessionStorage: {
+                                setItem: null,
+                                removeItem: null
+                            }
+                        });
+                    }
+                });
 
                 $invoke([name], function(storage) {
                     $storage = storage;
@@ -36,8 +47,14 @@ describe("storage", function() {
             });
 
             describe("get", function() {
-                it("should return for existing key", function(){
-                    provider.setItem("a", "b")
+                it("should return for existing key", function() {
+                    if (disableNative) {
+                        $storage.set("a", "b");
+                    }
+                    else {
+                        provider.setItem("a", "b");
+                    }
+
                     expect($storage.get("a")).toEqual("b");
                 });
 
@@ -54,22 +71,46 @@ describe("storage", function() {
                 });
 
                 it("should return empty value", function() {
-                    provider.setItem("a", "");
+                    if (disableNative) {
+                        $storage.set("a", "");
+                    }
+                    else {
+                        provider.setItem("a", "");
+                    }
+
                     expect($storage.get("a")).toEqual("");
                 });
 
                 it("should parse json", function() {
-                    provider.setItem("a", toJson({b:"c"}));
+                    if (disableNative) {
+                        $storage.set("a", toJson({b:"c"}));
+                    }
+                    else {
+                        provider.setItem("a", toJson({b:"c"}));
+                    }
+
                     expect($storage.get("a")).toEqual({b: "c"});
                 });
 
-                it("should return raw for malformed json", function(){
-                    provider.setItem("a", "{b:");
+                it("should return raw for malformed json", function() {
+                    if (disableNative) {
+                        $storage.set("a", "{b:");
+                    }
+                    else {
+                        provider.setItem("a", "{b:");
+                    }
+
                     expect($storage.get("a")).toEqual("{b:");
                 });
 
                 it("should preserve leading and trailing spaces", function() {
-                    provider.setItem("a", " b ");
+                    if (disableNative) {
+                        $storage.set("a", " b ");
+                    }
+                    else {
+                        provider.setItem("a", " b ");
+                    }
+
                     expect($storage.get("a")).toEqual(" b ");
                 });
             });
@@ -108,11 +149,6 @@ describe("storage", function() {
                 it("should save null", function() {
                     $storage.set("a", null);
                     expect($storage.get("a")).toEqual(null);
-                });
-
-                it("should save undefined as string", function() {
-                    $storage.set("a", undefined);
-                    expect($storage.get("a")).toEqual("undefined");
                 });
 
                 it("should save leading and trailing spaces", function() {
@@ -154,7 +190,12 @@ describe("storage", function() {
                     $storage.set("a", "b");
                     $storage.remove("a");
 
-                    expect(provider.getItem("a")).toEqual(null);
+                    if (disableNative) {
+                        expect($storage.get("a")).toEqual(null);
+                    }
+                    else {
+                        expect(provider.getItem("a")).toEqual(null);
+                    }
                 });
 
                 it("should return false if doesn't exist", function() {
@@ -169,6 +210,11 @@ describe("storage", function() {
                 });
 
                 it("should return false if doesn't exist", function() {
+                    expect($storage.exists("a")).toEqual(false);
+                });
+
+                it("should return false for expired", function() {
+                    $storage.set("a", "b", -1);
                     expect($storage.exists("a")).toEqual(false);
                 });
 
@@ -188,94 +234,57 @@ describe("storage", function() {
 
                 $storage.clear();
 
-                expect(provider.length).toEqual(0);
-            });
-
-            it("should iterate all items", function() {
-                $storage.set("a", 1);
-                $storage.set("b", 2);
-
-                var expected = [["b", 2], ["a", 1]];
-                var index = 0;
-
-                $storage.forEach(function(value, name) {
-                    expect(expected[index]).toEqual([name, value]);
-                    index++;
-                });
-            });
-        };
-    }
-
-    function specNotSupported(name) {
-        return function() {
-            var $storage;
-            var $log;
-
-            beforeEach(function(){
-                $include(null, function($mockable) {
-                    $mockable.value("$window", {
-                        localStorage: {
-                            setItem: null,
-                            removeItem: null
-                        },
-                        sessionStorage: {
-                            setItem: null,
-                            removeItem: null
-                        }
+                if (disableNative) {
+                    var count = 0;
+                    $storage.forEach(function(){
+                        count++;
                     });
+
+                    expect(count).toEqual(0);
+                }
+                else {
+                    expect(provider.length).toEqual(0);
+                }
+            });
+
+            describe("forEach", function() {
+                function validate(expected) {
+                    $storage.forEach(function(value, name) {
+                        var match = false;
+                        forEach(expected, function(item){
+                            if (item[0] === name && item[1] === value) {
+                                match = true;
+                                return false;
+                            }
+                        });
+
+                        expect(match).toEqual(true);
+                    });
+                }
+
+                it("should iterate all items", function() {
+                    $storage.set("a", 1);
+                    $storage.set("b", 2);
+
+                    validate([["a", 1], ["b", 2]]);
                 });
 
-                $invoke([name, "$log"], function(storage, log) {
-                    $storage = storage;
-                    $log = log;
-                });
-            });
+                it("should not iterate expired items", function() {
+                    $storage.set("a", 1);
+                    $storage.set("b", 2, -1);
+                    $storage.set("c", 3);
 
-            afterEach(function() {
-                $log.clear();
-            });
-
-            it("should return not supported", function() {
-                expect($storage.isSupported()).toEqual(false);
-            });
-
-            it("should log warning", function() {
-                expect($log.logs.warn.shift()).toEqual(["storage is not supported"]);
-            });
-
-            it("should not save", function() {
-                $storage.set("a", "b");
-                expect($storage.get("a")).toEqual(null);
-            });
-
-            it("should return false to remove", function() {
-                $storage.set("a", "b");
-                expect($storage.remove("a")).toEqual(false);
-            });
-
-            it("should return false for exists", function() {
-                $storage.set("a", "b");
-                expect($storage.exists("a")).toEqual(false);
-            });
-
-            it("should do nothing for clear", function() {
-                $storage.set("a", "b");
-                $storage.clear();
-
-                expect($storage.exists("a")).toEqual(false);
-            });
-
-            it("should iterate nothing", function() {
-                $storage.set("a", 1);
-                $storage.set("b", 2);
-
-                var count = 0;
-
-                $storage.forEach(function() {
-                    count++;
+                    validate([["a", 1], ["c", 3]]);
                 });
 
-                expect(count).toEqual(0);
+                it("should call iterator with context", function() {
+                    $storage.set("a", 1);
+                    var self = this;
+
+                    $storage.forEach(function() {
+                        expect(this).toEqual(self);
+                    }, this);
+                });
             });
         };
     }

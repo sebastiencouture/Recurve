@@ -39,21 +39,26 @@ function addStorageServices(module) {
             return item && item.hasOwnProperty("expires") && item.hasOwnProperty("value");
         }
 
-        var supported = isSupported();
-        var cache = config.useCache ? $cache(config.cacheName, config.cacheCountLimit) : null;
+        // If not supported then just use a cache, this will only occur in private browsing mode
+        // for the supported browsers
+        var cache;
+        if (!isSupported()) {
+            provider = null;
+            cache = $cache(config.cacheName);
+        }
+        else {
+            cache = config.cache ? $cache(config.cacheName, config.cacheCountLimit) : null;
+        }
 
         return {
             get: function(key) {
-                if (!supported) {
-                    return null;
-                }
-
                 var value;
                 if (cache) {
                     value = cache.get(key);
+                    value = parse(value);
                 }
 
-                if (!value) {
+                if (!value && provider) {
                     value = provider.getItem(key);
                     value = parse(value);
 
@@ -76,10 +81,6 @@ function addStorageServices(module) {
             },
 
             set: function(key, value, expires) {
-                if (!supported) {
-                    return;
-                }
-
                 if (expires && (isNumber(expires) || isDate(expires))) {
                     if (isNumber(expires)) {
                         expires = addDaysFromNow(expires);
@@ -89,8 +90,10 @@ function addStorageServices(module) {
                     return;
                 }
 
-                var serialized = serialize(value);
-                provider.setItem(key, serialized);
+                if (provider) {
+                    var serialized = serialize(value);
+                    provider.setItem(key, serialized);
+                }
 
                 if (cache) {
                     cache.set(key, value);
@@ -98,55 +101,75 @@ function addStorageServices(module) {
             },
 
             remove: function(key) {
-                if (!supported) {
-                    return false;
-                }
+                var exists = this.exists(key);
 
                 if (cache) {
                     cache.remove(key);
                 }
 
-                var exists = this.exists(key);
-                provider.removeItem(key);
+                if (provider) {
+                    provider.removeItem(key);
+                }
 
                 return exists;
             },
 
             exists: function(key) {
-                if (!supported) {
-                    return false;
+                // we don't call get(..) to avoid infinite loop: get -> remove -> exists
+
+                var value;
+                if (cache) {
+                    value = cache.get(key);
                 }
 
-                return provider.getItem(key) ? true : false;
+                if (!value && provider) {
+                    value = provider.getItem(key);
+                    value = parse(value);
+                }
+
+                if (value) {
+                    if (withExpiration(value)) {
+                        if (value.expires < Date.now()) {
+                            value = null;
+                        }
+                    }
+                }
+
+                return !!value;
             },
 
             clear: function() {
-                if (!supported) {
-                    return;
-                }
-
-                provider.clear();
-
                 if (cache) {
                     cache.clear();
                 }
+
+                if (provider) {
+                    provider.clear();
+                }
             },
 
-            forEach: function(iterator) {
+            forEach: function(iterator, context) {
                 assert(iterator, "iterator must be set");
 
-                if (!supported) {
-                    return;
+                if (cache) {
+                    // need to handle expiration
+                    cache.forEach(callIfExists, this);
+                }
+                else if (provider) {
+                    for (var key in provider) {
+                        callIfExists(key);
+                    }
+                }
+                else {
+                    assert(false, "cache or storage provider should exist");
                 }
 
-                for (var key in provider) {
-                    var value = this.get(key);
-                    iterator(value, key);
+                function callIfExists(key) {
+                    if (this.exists(key)) {
+                        var value = this.get(key);
+                        iterator.call(context, value, key);
+                    }
                 }
-            },
-
-            isSupported: function() {
-                return supported;
             }
         };
     }
@@ -157,7 +180,8 @@ function addStorageServices(module) {
     });
 
     module.config("$localStorage", {
-        useCache: false,
+        cache: false,
+        cacheName: "$localStorage",
         cacheCountLimit: 0
     });
 
@@ -167,7 +191,8 @@ function addStorageServices(module) {
     });
 
     module.config("$sessionStorage", {
-        useCache: false,
+        cache: false,
+        cacheName: "$sessionStorage",
         cacheCountLimit: 0
     });
 }

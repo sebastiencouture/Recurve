@@ -70,10 +70,10 @@ function addCacheService(module) {
                     return totalCostLimit;
                 },
 
-                forEach: function(iterator) {
+                forEach: function(iterator, context) {
                     assert(iterator, "iterator must be set");
 
-                    forEach(cache, iterator);
+                    forEach(cache, iterator, context);
                 }
             };
 

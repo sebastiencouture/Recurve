@@ -226,20 +226,31 @@ describe("$cache", function() {
         });
     });
 
-    it("should allow iteration of all key/values", function(){
-        cache.set("a", 1, 2);
-        cache.set("b", 2, 2);
-        cache.set("c", 3, 1);
+    describe("forEach", function() {
+        it("should iterate all key/values", function(){
+            cache.set("a", 1, 2);
+            cache.set("b", 2, 2);
+            cache.set("c", 3, 1);
 
-        var pairs = [];
-        cache.forEach(function(value, key) {
-            pairs.push({value: value, key: key});
+            var pairs = [];
+            cache.forEach(function(value, key) {
+                pairs.push({value: value, key: key});
+            });
+
+            expect(pairs.length).toEqual(3);
+            expect(pairs[0]).toEqual({value: {value: 1, cost: 2}, key: "a"});
+            expect(pairs[1]).toEqual({value: {value: 2, cost: 2}, key: "b"});
+            expect(pairs[2]).toEqual({value: {value: 3, cost: 1}, key: "c"});
         });
 
-        expect(pairs.length).toEqual(3);
-        expect(pairs[0]).toEqual({value: {value: 1, cost: 2}, key: "a"});
-        expect(pairs[1]).toEqual({value: {value: 2, cost: 2}, key: "b"});
-        expect(pairs[2]).toEqual({value: {value: 3, cost: 1}, key: "c"});
+        it("should call iterator with context", function() {
+            cache.set("a", 1);
+            var self = this;
+
+            cache.forEach(function() {
+                expect(this).toEqual(self);
+            }, this);
+        });
     });
 
     it("should destroy cache", function(){
