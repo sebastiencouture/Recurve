@@ -63,7 +63,7 @@ describe("common", function(){
             var obj = {};
             expect(forEach(obj, function(){})).toBe(obj);
         });
-        
+
         it("should not throw error for null object", function(){
             forEach(null);
         });
