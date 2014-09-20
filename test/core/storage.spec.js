@@ -279,10 +279,10 @@ describe("storage", function() {
 
                 it("should call iterator with context", function() {
                     $storage.set("a", 1);
-                    var self = this;
 
+                    var self = this;
                     $storage.forEach(function() {
-                        expect(this).toEqual(self);
+                        expect(this).toBe(self);
                     }, this);
                 });
             });

@@ -245,10 +245,10 @@ describe("$cache", function() {
 
         it("should call iterator with context", function() {
             cache.set("a", 1);
-            var self = this;
 
+            var self = this;
             cache.forEach(function() {
-                expect(this).toEqual(self);
+                expect(this).toBe(self);
             }, this);
         });
     });

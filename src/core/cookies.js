@@ -143,14 +143,12 @@ function addCookiesService(module) {
                 }
             },
 
-            forEach: function(iterator) {
-                assert(iterator, "iterator must be set");
-
+            forEach: function(iterator, context) {
                 forEachCookie(function(cookie, name){
                     var rawValue = afterSeparator(cookie, "=");
                     var value = parse(rawValue);
 
-                    iterator(value, name);
+                    iterator.call(context, value, name);
                 });
             }
         };

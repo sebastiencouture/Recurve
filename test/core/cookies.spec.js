@@ -238,16 +238,27 @@ describe("$cookies", function() {
         expect(document.cookie).toEqual("");
     });
 
-    it("should iterate all cookies", function() {
-        $cookies.set("a", 1);
-        $cookies.set("b", 2);
+    describe("forEach", function() {
+        it("should iterate all cookies", function() {
+            $cookies.set("a", 1);
+            $cookies.set("b", 2);
 
-        var expected = [["a", 1], ["b", 2]];
-        var index = 0;
+            var expected = [["a", 1], ["b", 2]];
+            var index = 0;
 
-        $cookies.forEach(function(value, name) {
-            expect(expected[index]).toEqual([name, value]);
-            index++;
+            $cookies.forEach(function(value, name) {
+                expect(expected[index]).toEqual([name, value]);
+                index++;
+            });
+        });
+
+        it("should call iterator with context", function() {
+            $cookies.set("a", 1);
+
+            var self = this;
+            $cookies.forEach(function() {
+                expect(self).toBe(this);
+            });
         });
     });
 });
