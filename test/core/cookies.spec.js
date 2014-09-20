@@ -258,7 +258,7 @@ describe("$cookies", function() {
             var self = this;
             $cookies.forEach(function() {
                 expect(self).toBe(this);
-            });
+            }, this);
         });
     });
 });

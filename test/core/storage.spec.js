@@ -1,7 +1,7 @@
 "use strict";
 
 describe("storage", function() {
-
+    
     describe("$localStorage", spec("$localStorage", window.localStorage));
     describe("$localStorage with cache", spec("$localStorage", window.localStorage, true));
     describe("$localStorage with native not supported", spec("$localStorage", window.localStorage, false, true));
