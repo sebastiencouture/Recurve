@@ -5,7 +5,7 @@ var recurve = window.recurve || (window.recurve = {});
 
 function forEach(obj, iterator, context) {
     if (!obj) {
-        return;
+        return obj;
     }
 
     if (obj.forEach && obj.forEach === Object.forEach) {
@@ -14,7 +14,7 @@ function forEach(obj, iterator, context) {
     else if (isArray(obj)) {
         for (var index = 0; index < obj.length; index++) {
             if (false === iterator.call(context, obj[index], index, obj)) {
-                return;
+                break;
             }
         }
     }
@@ -23,10 +23,12 @@ function forEach(obj, iterator, context) {
         for (var index = 0; index < keys.length; index++) {
             var key = keys[index];
             if (false === iterator.call(context, obj[key], key, obj)) {
-                return;
+                break;
             }
         }
     }
+
+    return obj;
 }
 
 function find(obj, property, value) {
