@@ -48,7 +48,7 @@ function addStorageServices(module) {
 
         return {
             get: function(key) {
-                var value;
+                var value = null;
                 if (cache) {
                     value = cache.get(key);
                     value = parse(value);

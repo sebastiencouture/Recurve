@@ -4,17 +4,17 @@ function addCacheService(module) {
     module.factory("$cache", null, function(){
         var caches = {};
 
-        var factory = function(name, countLimit, totalCostLimit) {
+        var $cache = function(name, countLimit, totalCostLimit) {
             assert(name, "cache name must be specified");
 
             if (caches[name]) {
                 return caches[name];
             }
 
-            if (undefined === countLimit) {
+            if (isUndefined(countLimit)) {
                 countLimit = 0;
             }
-            if (undefined === totalCostLimit) {
+            if (isUndefined(totalCostLimit)) {
                 totalCostLimit = 0;
             }
 
@@ -23,7 +23,7 @@ function addCacheService(module) {
             return caches[name] = {
                 get: function(key) {
                     var value = cache[key];
-                    return value ? value.value : undefined;
+                    return value ? value.value : null;
                 },
 
                 set: function(key, value, cost) {
@@ -31,7 +31,7 @@ function addCacheService(module) {
                         return;
                     }
 
-                    if (undefined === cost) {
+                    if (isUndefined(cost)) {
                         cost = 0;
                     }
 
@@ -138,7 +138,7 @@ function addCacheService(module) {
             }
         };
 
-        return extend(factory, {
+        return extend($cache, {
             destroy: function(name) {
                 if (!caches[name]) {
                     return;
