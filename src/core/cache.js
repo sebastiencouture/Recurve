@@ -106,7 +106,7 @@ function addCacheService(module) {
 
             function evictMostCostly() {
                 var maxCost = 0;
-                var maxKey;
+                var maxKey = null;
 
                 forEach(cache, function(value, key) {
                     if (!maxKey) {
@@ -122,6 +122,7 @@ function addCacheService(module) {
                     }
                 });
 
+                assert(maxKey, "a key must exist");
                 remove(maxKey);
             }
 
