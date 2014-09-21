@@ -24,7 +24,6 @@ function publishApi(recurve) {
         assert: assert
     });
 
-    // TODO TBD create the core module
     var recurveModule = recurve.$module = module();
 
     addSignalService(recurveModule);
@@ -37,6 +36,7 @@ function publishApi(recurve) {
     addPerformanceService(recurveModule);
     addCookiesService(recurveModule);
     addStorageServices(recurveModule);
+    addPromiseService(recurveModule);
 
     recurve.module = function(dependentModules) {
         // TODO TBD core module is always include, but does not need to be explicitly specified

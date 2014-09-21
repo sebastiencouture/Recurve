@@ -45,28 +45,28 @@ describe("$cache", function() {
     });
 
     describe("get", function() {
-        it("should return undefined for null key", function(){
-            expect(cache.get(null)).not.toBeDefined();
+        it("should return null for null key", function(){
+            expect(cache.get(null)).toEqual(null);
         });
 
-        it("should return undefined for null key", function(){
-            expect(cache.get(undefined)).not.toBeDefined();
+        it("should return null for null key", function(){
+            expect(cache.get(undefined)).toEqual(null);
         });
 
         it("should return undefined for key not set", function(){
-            expect(cache.get("a")).not.toBeDefined();
+            expect(cache.get("a")).toEqual(null);
         });
     });
 
     describe("set", function(){
         it("should do nothing for null key", function(){
             cache.set(null);
-            expect(cache.get(null)).not.toBeDefined();
+            expect(cache.get(null)).toEqual(null);
         });
 
         it("should do nothing for undefined key", function(){
             cache.set(null);
-            expect(cache.get(null)).not.toBeDefined();
+            expect(cache.get(null)).toEqual(null);
         });
     });
 
@@ -151,7 +151,7 @@ describe("$cache", function() {
             cache.set("c", 3, 1);
 
             expect(cache.get("a")).toBeDefined();
-            expect(cache.get("b")).not.toBeDefined();
+            expect(cache.get("b")).toEqual(null);
             expect(cache.get("c")).toBeDefined();
         });
 
@@ -160,15 +160,15 @@ describe("$cache", function() {
             cache.set("b", 2, 10);
             cache.set("c", 3, 1);
 
-            expect(cache.get("a")).toBeDefined();
-            expect(cache.get("b")).toBeDefined();
-            expect(cache.get("c")).toBeDefined();
+            expect(cache.get("a")).toEqual(1);
+            expect(cache.get("b")).toEqual(2);
+            expect(cache.get("c")).toEqual(3);
 
             cache.setCountLimit(2);
 
-            expect(cache.get("a")).toBeDefined();
-            expect(cache.get("b")).not.toBeDefined();
-            expect(cache.get("c")).toBeDefined();
+            expect(cache.get("a")).toEqual(1);
+            expect(cache.get("b")).toEqual(null);
+            expect(cache.get("c")).toEqual(3);
         });
 
         it("should evict first in as tie breaker for most costly past limit", function(){
@@ -178,9 +178,9 @@ describe("$cache", function() {
             cache.set("b", 2, 10);
             cache.set("c", 3, 10);
 
-            expect(cache.get("a")).toBeDefined();
-            expect(cache.get("b")).not.toBeDefined();
-            expect(cache.get("c")).toBeDefined();
+            expect(cache.get("a")).toEqual(1);
+            expect(cache.get("b")).toEqual(null);
+            expect(cache.get("c")).toEqual(3);
         });
     });
 
@@ -201,9 +201,9 @@ describe("$cache", function() {
             cache.set("b", 2, 1);
             cache.set("c", 3, 3);
 
-            expect(cache.get("a")).not.toBeDefined();
-            expect(cache.get("b")).toBeDefined();
-            expect(cache.get("c")).toBeDefined();
+            expect(cache.get("a")).toEqual(null);
+            expect(cache.get("b")).toEqual(2);
+            expect(cache.get("c")).toEqual(3);
         });
 
         it("should evict upon setting new limit", function(){
@@ -211,15 +211,15 @@ describe("$cache", function() {
             cache.set("b", 2, 1);
             cache.set("c", 3, 3);
 
-            expect(cache.get("a")).toBeDefined();
-            expect(cache.get("b")).toBeDefined();
-            expect(cache.get("c")).toBeDefined();
+            expect(cache.get("a")).toEqual(1);
+            expect(cache.get("b")).toEqual(2);
+            expect(cache.get("c")).toEqual(3);
 
             cache.setTotalCostLimit(5);
 
-            expect(cache.get("a")).not.toBeDefined();
-            expect(cache.get("b")).toBeDefined();
-            expect(cache.get("c")).toBeDefined();
+            expect(cache.get("a")).toEqual(null);
+            expect(cache.get("b")).toEqual(2);
+            expect(cache.get("c")).toEqual(3);
         });
 
         it("should evict first in as tie breaker for most costly past limit", function(){
@@ -229,9 +229,9 @@ describe("$cache", function() {
             cache.set("b", 2, 2);
             cache.set("c", 3, 1);
 
-            expect(cache.get("a")).not.toBeDefined();
-            expect(cache.get("b")).toBeDefined();
-            expect(cache.get("c")).toBeDefined();
+            expect(cache.get("a")).toEqual(null);
+            expect(cache.get("b")).toEqual(2);
+            expect(cache.get("c")).toEqual(3);
         });
     });
 
@@ -271,7 +271,7 @@ describe("$cache", function() {
         $cache.destroy("a");
 
         expect(a).not.toBe($cache("a"));
-        expect(a.get("a")).not.toBeDefined();
+        expect(a.get("a")).toEqual(null);
     });
 
     it("should destroy all caches", function(){
@@ -284,8 +284,9 @@ describe("$cache", function() {
         $cache.destroyAll();
 
         expect(a).not.toBe($cache("a"));
-        expect(a.get("a")).not.toBeDefined();
+        expect(a.get("a")).toEqual(null);
+
         expect(b).not.toBe($cache("b"));
-        expect(b.get("a")).not.toBeDefined();
+        expect(b.get("a")).toEqual(null);
     });
 });
