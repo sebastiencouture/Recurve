@@ -219,8 +219,8 @@ function clone(object) {
 }
 
 function toJson(obj) {
-    if (!isObject(obj)) {
-        throw new Error("not an object to convert to JSON");
+    if (isUndefined(obj)) {
+        return undefined;
     }
 
     return JSON.stringify(obj);

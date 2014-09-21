@@ -71,7 +71,9 @@ function addCacheService(module) {
                 },
 
                 forEach: function(iterator, context) {
-                    forEach(cache, iterator, context);
+                    forEach(cache, function(value, key) {
+                        iterator.call(context, value.value, key);
+                    }, context);
                 }
             };
 
@@ -128,7 +130,10 @@ function addCacheService(module) {
                     return;
                 }
 
+                var exists = cache.hasOwnProperty(key);
                 delete cache[key];
+
+                return exists;
             }
         };
 

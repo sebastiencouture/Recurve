@@ -570,19 +570,15 @@ describe("common", function(){
     });
 
     describe("toJson", function(){
-        it("should stringify valid object", function(){
+        it("should stringify objects", function(){
             var obj = {a: 1, b: 2};
             var json = toJson(obj);
 
             expect(json).toEqual('{"a":1,"b":2}');
         });
 
-        it("should throw an error for numbers", function(){
-            expect(function(){toJson(1)}).toThrow(new Error("not an object to convert to JSON"));
-        });
-
-        it("should throw an error for string literals", function(){
-            expect(function(){toJson("1")}).toThrow(new Error("not an object to convert to JSON"));
+        it("should stringify numbers", function(){
+            expect(toJson(1)).toEqual("1");
         });
     });
 

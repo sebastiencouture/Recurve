@@ -155,38 +155,10 @@ describe("storage", function() {
                     $storage.set(" a ", " b ");
                     expect($storage.get(" a ")).toEqual(" b ");
                 });
-
-                it("should save with expires as Date instance", function() {
-                    var oneDayFromNow = new Date();
-                    oneDayFromNow.setDate(oneDayFromNow.getDate() + 1);
-
-                    $storage.set("a", "b", oneDayFromNow);
-                    expect($storage.get("a")).toEqual("b");
-                });
-
-                it("should save with expires as number", function() {
-                    $storage.set("a", "b", 1);
-                    expect($storage.get("a")).toEqual("b");
-                });
-
-                it("should return null if expired", function() {
-                    $storage.set("a", "b", -1);
-                    expect($storage.get("a")).toEqual(null);
-                });
-
-                it("should save with no expiration for null expiry date", function() {
-                    $storage.set("a", "b", null);
-                    expect($storage.get("a")).toEqual("b");
-                });
-
-                it("should save with no expiration for undefined expiry date", function() {
-                    $storage.set("a", "b", undefined);
-                    expect($storage.get("a")).toEqual("b");
-                });
             });
 
             describe("remove", function() {
-                it("should remove and return true", function() {
+                it("should remove", function() {
                     $storage.set("a", "b");
                     $storage.remove("a");
 
@@ -198,8 +170,21 @@ describe("storage", function() {
                     }
                 });
 
+                it("should return true if exists", function() {
+                    $storage.set("a", "b");
+                    expect($storage.remove("a")).toEqual(true);
+                });
+
                 it("should return false if doesn't exist", function() {
                     expect($storage.remove("a")).toEqual(false);
+                });
+
+                it("should not throw error for null key", function(){
+                    $storage.remove(null);
+                });
+
+                it("should not throw error for undefined key", function(){
+                    $storage.remove(undefined);
                 });
             });
 
@@ -210,11 +195,6 @@ describe("storage", function() {
                 });
 
                 it("should return false if doesn't exist", function() {
-                    expect($storage.exists("a")).toEqual(false);
-                });
-
-                it("should return false for expired", function() {
-                    $storage.set("a", "b", -1);
                     expect($storage.exists("a")).toEqual(false);
                 });
 
@@ -248,7 +228,12 @@ describe("storage", function() {
             });
 
             describe("forEach", function() {
-                function validate(expected) {
+                it("should iterate all items", function() {
+                    $storage.set("a", 1);
+                    $storage.set("b", 2);
+
+                    var expected = [["a", 1], ["b", 2]];
+
                     $storage.forEach(function(value, name) {
                         var match = false;
                         forEach(expected, function(item){
@@ -260,30 +245,17 @@ describe("storage", function() {
 
                         expect(match).toEqual(true);
                     });
-                }
-
-                it("should iterate all items", function() {
-                    $storage.set("a", 1);
-                    $storage.set("b", 2);
-
-                    validate([["a", 1], ["b", 2]]);
-                });
-
-                it("should not iterate expired items", function() {
-                    $storage.set("a", 1);
-                    $storage.set("b", 2, -1);
-                    $storage.set("c", 3);
-
-                    validate([["a", 1], ["c", 3]]);
                 });
 
                 it("should call iterator with context", function() {
                     $storage.set("a", 1);
 
-                    var self = this;
+                    var context = null;
                     $storage.forEach(function() {
-                        expect(this).toBe(self);
+                        context = this;
                     }, this);
+
+                    expect(context).toBe(this);
                 });
             });
         };

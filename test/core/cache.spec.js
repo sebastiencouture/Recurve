@@ -88,11 +88,20 @@ describe("$cache", function() {
             expect(cache.get("a")).toEqual(null);
         });
 
-        it("should do nothing for null key", function(){
+        it("should return true if exists", function() {
+            cache.set("a", "b");
+            expect(cache.remove("a")).toEqual(true);
+        });
+
+        it("should return false if doesn't exist", function() {
+            expect(cache.remove("a")).toEqual(false);
+        });
+
+        it("should not throw error for null key", function(){
             cache.remove(null);
         });
 
-        it("should do nothing for undefined key", function(){
+        it("should not throw error for undefined key", function(){
             cache.remove(undefined);
         });
     });
@@ -238,18 +247,20 @@ describe("$cache", function() {
             });
 
             expect(pairs.length).toEqual(3);
-            expect(pairs[0]).toEqual({value: {value: 1, cost: 2}, key: "a"});
-            expect(pairs[1]).toEqual({value: {value: 2, cost: 2}, key: "b"});
-            expect(pairs[2]).toEqual({value: {value: 3, cost: 1}, key: "c"});
+            expect(pairs[0]).toEqual({value: 1, key: "a"});
+            expect(pairs[1]).toEqual({value: 2, key: "b"});
+            expect(pairs[2]).toEqual({value: 3, key: "c"});
         });
 
         it("should call iterator with context", function() {
             cache.set("a", 1);
 
-            var self = this;
+            var context = null;
             cache.forEach(function() {
-                expect(this).toBe(self);
+                context = this;
             }, this);
+
+            expect(context).toBe(this);
         });
     });
 

@@ -3,12 +3,12 @@
 function addStorageServices(module) {
     function storage(provider, config, $cache, $log) {
         function serialize(value) {
-            return JSON.stringify(value);
+            return toJson(value);
         }
 
         function parse(value) {
             try {
-                return JSON.parse(value);
+                return fromJson(value);
             }
             catch(e) {
                 return value;
@@ -35,12 +35,8 @@ function addStorageServices(module) {
             return true;
         }
 
-        function withExpiration(item) {
-            return item && item.hasOwnProperty("expires") && item.hasOwnProperty("value");
-        }
-
         // If not supported then just use a cache, this will only occur in private browsing mode
-        // for the supported browsers
+        // for supported browsers
         var cache;
         if (!isSupported()) {
             provider = null;
@@ -57,7 +53,6 @@ function addStorageServices(module) {
                     value = cache.get(key);
                     value = parse(value);
                 }
-
                 if (!value && provider) {
                     value = provider.getItem(key);
                     value = parse(value);
@@ -67,82 +62,50 @@ function addStorageServices(module) {
                     }
                 }
 
-                if (withExpiration(value)) {
-                    if (value.expires < Date.now()) {
-                        this.remove(key);
-                        value = null;
-                    }
-                    else {
-                        value = value.value;
-                    }
-                }
-
                 return value;
             },
 
-            set: function(key, value, expires) {
-                if (expires && (isNumber(expires) || isDate(expires))) {
-                    if (isNumber(expires)) {
-                        expires = addDaysFromNow(expires);
-                    }
-
-                    this.set(key, {value: value, expires: expires.getTime()});
-                    return;
-                }
-
+            set: function(key, value) {
                 if (provider) {
                     var serialized = serialize(value);
                     provider.setItem(key, serialized);
                 }
-
                 if (cache) {
                     cache.set(key, value);
                 }
             },
 
             remove: function(key) {
-                var exists = this.exists(key);
-
+                var existed = this.exists(key);
                 if (cache) {
                     cache.remove(key);
                 }
-
                 if (provider) {
                     provider.removeItem(key);
                 }
 
-                return exists;
+                return existed;
             },
 
             exists: function(key) {
-                // we don't call get(..) to avoid infinite loop: get -> remove -> exists
-
-                var value;
+                var found = false;
                 if (cache) {
-                    value = cache.get(key);
+                    found = cache.exists(key);
+                }
+                else if (provider) {
+                    found = !!provider.getItem(key);
+                }
+                else {
+                    assert(false, "either cache or storage provider should exist");
                 }
 
-                if (!value && provider) {
-                    value = provider.getItem(key);
-                    value = parse(value);
-                }
-
-                if (value) {
-                    if (withExpiration(value)) {
-                        if (value.expires < Date.now()) {
-                            value = null;
-                        }
-                    }
-                }
-
-                return !!value;
+                return found;
             },
 
             clear: function() {
                 if (cache) {
                     cache.clear();
                 }
-
                 if (provider) {
                     provider.clear();
                 }
@@ -150,23 +113,16 @@ function addStorageServices(module) {
 
             forEach: function(iterator, context) {
                 if (cache) {
-                    // need to handle expiration
-                    cache.forEach(callIfExists, this);
+                    cache.forEach(iterator, context);
                 }
                 else if (provider) {
                     for (var key in provider) {
-                        callIfExists.call(this, key);
-                    }
-                }
-                else {
-                    assert(false, "cache or storage provider should exist");
-                }
-
-                function callIfExists(key) {
-                    if (this.exists(key)) {
                         var value = this.get(key);
                         iterator.call(context, value, key);
                     }
+                }
+                else {
+                    assert(false, "either cache or storage provider should exist");
                 }
             }
         };

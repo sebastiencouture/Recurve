@@ -174,15 +174,28 @@ describe("$cookies", function() {
     });
 
     describe("remove", function() {
-        it("should remove and return true", function() {
+        it("should remove", function() {
             $cookies.set("a", "b");
             $cookies.remove("a");
 
             expect(document.cookie).toEqual("");
         });
 
+        it("should return true if exists", function(){
+            $cookies.set("a", "b");
+            expect($cookies.remove("a")).toEqual(true);
+        })
+
         it("should return false if doesn't exist", function() {
             expect($cookies.remove("a")).toEqual(false);
+        });
+
+        it("should not throw error for null key", function(){
+            $cookies.remove(null);
+        });
+
+        it("should not throw error for undefined key", function(){
+            $cookies.remove(undefined);
         });
 
         // can't fully test domain or path, but lets do what we can...
@@ -255,10 +268,12 @@ describe("$cookies", function() {
         it("should call iterator with context", function() {
             $cookies.set("a", 1);
 
-            var self = this;
+            var context = null;
             $cookies.forEach(function() {
-                expect(self).toBe(this);
+                context = this;
             }, this);
+
+            expect(context).toBe(this);
         });
     });
 });
