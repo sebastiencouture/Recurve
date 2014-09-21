@@ -12,6 +12,13 @@ function addCookiesService(module) {
             });
         }
 
+        function addDaysFromNow(days) {
+            var date = new Date();
+            date.setDate(date.getDate() + days);
+
+            return date;
+        }
+
         function serialize(value) {
             var string = isObject(value) ? toJson(value) : String(value);
             return encodeURIComponent(string);
