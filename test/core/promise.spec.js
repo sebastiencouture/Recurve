@@ -293,7 +293,9 @@ describe("$promise", function() {
     });
 
     // Promises/A+ spec: https://github.com/promises-aplus/promises-spec#notes
-    // Tests based on: https://github.com/jakearchibald/es6-promise/blob/master/test/tests/extension-test.js
+    // Tests based on:
+    // - https://github.com/promises-aplus/promises-tests/tree/master/lib/tests
+    // - https://github.com/jakearchibald/es6-promise/blob/master/test/tests/extension-test.js
     describe("resolve", function() {
         describe("if x is a promise, adopt its state", function() {
             it("if x is pending, promise must remain pending until x is fulfilled or rejected.", function() {
