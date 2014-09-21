@@ -8,7 +8,7 @@ function addPromiseService(module) {
         }
 
         function async(fn) {
-            window.setTimeout(fn, 0);
+            $window.setTimeout(fn, 0);
         }
 
         function invokeCallback(callback, value, deferred) {
@@ -63,7 +63,7 @@ function addPromiseService(module) {
             var value;
             var subscribers = [];
 
-            function resolve(value) {
+            function resolve(resolveValue) {
                 function resolveHandler(resolvedValue) {
                     fulfilled = true;
                     value = resolvedValue;
@@ -79,11 +79,11 @@ function addPromiseService(module) {
                     reject(reason);
                 }
 
-                if (isPromiseLike(value)) {
-                    value.then(resolveHandler, rejectHandler);
+                if (isPromiseLike(resolveValue)) {
+                    resolveValue.then(resolveHandler, rejectHandler);
                 }
                 else {
-                    resolveHandler(value);
+                    resolveHandler(resolveValue);
                 }
             }
 
