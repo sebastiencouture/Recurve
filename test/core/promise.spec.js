@@ -351,6 +351,7 @@ describe("$promise", function() {
         });
 
         describe("otherwise, if x is an object or function", function() {
+            // TODO TBD do we care about this?
             it("Let then be x.then", function() {
                 if (!isFunction(Object.defineProperty)) {
                     return;
