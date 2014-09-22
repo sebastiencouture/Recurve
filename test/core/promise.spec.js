@@ -298,26 +298,82 @@ describe("$promise", function() {
     // - https://github.com/jakearchibald/es6-promise/blob/master/test/tests/extension-test.js
     describe("resolve", function() {
         describe("if x is a promise, adopt its state", function() {
-            it("if x is pending, promise must remain pending until x is fulfilled or rejected.", function() {
+            it("if x is pending, promise must remain pending until x is fulfilled or rejected.", function(done) {
+                var deferred = $promise.defer();
+                var promise = $promise.resolve(deferred.promise);
 
+                promise.then(function(value) {
+                    expect(value).toEqual(1);
+                    done();
+                }, function() {
+                    assert(false);
+                    done();
+                });
+
+                setTimeout(function() {
+                    deferred.resolve(1);
+                }, 10);
             });
 
-            it("if/when x is fulfilled, fulfill promise with the same value", function() {
+            it("if/when x is fulfilled, fulfill promise with the same value", function(done) {
+                var deferred = $promise.defer();
+                var promise = $promise.resolve(deferred.promise);
 
+                promise.then(function(value) {
+                    expect(value).toEqual(1);
+                    done();
+                }, function() {
+                    assert(false);
+                    done();
+                });
+
+                setTimeout(function() {
+                    deferred.resolve(1);
+                }, 10);
             });
 
-            it("if/when x is rejected, reject promise with the same reason", function() {
+            it("if/when x is rejected, reject promise with the same reason", function(done) {
+                var deferred = $promise.defer();
+                var promise = $promise.resolve(deferred.promise);
 
+                promise.then(function() {
+                    assert(false);
+                    done();
+                }, function(reason) {
+                    expect(reason).toEqual(1);
+                    done();
+                });
+
+                setTimeout(function() {
+                    deferred.reject(1);
+                }, 10);
             });
         });
 
         describe("otherwise, if x is an object or function", function() {
             it("Let then be x.then", function() {
+                if (!isFunction(Object.defineProperty)) {
+                    return;
+                }
 
+                var thenable = {};
+                var count = 0;
+
+                Object.defineProperty(thenable, 'then', {
+                    get: function() {
+                        count++;
+                        return function() {
+                        };
+                    }
+                });
+
+                expect(count).toEqual(0);
+                $promise.resolve(thenable);
+                expect(count).toEqual(1);
             });
 
             it("if retrieving the property x.then results in a thrown exception e, reject promise with e as the reason", function() {
-
+                // TODO TBD don't think there is anyway to test this?
             });
 
             describe("if then is a function, call it with x as this, first argument resolvePromise, and second argument rejectPromise, where", function() {
