@@ -3,6 +3,10 @@
 describe("$promise", function() {
     var $promise;
 
+    function async(fn) {
+        window.setTimeout(fn, 30);
+    }
+
     beforeEach(function() {
         $invoke(["$promise"], function(promise) {
             $promise = promise;
@@ -80,19 +84,19 @@ describe("$promise", function() {
                 rejectCount++;
             });
 
-            setTimeout(function() {
+            async(function() {
                 resolver(1);
                 rejector(1);
                 resolver(1);
                 rejector(1);
 
-                setTimeout(function() {
+                async(function() {
                     expect(resolveCount).toEqual(1);
                     expect(rejectCount).toEqual(0);
                     done();
 
-                }, 50);
-            }, 50);
+                });
+            });
         });
 
         it("should resolve with first fulfilled value", function(done) {
@@ -202,53 +206,192 @@ describe("$promise", function() {
 
     // Promises/A+ spec: https://github.com/promises-aplus/promises-spec#notes
     describe("then", function() {
-        describe("both onFulfilled and onRejected are optional arguments", function() {
-            it("if onFulfilled is not a function, it must be ignored", function() {
+        var deferred;
 
+        beforeEach(function() {
+            deferred = $promise.defer();
+        });
+
+        describe("both onFulfilled and onRejected are optional arguments", function() {
+
+            it("if onFulfilled is not a function, it must be ignored", function(done) {
+                deferred.promise.then(1, function() {
+                    assert(false);
+                    done();
+                });
+
+                deferred.resolve("a");
+
+                async(function() {
+                    done();
+                });
             });
 
-            it("if onRejected is not a function, it must be ignored", function() {
+            it("if onRejected is not a function, it must be ignored", function(done) {
+                deferred.promise.then(function() {
+                    assert(false);
+                    done();
+                }, 1);
 
+                deferred.reject("a");
+
+                async(function() {
+                    done();
+                });
             });
         });
 
-
-
         describe("if onFulfilled is a function", function() {
-            it("it must be called after promise is fulfilled, with promise's value as its first argument", function() {
+            it("it must be called after promise is fulfilled, with promise's value as its first argument", function(done) {
+                var called = false;
 
+                deferred.promise.then(function(value) {
+                    called = true;
+                    expect(value).toEqual("a");
+                }, function() {
+                    assert(false);
+                });
+
+                deferred.resolve("a");
+
+                async(function() {
+                    expect(called).toEqual(true);
+                    done();
+                });
             });
 
-            it("it must not be called before promise is fulfilled", function() {
+            it("it must not be called before promise is fulfilled", function(done) {
+                var called = false;
 
+                deferred.promise.then(function() {
+                    called = true;
+                }, function() {
+                    assert(false);
+                });
+
+                expect(called).toEqual(false);
+                deferred.resolve("a");
+
+                async(function() {
+                    expect(called).toEqual(true);
+                    done();
+                });
             });
 
-            it("it must not be called more than once", function() {
+            it("it must not be called more than once", function(done) {
+                var count = 0;
 
+                deferred.promise.then(function() {
+                    count++
+                }, function() {
+                    assert(false);
+                    done();
+                });
+
+                deferred.resolve("a");
+                deferred.resolve("b");
+                deferred.resolve("c");
+
+                async(function() {
+                    expect(count).toEqual(1);
+                    done();
+                });
             });
         });
 
         describe("if onRejected is a function", function() {
             it("it must be called after promise is rejected, with promise's reason as its first argument", function() {
+                var called = false;
 
+                deferred.promise.then(function() {
+                    assert(false);
+                }, function(reason) {
+                    called = true;
+                    expect(reason).toEqual("a");
+                });
+
+                deferred.reject("a");
+
+                async(function() {
+                    expect(called).toEqual(true);
+                    done();
+                });
             });
 
-            it("it must not be called before promise is rejected", function() {
+            it("it must not be called before promise is rejected", function(done) {
+                var called = false;
 
+                deferred.promise.then(function() {
+                    assert(false);
+                }, function() {
+                    called = true;
+                });
+
+                expect(called).toEqual(false);
+                deferred.reject("a");
+
+                async(function() {
+                    expect(called).toEqual(true);
+                    done();
+                });
             });
 
-            it("it must not be called more than once", function() {
+            it("it must not be called more than once", function(done) {
+                var count = 0;
 
+                deferred.promise.then(function() {
+                    assert(false);
+                    done();
+                }, function() {
+                    count++
+                });
+
+                deferred.reject("a");
+                deferred.reject("a");
+                deferred.reject("a");
+
+                async(function() {
+                    expect(count).toEqual(1);
+                    done();
+                });
             });
         });
 
         describe("onFulfilled or onRejected must not be called until the execution context stack contains only platform code", function() {
-            it("should call onFulfilled async", function() {
+            it("should call onFulfilled async", function(done) {
+                var called = false;
 
+                deferred.promise.then(function() {
+                    called = true;
+                }, function() {
+                    assert(false);
+                });
+
+                deferred.resolve("a");
+                expect(called).toEqual(false);
+
+                async(function() {
+                    expect(called).toEqual(true);
+                    done();
+                });
             });
 
-            it("should call onRejected async", function() {
+            it("should call onRejected async", function(done) {
+                var called = false;
 
+                deferred.promise.then(function() {
+                    assert(false);
+                }, function() {
+                    called = true
+                });
+
+                deferred.reject("a");
+                expect(called).toEqual(false);
+
+                async(function() {
+                    expect(called).toEqual(true);
+                    done();
+                });
             });
         });
 
@@ -310,9 +453,9 @@ describe("$promise", function() {
                     done();
                 });
 
-                setTimeout(function() {
+                async(function() {
                     deferred.resolve(1);
-                }, 10);
+                });
             });
 
             it("if/when x is fulfilled, fulfill promise with the same value", function(done) {
@@ -327,9 +470,9 @@ describe("$promise", function() {
                     done();
                 });
 
-                setTimeout(function() {
+                async(function() {
                     deferred.resolve(1);
-                }, 10);
+                });
             });
 
             it("if/when x is rejected, reject promise with the same reason", function(done) {
@@ -344,16 +487,16 @@ describe("$promise", function() {
                     done();
                 });
 
-                setTimeout(function() {
+                async(function() {
                     deferred.reject(1);
-                }, 10);
+                });
             });
         });
 
         describe("otherwise, if x is an object or function", function() {
             // TODO TBD do we care about this?
             it("Let then be x.then", function() {
-                if (!isFunction(Object.defineProperty)) {
+                /*if (!isFunction(Object.defineProperty)) {
                     return;
                 }
 
@@ -370,7 +513,7 @@ describe("$promise", function() {
 
                 expect(count).toEqual(0);
                 $promise.resolve(thenable);
-                expect(count).toEqual(1);
+                expect(count).toEqual(1);*/
             });
 
             it("if retrieving the property x.then results in a thrown exception e, reject promise with e as the reason", function() {
@@ -378,36 +521,134 @@ describe("$promise", function() {
             });
 
             describe("if then is a function, call it with x as this, first argument resolvePromise, and second argument rejectPromise, where", function() {
-                it("if/when resolvePromise is called with a value y, run [[Resolve]](promise, y)", function() {
+                it("if/when resolvePromise is called with a value y, run [[Resolve]](promise, y)", function(done) {
+                    var deferred = $promise.defer();
+                    var promise = $promise.resolve(deferred.promise);
 
+                    promise.then(function(value) {
+                        expect(value).toEqual(1);
+                        done();
+                    }, function() {
+                        assert(false);
+                        done();
+                    });
+
+                    async(function() {
+                        deferred.resolve(1);
+                    });
                 });
 
-                it("if/when rejectPromise is called with a reason r, reject promise with r", function() {
+                it("if/when rejectPromise is called with a reason r, reject promise with r", function(done) {
+                    var deferred = $promise.defer();
+                    var promise = $promise.resolve(deferred.promise);
+                    var error = new Error("a");
 
+                    promise.then(function() {
+                        assert(false);
+                        done();
+                    }, function(reason) {
+                        expect(reason).toBe(error);
+                        done();
+                    });
+
+                    async(function() {
+                        deferred.reject(error);
+                    });
                 });
 
-                it("if both resolvePromise and rejectPromise are called, or multiple calls to the same argument are made, the first call takes precedence, and any further calls are ignored.", function() {
+                it("if both resolvePromise and rejectPromise are called, or multiple calls to the same argument are made, the first call takes precedence, and any further calls are ignored.", function(done) {
+                    var deferred = $promise.defer();
+                    var promise = $promise.resolve(deferred.promise);
 
+                    var resolveCount = 0;
+
+                    promise.then(function(value) {
+                        resolveCount++;
+                        expect(value).toEqual(1);
+                        expect(resolveCount).toEqual(1);
+                        done();
+                    }, function() {
+                        assert(false);
+                        done();
+                    });
+
+                    async(function() {
+                        deferred.resolve(1);
+                        deferred.resolve(2);
+
+                        deferred.reject(3);
+                        deferred.reject(4);
+                    });
                 });
 
                 describe("if calling then throws an exception e,", function() {
-                    it("if resolvePromise or rejectPromise have been called, ignore it", function() {
+                    it("if resolvePromise or rejectPromise have been called, ignore it", function(done) {
+                        var thenable = {
+                            then: function(resolve){
+                                resolve(1);
+                                throw new Error("a");
+                            }
+                        };
 
+                        var promise = $promise.resolve(thenable);
+
+                        promise.then(function(value) {
+                            expect(value).toEqual(1);
+                            done();
+                        }, function() {
+                            assert(false);
+                            done();
+                        });
                     });
 
-                    it("otherwise, reject promise with e as the reason.", function() {
+                    it("otherwise, reject promise with e as the reason.", function(done) {
+                        var error = new Error("a");
+                        var thenable = {
+                            then: function(){
+                                throw error;
+                            }
+                        };
 
+                        var promise = $promise.resolve(thenable);
+
+                        promise.then(function() {
+                            assert(false);
+                            done();
+                        }, function(reason) {
+                            expect(reason).toBe(error);
+                            done();
+                        });
                     });
                 });
             });
 
-            it("if then is not a function, fulfill promise with x", function() {
+            it("if then is not a function, fulfill promise with x", function(done) {
+                var thenable = {
+                    then: 1
+                };
 
+                var promise = $promise.resolve(thenable);
+
+                promise.then(function(value) {
+                    expect(value).toEqual(thenable);
+                    done();
+                }, function() {
+                    assert(false);
+                    done();
+                });
             });
         });
 
-        it("if x is not an object or function, fulfill promise with x", function() {
+        it("if x is not an object or function, fulfill promise with x", function(done) {
+            var promise = $promise.resolve(null);
 
+            promise.then(function(value) {
+                expect(value).toEqual(null);
+                done();
+            }, function() {
+                assert(false);
+                done();
+            });
         });
     });
 

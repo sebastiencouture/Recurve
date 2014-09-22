@@ -150,7 +150,37 @@ function addPromiseService(module) {
         return extend($promise, {
             defer: function() {
                 var deferred = {};
+                var deferredResolve;
+                var deferredReject;
+
+                deferred.resolve = function() {
+                    if (deferredResolve) {
+                        deferredResolve.apply(deferred, arguments);
+                    }
+                    else {
+                        var args = arguments;
+                        async(function() {
+                            deferredResolve.apply(deferred, args);
+                        });
+                    }
+                };
+
+                deferred.reject = function() {
+                    if (deferredReject) {
+                        deferredReject.apply(deferred, arguments);
+                    }
+                    else {
+                        var args = arguments;
+                        async(function() {
+                            deferredReject.apply(deferred, args);
+                        });
+                    }
+                };
+
                 deferred.promise = $promise(function(resolve, reject) {
+                    deferredResolve = resolve;
+                    deferredReject = reject;
+
                     deferred.resolve = resolve;
                     deferred.reject = reject;
                 });
@@ -159,9 +189,10 @@ function addPromiseService(module) {
             },
 
             resolve: function(value) {
-                if (isPromiseLike(value)) {
-                    return value;
-                }
+                //if (isPromiseLike(value)) {
+                //    console.log("adas");
+                //    return value;
+                //}
 
                 return $promise(function(resolve) {
                     resolve(value);
