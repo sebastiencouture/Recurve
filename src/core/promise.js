@@ -255,7 +255,9 @@ function addPromiseService(module) {
                             value.then(resolve, reject);
                         }
                         else {
-                            resolve(value);
+                            async(function() {
+                                resolve(value);
+                            });
                         }
                     });
                 });

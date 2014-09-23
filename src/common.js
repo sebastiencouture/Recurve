@@ -533,7 +533,7 @@ function assert(condition, message) {
     }
 
     Array.prototype.shift.apply(arguments);
-    message = format.apply(this, arguments);
+    message = format.apply(this, arguments) || "";
 
     throw new Error(message);
 };

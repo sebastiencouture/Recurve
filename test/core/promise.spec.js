@@ -7,6 +7,10 @@ describe("$promise", function() {
         window.setTimeout(fn, 30);
     }
 
+    function shouldNotBeCalled(valueOrReason) {
+        assert(false, "onFulfilled or onRejected called when should not: " + valueOrReason);
+    }
+
     beforeEach(function() {
         $invoke(["$promise"], function(promise) {
             $promise = promise;
@@ -35,10 +39,7 @@ describe("$promise", function() {
                 reject(1);
             });
 
-            promise.then(function() {
-                assert(false);
-                done();
-            }, function(reason) {
+            promise.then(shouldNotBeCalled, function(reason) {
                 expect(reason).toEqual(1);
                 done();
             })
@@ -49,10 +50,7 @@ describe("$promise", function() {
                 throw new Error("a");
             });
 
-            promise.then(function() {
-                assert(false);
-                done();
-            }, function(reason) {
+            promise.then(shouldNotBeCalled, function(reason) {
                 expect(reason).toEqual(new Error("a"));
                 done();
             })
@@ -111,10 +109,7 @@ describe("$promise", function() {
             promise.then(function(value) {
                 expect(value).toEqual(1);
                 done();
-            }, function() {
-                assert(false);
-                done();
-            });
+            }, shouldNotBeCalled);
         });
 
         it("should resolve with first fulfilled value for thenable", function(done) {
@@ -133,10 +128,7 @@ describe("$promise", function() {
             promise.then(function(value) {
                 expect(value).toEqual(1);
                 done();
-            }, function() {
-                assert(false);
-                done();
-            });
+            }, shouldNotBeCalled);
         });
 
         it("should reject with first rejected reason", function(done) {
@@ -148,10 +140,7 @@ describe("$promise", function() {
                 resolve(fulfilledPromise);
             });
 
-            promise.then(function() {
-                assert(false);
-                done();
-            }, function(reason) {
+            promise.then(shouldNotBeCalled, function(reason) {
                 expect(reason).toEqual(1);
                 done();
             });
@@ -170,10 +159,7 @@ describe("$promise", function() {
                 resolve(fulfilledThenable);
             });
 
-            promise.then(function() {
-                assert(false);
-                done();
-            }, function(reason) {
+            promise.then(shouldNotBeCalled, function(reason) {
                 expect(reason).toEqual(1);
                 done();
             });
@@ -204,6 +190,40 @@ describe("$promise", function() {
         });
     });
 
+    describe("defer", function() {
+        var deferred;
+
+        beforeEach(function() {
+            deferred = $promise.defer();
+        });
+
+        it("should include a promise property", function() {
+            expect(deferred.promise).toBeDefined();
+        });
+
+        it("should resolve promise upon calling resolve with value", function(done) {
+            expect(deferred.resolve).toBeDefined();
+
+            deferred.promise.then(function(value) {
+                expect(value).toEqual("a");
+                done();
+            }, shouldNotBeCalled);
+
+            deferred.resolve("a");
+        });
+
+        it("should reject the promise upon calling reject with reason", function(done) {
+            expect(deferred.reject).toBeDefined();
+
+            deferred.promise.then(shouldNotBeCalled, function(reason) {
+                expect(reason).toEqual("a");
+                done();
+            });
+
+            deferred.reject("a");
+        });
+    });
+
     // Promises/A+ spec: https://github.com/promises-aplus/promises-spec#notes
     describe("then", function() {
         var deferred;
@@ -215,10 +235,7 @@ describe("$promise", function() {
         describe("both onFulfilled and onRejected are optional arguments", function() {
 
             it("if onFulfilled is not a function, it must be ignored", function(done) {
-                deferred.promise.then(1, function() {
-                    assert(false);
-                    done();
-                });
+                deferred.promise.then(1, shouldNotBeCalled);
 
                 deferred.resolve("a");
 
@@ -228,10 +245,7 @@ describe("$promise", function() {
             });
 
             it("if onRejected is not a function, it must be ignored", function(done) {
-                deferred.promise.then(function() {
-                    assert(false);
-                    done();
-                }, 1);
+                deferred.promise.then(shouldNotBeCalled, 1);
 
                 deferred.reject("a");
 
@@ -248,9 +262,7 @@ describe("$promise", function() {
                 deferred.promise.then(function(value) {
                     called = true;
                     expect(value).toEqual("a");
-                }, function() {
-                    assert(false);
-                });
+                }, shouldNotBeCalled);
 
                 deferred.resolve("a");
 
@@ -265,9 +277,7 @@ describe("$promise", function() {
 
                 deferred.promise.then(function() {
                     called = true;
-                }, function() {
-                    assert(false);
-                });
+                }, shouldNotBeCalled);
 
                 expect(called).toEqual(false);
                 deferred.resolve("a");
@@ -283,10 +293,7 @@ describe("$promise", function() {
 
                 deferred.promise.then(function() {
                     count++
-                }, function() {
-                    assert(false);
-                    done();
-                });
+                }, shouldNotBeCalled);
 
                 deferred.resolve("a");
                 deferred.resolve("b");
@@ -303,9 +310,7 @@ describe("$promise", function() {
             it("it must be called after promise is rejected, with promise's reason as its first argument", function() {
                 var called = false;
 
-                deferred.promise.then(function() {
-                    assert(false);
-                }, function(reason) {
+                deferred.promise.then(shouldNotBeCalled, function(reason) {
                     called = true;
                     expect(reason).toEqual("a");
                 });
@@ -321,9 +326,7 @@ describe("$promise", function() {
             it("it must not be called before promise is rejected", function(done) {
                 var called = false;
 
-                deferred.promise.then(function() {
-                    assert(false);
-                }, function() {
+                deferred.promise.then(shouldNotBeCalled, function() {
                     called = true;
                 });
 
@@ -339,10 +342,7 @@ describe("$promise", function() {
             it("it must not be called more than once", function(done) {
                 var count = 0;
 
-                deferred.promise.then(function() {
-                    assert(false);
-                    done();
-                }, function() {
+                deferred.promise.then(shouldNotBeCalled, function() {
                     count++
                 });
 
@@ -363,9 +363,7 @@ describe("$promise", function() {
 
                 deferred.promise.then(function() {
                     called = true;
-                }, function() {
-                    assert(false);
-                });
+                }, shouldNotBeCalled);
 
                 deferred.resolve("a");
                 expect(called).toEqual(false);
@@ -379,9 +377,7 @@ describe("$promise", function() {
             it("should call onRejected async", function(done) {
                 var called = false;
 
-                deferred.promise.then(function() {
-                    assert(false);
-                }, function() {
+                deferred.promise.then(shouldNotBeCalled, function() {
                     called = true
                 });
 
@@ -398,47 +394,132 @@ describe("$promise", function() {
         // onFulfilled and onRejected must be called as functions (i.e. with no this value)
 
         describe("then may be called multiple times on the same promise", function() {
-            it("if/when promise is fulfilled, all respective onFulfilled callbacks must execute in the order of their originating calls to then", function() {
+            it("if/when promise is fulfilled, all respective onFulfilled callbacks must execute in the order of their originating calls to then", function(done) {
+                var count = 0;
 
+                deferred.promise.then(function() {
+                    count++;
+                    expect(count).toEqual(1);
+                }, shouldNotBeCalled);
+
+                deferred.promise.then(function() {
+                    count++;
+                    expect(count).toEqual(2);
+                }, shouldNotBeCalled);
+
+                deferred.promise.then(function() {
+                    count++;
+                    expect(count).toEqual(3);
+                }, shouldNotBeCalled);
+
+                deferred.resolve("a");
+
+                async(function() {
+                    done();
+                });
             });
 
-            it("if/when promise is rejected, all respective onRejected callbacks must execute in the order of their originating calls to then", function() {
+            it("if/when promise is rejected, all respective onRejected callbacks must execute in the order of their originating calls to then", function(done) {
+                var count = 0;
 
+                deferred.promise.then(shouldNotBeCalled, function() {
+                    count++;
+                    expect(count).toEqual(1);
+                });
+
+                deferred.promise.then(shouldNotBeCalled, function() {
+                    count++;
+                    expect(count).toEqual(2);
+                });
+
+                deferred.promise.then(shouldNotBeCalled, function() {
+                    count++;
+                    expect(count).toEqual(3);
+                });
+
+                deferred.reject("a");
+
+                async(function() {
+                    done();
+                });
             });
         });
 
         describe("then must return a promise", function() {
             it("should return a promise", function() {
+                var promise = deferred.promise.then();
 
+                expect(promise).toBeDefined();
+                expect(promise.then).toBeDefined();
+                expect(promise.catch).toBeDefined();
             });
 
-            // If either onFulfilled or onRejected returns a value x, run the Promise Resolution Procedure [[Resolve]](promise2, x)
-            // covered in "resolve" spec
+            // this is mostly covered in "resolve" tests
+            it("if either onFulfilled or onRejected returns a value x, run the Promise Resolution Procedure [[Resolve]](promise2, x)", function(done) {
+                var promise2 = deferred.promise.then(function() {
+                    return "b";
+                });
 
-            it("if either onFulfilled or onRejected throws an exception e, promise2 must be rejected with e as the reason", function() {
+                promise2.then(function(value) {
+                    expect(value).toEqual("b");
+                    done();
+                }, shouldNotBeCalled);
 
+                deferred.resolve("a");
             });
 
-            it("if onFulfilled is not a function and promise1 is fulfilled, promise2 must be fulfilled with the same value as promise1", function() {
+            it("if either onFulfilled or onRejected throws an exception e, promise2 must be rejected with e as the reason", function(done) {
+                var error = new Error("e");
+                var promise2 = deferred.promise.then(function() {
+                    throw error
+                }, shouldNotBeCalled);
 
+                promise2.then(shouldNotBeCalled, function(reason) {
+                    expect(reason).toBe(error);
+                    done();
+                });
+
+                deferred.resolve("a");
             });
 
-            it("if onRejected is not a function and promise1 is rejected, promise2 must be rejected with the same reason as promise1", function() {
+            it("if onFulfilled is not a function and promise1 is fulfilled, promise2 must be fulfilled with the same value as promise1", function(done) {
+                var promise2 = deferred.promise.then(null, shouldNotBeCalled);
 
+                promise2.then(function(value) {
+                    expect(value).toEqual("a");
+                    done();
+                }, shouldNotBeCalled);
+
+                deferred.resolve("a");
+            });
+
+            it("if onRejected is not a function and promise1 is rejected, promise2 must be rejected with the same reason as promise1", function(done) {
+                var promise2 = deferred.promise.then(shouldNotBeCalled, null);
+
+                promise2.then(shouldNotBeCalled, function(reason) {
+                    expect(reason).toEqual("a");
+                    done();
+                });
+
+                deferred.reject("a");
             });
         });
     });
 
     describe("catch", function() {
-        it("should be called on reject", function() {
+        it("should be called on reject", function(done) {
+            var promise = $promise(function(resolve, reject) {
+                reject("a");
+            })
 
+            promise.catch(function(reason) {
+                expect(reason).toEqual("a");
+                done();
+            });
         });
     });
 
     // Promises/A+ spec: https://github.com/promises-aplus/promises-spec#notes
-    // Tests based on:
-    // - https://github.com/promises-aplus/promises-tests/tree/master/lib/tests
-    // - https://github.com/jakearchibald/es6-promise/blob/master/test/tests/extension-test.js
     describe("resolve", function() {
         describe("if x is a promise, adopt its state", function() {
             it("if x is pending, promise must remain pending until x is fulfilled or rejected.", function(done) {
@@ -448,10 +529,7 @@ describe("$promise", function() {
                 promise.then(function(value) {
                     expect(value).toEqual(1);
                     done();
-                }, function() {
-                    assert(false);
-                    done();
-                });
+                }, shouldNotBeCalled);
 
                 async(function() {
                     deferred.resolve(1);
@@ -465,10 +543,7 @@ describe("$promise", function() {
                 promise.then(function(value) {
                     expect(value).toEqual(1);
                     done();
-                }, function() {
-                    assert(false);
-                    done();
-                });
+                }, shouldNotBeCalled);
 
                 async(function() {
                     deferred.resolve(1);
@@ -479,10 +554,7 @@ describe("$promise", function() {
                 var deferred = $promise.defer();
                 var promise = $promise.resolve(deferred.promise);
 
-                promise.then(function() {
-                    assert(false);
-                    done();
-                }, function(reason) {
+                promise.then(shouldNotBeCalled, function(reason) {
                     expect(reason).toEqual(1);
                     done();
                 });
@@ -496,6 +568,7 @@ describe("$promise", function() {
         describe("otherwise, if x is an object or function", function() {
             // TODO TBD do we care about this?
             it("Let then be x.then", function() {
+                // https://github.com/jakearchibald/es6-promise/blob/master/test/tests/extension-test.js
                 /*if (!isFunction(Object.defineProperty)) {
                     return;
                 }
@@ -528,10 +601,7 @@ describe("$promise", function() {
                     promise.then(function(value) {
                         expect(value).toEqual(1);
                         done();
-                    }, function() {
-                        assert(false);
-                        done();
-                    });
+                    }, shouldNotBeCalled);
 
                     async(function() {
                         deferred.resolve(1);
@@ -543,10 +613,7 @@ describe("$promise", function() {
                     var promise = $promise.resolve(deferred.promise);
                     var error = new Error("a");
 
-                    promise.then(function() {
-                        assert(false);
-                        done();
-                    }, function(reason) {
+                    promise.then(shouldNotBeCalled, function(reason) {
                         expect(reason).toBe(error);
                         done();
                     });
@@ -567,10 +634,7 @@ describe("$promise", function() {
                         expect(value).toEqual(1);
                         expect(resolveCount).toEqual(1);
                         done();
-                    }, function() {
-                        assert(false);
-                        done();
-                    });
+                    }, shouldNotBeCalled);
 
                     async(function() {
                         deferred.resolve(1);
@@ -595,10 +659,7 @@ describe("$promise", function() {
                         promise.then(function(value) {
                             expect(value).toEqual(1);
                             done();
-                        }, function() {
-                            assert(false);
-                            done();
-                        });
+                        }, shouldNotBeCalled);
                     });
 
                     it("otherwise, reject promise with e as the reason.", function(done) {
@@ -611,10 +672,7 @@ describe("$promise", function() {
 
                         var promise = $promise.resolve(thenable);
 
-                        promise.then(function() {
-                            assert(false);
-                            done();
-                        }, function(reason) {
+                        promise.then(shouldNotBeCalled, function(reason) {
                             expect(reason).toBe(error);
                             done();
                         });
@@ -632,68 +690,134 @@ describe("$promise", function() {
                 promise.then(function(value) {
                     expect(value).toEqual(thenable);
                     done();
-                }, function() {
-                    assert(false);
-                    done();
-                });
+                }, shouldNotBeCalled);
             });
         });
 
         it("if x is not an object or function, fulfill promise with x", function(done) {
-            var promise = $promise.resolve(null);
+            var promise = $promise.resolve("a");
 
             promise.then(function(value) {
-                expect(value).toEqual(null);
+                expect(value).toEqual("a");
                 done();
-            }, function() {
-                assert(false);
-                done();
-            });
+            }, shouldNotBeCalled);
         });
     });
 
     describe("reject", function () {
-        it("should reject with reason", function() {
+        it("should reject with reason", function(done) {
+            var promise = $promise.reject("a");
 
-        });
-    });
-
-    describe("defer", function() {
-        it("should include a promise property", function() {
-
-        });
-
-        it("should resolve promise upon calling resolve property", function() {
-
-        });
-
-        it("should reject the promise upon calling reject property", function() {
-
+            promise.then(shouldNotBeCalled, function(reason) {
+                expect(reason).toEqual("a");
+                done();
+            });
         });
     });
 
     describe("all", function() {
         it("should fulfill after all promises are fulfilled", function(done) {
-            done();
+            var firstResolved;
+            var secondResolved;
+            var thirdResolved;
+
+            var promise1 = $promise(function(resolve) {
+                firstResolved = true;
+                resolve(1);
+            });
+
+            var promise2 = $promise(function(resolve) {
+                secondResolved = true;
+                resolve(1);
+            });
+
+            var promise3 = $promise(function(resolve) {
+                thirdResolved = true;
+                resolve(1);
+            });
+
+            $promise.all([promise1, promise2, promise3]).then(function() {
+                expect(firstResolved).toEqual(true);
+                expect(secondResolved).toEqual(true);
+                expect(thirdResolved).toEqual(true);
+                done();
+            }, shouldNotBeCalled);
         });
 
         it("should reject after one promise is rejected", function(done) {
-            done();
+            var promise1 = $promise(function(resolve) {
+                resolve(1);
+            });
+
+            var promise2 = $promise(function(resolve, reject) {
+                reject("a");
+            });
+
+            var promise3 = $promise(function(resolve) {
+                resolve(1);
+            });
+
+            $promise.all([promise1, promise2, promise3]).then(shouldNotBeCalled, function(reason) {
+                expect(reason).toEqual("a");
+                done();
+            });
         });
 
         it("should return in order array of all fulfilled values", function(done) {
-            done();
+            var count = 0;
+
+            var promise1 = $promise(function(resolve) {
+                resolve(count++);
+            });
+
+            var promise2 = $promise(function(resolve) {
+                resolve(count++);
+            });
+
+            var promise3 = $promise(function(resolve) {
+                resolve(count++);
+            });
+
+            $promise.all([promise1, promise2, promise3]).then(function(values) {
+                expect(count).toEqual(3);
+                expect(values.length).toEqual(3);
+                expect(values[0]).toEqual(0);
+                expect(values[1]).toEqual(1);
+                expect(values[2]).toEqual(2);
+                done();
+            }, shouldNotBeCalled);
         });
 
-        it("should allow non promise like values", function(done) {
-            done();
+        it("should fulfill with empty array", function() {
+            $promise.all([]).then(function(values) {
+                expect(values.length).toEqual(0);
+                done();
+            }, shouldNotBeCalled);
         });
 
-        it("should allow thenables", function(done) {
-            done();
+        it("should fulfill with mix of promises, thenables, and non promise like values", function(done) {
+            var promise = $promise(function(resolve) {
+                resolve(1);
+            });
+
+            var thenable = {
+                then: function(onFulfilled) {
+                    setTimeout(function() {
+                        onFulfilled(2);
+                    }, 0);
+                }
+            };
+
+            $promise.all([promise, thenable, 3]).then(function(values) {
+                expect(values.length).toEqual(3);
+                expect(values[0]).toEqual(1);
+                expect(values[1]).toEqual(2);
+                expect(values[2]).toEqual(3);
+                done();
+            }, shouldNotBeCalled);
         });
 
-        it("should reject if not array parameter", function(done) {
+        it("should reject if not an array", function(done) {
             $promise.all({}).then(function() {
                 expect(false);
                 done();
@@ -706,30 +830,132 @@ describe("$promise", function() {
 
     describe("race", function() {
         it("should fulfill after one promise is fulfilled", function(done) {
-            done();
+            var promise1 = $promise(function() {});
+
+            var promise2 = $promise(function(resolve) {
+                resolve(1);
+            });
+
+            var promise3 = $promise(function() {});
+
+            $promise.race([promise1, promise2, promise3]).then(function(value) {
+                expect(value).toEqual(1);
+                done();
+            }, shouldNotBeCalled);
         });
 
         it("should reject after one promise is rejected", function(done) {
-            done();
+            var promise1 = $promise(function() {});
+
+            var promise2 = $promise(function(resolve, reject) {
+                reject(1);
+            });
+
+            var promise3 = $promise(function() {});
+
+            $promise.race([promise1, promise2, promise3]).then(shouldNotBeCalled, function(reason) {
+                expect(reason).toEqual(1);
+                done();
+            });
         });
 
         it("should return value of first fulfilled promise", function(done) {
-            done();
+            var promise1 = $promise(function(resolve) {
+                setTimeout(function(){
+                    resolve(1);
+                }, 30);
+            });
+
+            var promise2 = $promise(function(resolve) {
+                setTimeout(function(){
+                    resolve(2);
+                }, 10);
+            });
+
+            var promise3 = $promise(function(resolve) {
+                setTimeout(function(){
+                    resolve(3);
+                }, 20);
+            });
+
+            $promise.race([promise1, promise2, promise3]).then(function(value) {
+                expect(value).toEqual(2);
+                done();
+            }, shouldNotBeCalled);
         });
 
         it("should return reason of first rejected promise", function(done) {
-            done();
+            var promise1 = $promise(function(resolve, reject) {
+                setTimeout(function(){
+                    reject(1);
+                }, 30);
+            });
+
+            var promise2 = $promise(function(resolve, reject) {
+                setTimeout(function(){
+                    reject(2);
+                }, 10);
+            });
+
+            var promise3 = $promise(function(resolve, reject) {
+                setTimeout(function(){
+                    reject(3);
+                }, 20);
+            });
+
+            $promise.race([promise1, promise2, promise3]).then(shouldNotBeCalled, function(reason) {
+                expect(reason).toEqual(2);
+                done();
+            });
         });
 
-        it("should ignore non promise like values", function(done) {
-            done();
+        it("should prioritize by array order on next frame", function(done) {
+            var promise1 = $promise(function(resolve) {
+                resolve(1);
+            });
+
+            var promise2 = $promise(function(resolve) {
+                resolve(2);
+            });
+
+            $promise.race([promise1, promise2, 3]).then(function(reason) {
+                expect(reason).toEqual(1);
+                done();
+            }, shouldNotBeCalled);
         });
 
-        it("should allow thenables", function(done) {
-            done();
+        it("should fulfill with mix of promises, thenables, and non promise like values", function(done) {
+            var promise = $promise(function(resolve) {
+                resolve(1);
+            });
+
+            var thenable = {
+                then: function(onFulfilled) {
+                    onFulfilled(2);
+                }
+            };
+
+            $promise.race([promise, thenable, 3]).then(function(value) {
+                expect(value).toEqual(2);
+                done();
+            }, shouldNotBeCalled);
         });
 
-        it("should reject if not array parameter", function(done) {
+        it("should not resolve an empty array", function(done) {
+            var called = false;
+            $promise.race([]).then(function() {
+                called = true
+            }, function() {
+                called = true;
+            });
+
+            async(function() {
+                expect(called).toEqual(false);
+                done();
+            });
+        });
+
+        it("should reject if not an array", function(done) {
             $promise.race({}).then(function() {
                 expect(false);
                 done();
@@ -739,5 +965,4 @@ describe("$promise", function() {
             });
         });
     });
-
 });

@@ -1183,7 +1183,7 @@ describe("common", function(){
         });
 
         it("should throw an error", function(){
-            expect(function(){assert(false)}).toThrow(new Error(null));
+            expect(function(){assert(false)}).toThrow(new Error(""));
         });
 
         it("should include message", function(){
