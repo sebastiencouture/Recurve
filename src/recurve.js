@@ -26,9 +26,10 @@ function publishApi(recurve) {
 
     var recurveModule = recurve.$module = module();
 
+    addDocumentService(recurveModule);
+    addWindowService(recurveModule);
     addSignalService(recurveModule);
     addEventEmitterService(recurveModule);
-    addWindowService(recurveModule);
     addCacheService(recurveModule);
     addLogService(recurveModule);
     addLogConsoleService(recurveModule);
@@ -37,6 +38,8 @@ function publishApi(recurve) {
     addCookiesService(recurveModule);
     addStorageServices(recurveModule);
     addPromiseService(recurveModule);
+    addHttpProviderService(recurveModule);
+    addHttpService(recurveModule);
 
     recurve.module = function(dependentModules) {
         // TODO TBD core module is always include, but does not need to be explicitly specified

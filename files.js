@@ -6,9 +6,10 @@ var recurveFiles = {
         "src/recurve.js",
         "src/di/container.js",
         "src/di/module.js",
+        "src/core/window.js",
+        "src/core/document.js",
         "src/core/signal.js",
         "src/core/event-emitter.js",
-        "src/core/window.js",
         "src/core/cache.js",
         "src/core/log/log.js",
         "src/core/log/log-console.js",
@@ -16,7 +17,11 @@ var recurveFiles = {
         "src/core/performance.js",
         "src/core/cookies.js",
         "src/core/storage.js",
-        "src/core/promise.js"
+        "src/core/promise.js",
+        "src/core/http/http.js",
+        "src/core/http/http-provider.js",
+        "src/core/http/http-xhr.js",
+        "src/core/http/http-jsonp.js"
     ],
 
     "recurveModules" : {

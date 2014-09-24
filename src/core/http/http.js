@@ -1,11 +1,37 @@
 "use strict";
 
 function addHttpService(module) {
-    module.factory("$http", ["$promise", "$config"], function($promise, config) {
+    module.factory("$http", ["$httpProvider", "$promise", "$config"], function($httpProvider, $promise, config) {
         var defaults = config;
 
         function createHttpDeferred() {
+            var deferred = $promise.defer();
 
+            deferred.promise.success = function(onSuccess) {
+                deferred.promise.then(function(response) {
+                    onSuccess(
+                        response.data, response.status, response.statusText,
+                        response.headers, response.options, response.canceled);
+                });
+
+                return this._deferred.promise;
+            };
+
+            deferred.promise.error = function(onError) {
+                deferred.promise.then(null, function(response) {
+                    onError(
+                        response.data, response.status, response.statusText,
+                        response.headers, response.options, response.canceled);
+                });
+
+                return this._deferred.promise;
+            };
+
+            deferred.promise.cancel = function() {
+                deferred.request.cancel();
+            };
+
+            return deferred;
         }
 
         function createOptionsWithDefaults(options) {
@@ -197,7 +223,6 @@ function addHttpService(module) {
 
         cache: true,
 
-        errorOnCancel: true,
         emulateHttp: false,
 
         serialize: function(data, contentType) {
