@@ -86,7 +86,7 @@ function addHttpService(module) {
                 else if ("xml" === dataType) {
                     accept = "application/xml,text/xml,*/*;q=0.01";
                 }
-                else if ("json" === dataType || "script" === dataType) {
+                else if ("json" === dataType) {
                     accept = "application/json,text/javascript,*/*;q=0.01";
                 }
                 else {
@@ -99,8 +99,7 @@ function addHttpService(module) {
 
         function addRequestedWithHeader(options) {
             if (!options.crossDomain &&
-                !options.headers["X-Requested-With"] &&
-                !isEqualIgnoreCase("script", options.dataType)) {
+                !options.headers["X-Requested-With"]) {
                 options.headers["X-Requested-With"] = "XMLHttpRequest";
             }
         }
@@ -192,11 +191,6 @@ function addHttpService(module) {
             patch: function(url, data, options) {
                 options = extend(options, {method: "patch", url: url, data: data});
                 return http(options);
-            },
-
-            getScript: function(url, options) {
-                options = extend(options, {method: "script", url: url});
-                return http(options);
             }
         });
     });
@@ -214,8 +208,7 @@ function addHttpService(module) {
             },
             head: {},
             "delete": {},
-            jsonp: {},
-            script: {}
+            jsonp: {}
         },
 
         method: "get",
