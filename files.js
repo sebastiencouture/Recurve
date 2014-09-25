@@ -21,7 +21,8 @@ var recurveFiles = {
         "src/core/http/http.js",
         "src/core/http/http-provider.js",
         "src/core/http/http-xhr.js",
-        "src/core/http/http-jsonp.js"
+        "src/core/http/http-jsonp.js",
+        "src/core/http/http-deferred.js"
     ],
 
     "recurveModules" : {

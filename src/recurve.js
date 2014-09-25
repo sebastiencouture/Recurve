@@ -38,6 +38,9 @@ function publishApi(recurve) {
     addCookiesService(recurveModule);
     addStorageServices(recurveModule);
     addPromiseService(recurveModule);
+    addHttpXhrService(recurveModule);
+    addHttpJsonpService(recurveModule);
+    addHttpDeferredService(recurveModule);
     addHttpProviderService(recurveModule);
     addHttpService(recurveModule);
 

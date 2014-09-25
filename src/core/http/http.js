@@ -1,38 +1,8 @@
 "use strict";
 
 function addHttpService(module) {
-    module.factory("$http", ["$httpProvider", "$promise", "$config"], function($httpProvider, $promise, config) {
+    module.factory("$http", ["$httpProvider", "$httpDeferred", "$promise", "$config"], function($httpProvider, $httpDeferred, $promise, config) {
         var defaults = config;
-
-        function createHttpDeferred() {
-            var deferred = $promise.defer();
-
-            deferred.promise.success = function(onSuccess) {
-                deferred.promise.then(function(response) {
-                    onSuccess(
-                        response.data, response.status, response.statusText,
-                        response.headers, response.options, response.canceled);
-                });
-
-                return this._deferred.promise;
-            };
-
-            deferred.promise.error = function(onError) {
-                deferred.promise.then(null, function(response) {
-                    onError(
-                        response.data, response.status, response.statusText,
-                        response.headers, response.options, response.canceled);
-                });
-
-                return this._deferred.promise;
-            };
-
-            deferred.promise.cancel = function() {
-                deferred.request.cancel();
-            };
-
-            return deferred;
-        }
 
         function createOptionsWithDefaults(options) {
             var withDefaults = extend({}, defaults);
@@ -139,20 +109,20 @@ function addHttpService(module) {
 
             options.data = withDefaults.serialize(options.data, options.contentType);
 
-            var deferred = createHttpDeferred();
-            $httpProvider.send(withDefaults, deferred);
+            var httpDeferred = $httpDeferred();
 
             function parseResponseSuccess(response) {
                 response.data = withDefaults.parse(response.data);
-                return response;
+                httpDeferred.resolve(response);
             }
 
             function parseResponseError(response) {
                 response.data = withDefaults.parse(response.data);
-                return $promise.reject(response);
+                httpDeferred.reject(response);
             }
 
-            return deferred.promise.then(parseResponseSuccess, parseResponseError);
+            $httpProvider.send(withDefaults, httpDeferred).then(parseResponseSuccess, parseResponseError);
+            return httpDeferred.promise;
         };
 
         return extend(http, {

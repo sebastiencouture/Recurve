@@ -1,20 +1,21 @@
 "use strict";
 
 function addHttpProviderService(module) {
-    module.factory("$httpProvider", ["$window", "$document"], function($window, $document) {
+    module.factory("$httpProvider", ["$httpXhr", "$httpJsonp"], function($httpXhr, $httpJsonp) {
         return {
-            send: function(options, deferred) {
+            send: function(options, httpDeferred) {
                 var request;
 
                 if (isEqualIgnoreCase("jsonp", options.method)) {
-                    request = httpJsonp(options, deferred, $window, $document);
+                    request = $httpJsonp(options);
                 }
                 else {
-                    request = httpXhr(options, deferred, $window);
+                    request = $httpXhr(options);
                 }
 
-                deferred.request = request;
-                request.send();
+                httpDeferred.request = request;
+
+                return request.send();
             }
         };
     });
