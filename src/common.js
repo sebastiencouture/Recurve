@@ -342,7 +342,7 @@ function isEqualIgnoreCase(value, other) {
         return value === other;
     }
 
-    value = str.toLowerCase();
+    value = value.toLowerCase();
     other = other.toLowerCase();
 
     return value === other;
