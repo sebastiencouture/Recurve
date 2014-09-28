@@ -54,7 +54,7 @@ function addMockTimeoutService(module) {
 
         var timeoutGroupByTime = {};
 
-        function addTimeout(id, fn, time) {
+        function add(id, fn, time) {
             var group = timeoutGroupByTime[time];
             if (!group) {
                 group = timeoutGroup();
@@ -65,7 +65,7 @@ function addMockTimeoutService(module) {
             group.add(id, fn);
         }
 
-        function invokeTimeout(id, time) {
+        function invoke(id, time) {
             var group = timeoutGroupByTime[time];
             if (group) {
                 group.invoke(id);
@@ -74,10 +74,10 @@ function addMockTimeoutService(module) {
 
         var $timeout = function(fn, time) {
             var id = window.setTimeout(function() {
-                invokeTimeout(id, time);
+                invoke(id, time);
             }, time);
 
-            addTimeout(id, fn, time);
+            add(id, fn, time);
         };
 
         return recurve.extend($timeout, {
