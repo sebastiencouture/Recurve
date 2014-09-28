@@ -26,7 +26,9 @@ function addMockTimeoutService(module) {
                     timeouts.push({id: id, fn: fn});
                 },
 
-                call: function(id) {
+                remove: remove,
+
+                invoke: function(id) {
                     recurve.forEach(timeouts, function(timeout, index) {
                         if (timeout.id !== id) {
                             return;
@@ -39,16 +41,14 @@ function addMockTimeoutService(module) {
                     });
                 },
 
-                callAll: function() {
+                invokeAll: function() {
                     recurve.forEach(timeouts, function(timeout) {
                         timeout.fn();
                         window.clearTimeout(timeout.id);
                     });
 
                     timeouts = [];
-                },
-
-                remove: remove
+                }
             }
         }
 
@@ -65,16 +65,16 @@ function addMockTimeoutService(module) {
             group.add(id, fn);
         }
 
-        function callTimeout(id, time) {
+        function invokeTimeout(id, time) {
             var group = timeoutGroupByTime[time];
             if (group) {
-                group.call(id);
+                group.invoke(id);
             }
         }
 
         var $timeout = function(fn, time) {
             var id = window.setTimeout(function() {
-                callTimeout(id, time);
+                invokeTimeout(id, time);
             }, time);
 
             addTimeout(id, fn, time);
@@ -93,7 +93,7 @@ function addMockTimeoutService(module) {
                         return false;
                     }
 
-                    group.callAll();
+                    group.invokeAll();
                     delete timeoutGroupByTime[time];
                 });
             }
