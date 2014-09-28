@@ -45,7 +45,7 @@ describe("$promise", function() {
             })
         });
 
-        it("should reject on error with the error as the reason", function() {
+        it("should reject on error with the error as the reason", function(done) {
             var promise = $promise(function() {
                 throw new Error("a");
             });
@@ -307,7 +307,7 @@ describe("$promise", function() {
         });
 
         describe("if onRejected is a function", function() {
-            it("it must be called after promise is rejected, with promise's reason as its first argument", function() {
+            it("it must be called after promise is rejected, with promise's reason as its first argument", function(done) {
                 var called = false;
 
                 deferred.promise.then(shouldNotBeCalled, function(reason) {
@@ -788,7 +788,7 @@ describe("$promise", function() {
             }, shouldNotBeCalled);
         });
 
-        it("should fulfill with empty array", function() {
+        it("should fulfill with empty array", function(done) {
             $promise.all([]).then(function(values) {
                 expect(values.length).toEqual(0);
                 done();

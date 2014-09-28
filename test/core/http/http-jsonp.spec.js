@@ -206,7 +206,7 @@ describe("$httpJsonp", function() {
             getCallback()();
         });
 
-        it("should return 0 status code", function() {
+        it("should return 0 status code", function(done) {
             promise.then(shouldNotBeCalled, function(response) {
                 expect(response.status).toEqual(0);
                 done();

@@ -842,7 +842,7 @@ describe("common", function(){
 
     // Internal method only intended to be used with strings
     describe("isEqualIgnoreCase", function(){
-        if("should be equal with different case", function(){
+        it("should be equal with different case", function(){
             expect(isEqualIgnoreCase("example", "eXamPle")).toEqual(true);
         });
 
