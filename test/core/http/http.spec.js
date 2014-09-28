@@ -1,8 +1,17 @@
 "use strict";
 
 describe("$http", function() {
-    it("should be invokable", function() {
+    var $http;
 
+    beforeEach(function() {
+        $invoke(["$http"], function(http) {
+            $http = http;
+        });
+    });
+
+    it("should be invokable", function() {
+        expect($http).toBeDefined();
+        expect(isFunction($http)).toEqual(true);
     });
 
     describe("options", function() {

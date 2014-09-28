@@ -28,6 +28,7 @@ function publishApi(recurve) {
 
     addDocumentService(recurveModule);
     addWindowService(recurveModule);
+    addTimeoutService(recurveModule);
     addSignalService(recurveModule);
     addEventEmitterService(recurveModule);
     addCacheService(recurveModule);
