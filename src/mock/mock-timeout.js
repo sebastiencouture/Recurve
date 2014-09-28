@@ -1,51 +1,100 @@
 "use strict";
 
 function addMockTimeoutService(module) {
-    module.factory("$timeout", ["$window"], function($window) {
-        var timeoutsInProgress = {};
+    module.factory("$timeout", null, function() {
+        function timeoutGroup() {
+            var timeouts = [];
 
-        function removeTimeout(id) {
-            delete timeoutsInProgress[id];
-            $window.clearTimeout(id);
+            function remove(id) {
+                recurve.forEach(timeouts, function(timeout, index) {
+                    if (timeout.id !== id) {
+                        return;
+                    }
+
+                    removeAtIndex(timeout.id, index);
+                    return false;
+                });
+            }
+
+            function removeAtIndex(id, index) {
+                window.clearTimeout(id);
+                timeouts.splice(index, 1);
+            }
+
+            return {
+                add: function(id, fn) {
+                    timeouts.push({id: id, fn: fn});
+                },
+
+                call: function(id) {
+                    recurve.forEach(timeouts, function(timeout, index) {
+                        if (timeout.id !== id) {
+                            return;
+                        }
+
+                        timeout.fn();
+                        removeAtIndex(timeout.id, index);
+
+                        return false;
+                    });
+                },
+
+                callAll: function() {
+                    recurve.forEach(timeouts, function(timeout) {
+                        timeout.fn();
+                        window.clearTimeout(timeout.id);
+                    });
+
+                    timeouts = [];
+                },
+
+                remove: remove
+            }
         }
 
-        function addTimeout(id, fn) {
-            removeTimeout(id);
-            timeoutsInProgress[id] = fn;
+        var timeoutGroupByTime = {};
+
+        function addTimeout(id, fn, time) {
+            var group = timeoutGroupByTime[time];
+            if (!group) {
+                group = timeoutGroup();
+                timeoutGroupByTime[time] = group;
+            }
+
+            group.remove(id);
+            group.add(id, fn);
         }
 
-        function callTimeout(id) {
-            if (timeoutsInProgress.hasOwnProperty(id)) {
-                timeoutsInProgress[id]();
+        function callTimeout(id, time) {
+            var group = timeoutGroupByTime[time];
+            if (group) {
+                group.call(id);
             }
         }
 
         var $timeout = function(fn, time) {
-            var called;
-            var id = $window.setTimeout(function() {
-                called = true;
-                callTimeout(id);
-                removeTimeout(id);
+            var id = window.setTimeout(function() {
+                callTimeout(id, time);
             }, time);
 
-            // In case setTimeout is overriden and no longer async...
-            // TODO TBD maybe just use window instead of $window
-            if (!called) {
-                addTimeout(id);
-            }
+            addTimeout(id, fn, time);
         };
 
         return recurve.extend($timeout, {
             cancel: function(id) {
-                removeTimeout(id);
+                recurve.forEach(timeoutGroupByTime, function(group) {
+                    group.remove(id);
+                });
             },
 
-            flush: function() {
-                // TODO TBD these need to be called in order on time, and then as tie breaker in order
-                // added
-                recurve.forEach(timeoutsInProgress, function(fn, id) {
-                    fn();
-                    removeTimeout(id);
+            flush: function(maxTime) {
+                recurve.forEach(timeoutGroupByTime, function(group, time) {
+                    if (maxTime <= time) {
+                        return false;
+                    }
+
+                    group.callAll();
+                    delete timeoutGroupByTime[time];
                 });
             }
         });
