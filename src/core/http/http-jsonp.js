@@ -7,6 +7,10 @@ function addHttpJsonpService(module) {
             var deferred;
 
             function complete(success, data, status, statusText) {
+                if (isUndefined(status)) {
+                    status = 0;
+                }
+
                 var response = {
                     data: data,
                     status: status,

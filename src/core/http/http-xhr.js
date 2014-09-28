@@ -100,13 +100,7 @@ function addHttpXhrService(module) {
             }
 
             function successful(status) {
-                if (canceled) {
-                    return false;
-                }
-
-                return (200 <= status && 300 > status) ||
-                    304 === status ||
-                    (0 === status && "file:" === $window.location.protocol);
+                return 200 <= status && 300 > status;
             }
 
             function getData() {

@@ -468,6 +468,10 @@ function removeEventListener(element, event, callback) {
     }
 }
 
+function elementSupportsEvent(element, name) {
+    return name in element;
+}
+
 ////
 
 function addParametersToUrl(url, parameters) {
