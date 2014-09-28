@@ -1,14 +1,14 @@
 "use strict";
 
 function addPromiseService(module) {
-    module.factory("$promise", ["$window"], function($window) {
+    module.factory("$promise", ["$timeout"], function($timeout) {
 
         function isPromiseLike(obj) {
             return obj && isFunction(obj.then);
         }
 
         function async(fn) {
-            $window.setTimeout(fn, 0);
+            $timeout(fn, 0);
         }
 
         function invokeCallback(callback, value, deferred) {
