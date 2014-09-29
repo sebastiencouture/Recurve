@@ -2,7 +2,7 @@
 
 function addMockTimeoutService(module) {
     module.factory("$timeout", null, function() {
-        function timeoutGroup() {
+        function timeoutGroup(time) {
             var timeouts = [];
 
             function remove(id) {
@@ -22,6 +22,8 @@ function addMockTimeoutService(module) {
             }
 
             return {
+                time: time,
+
                 add: function(id, fn) {
                     timeouts.push({id: id, fn: fn});
                 },
@@ -52,13 +54,37 @@ function addMockTimeoutService(module) {
             }
         }
 
-        var timeoutGroupByTime = {};
+        var timeoutGroups = [];
+
+        function getTimeoutGroupByTime(time) {
+            var group = null;
+            recurve.forEach(timeoutGroups, function(possibleGroup) {
+                if (possibleGroup.time === time) {
+                    group = possibleGroup;
+                    return false;
+                }
+            });
+
+            return group;
+        }
 
         function add(id, fn, time) {
-            var group = timeoutGroupByTime[time];
+            var group = getTimeoutGroupByTime(time);
             if (!group) {
-                group = timeoutGroup();
-                timeoutGroupByTime[time] = group;
+                group = timeoutGroup(time);
+
+                var added;
+                recurve.forEach(timeoutGroups, function(existingGroup, index) {
+                    if (existingGroup.time > time) {
+                        timeoutGroups.splice(index, 0, group);
+                        added = true;
+                        return false;
+                    }
+                });
+
+                if (!added) {
+                    timeoutGroups.push(group);
+                }
             }
 
             group.remove(id);
@@ -66,7 +92,7 @@ function addMockTimeoutService(module) {
         }
 
         function invoke(id, time) {
-            var group = timeoutGroupByTime[time];
+            var group = getTimeoutGroupByTime(time);
             if (group) {
                 group.invoke(id);
             }
@@ -78,24 +104,31 @@ function addMockTimeoutService(module) {
             }, time);
 
             add(id, fn, time);
+
+            return id;
         };
 
         return recurve.extend($timeout, {
             cancel: function(id) {
-                recurve.forEach(timeoutGroupByTime, function(group) {
+                recurve.forEach(timeoutGroups, function(group) {
                     group.remove(id);
                 });
             },
 
             flush: function(maxTime) {
-                recurve.forEach(timeoutGroupByTime, function(group, time) {
-                    if (maxTime <= time) {
-                        return false;
+                var maxIndex = undefined;
+                forEach(timeoutGroups, function(group, index) {
+                    if (maxTime < group.time) {
+                        return;
                     }
 
                     group.invokeAll();
-                    delete timeoutGroupByTime[time];
+                    maxIndex = index;
                 });
+
+                if (!recurve.isUndefined(maxIndex)) {
+                    timeoutGroups.splice(0, maxIndex + 1);
+                }
             }
         });
     });
