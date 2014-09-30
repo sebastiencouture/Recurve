@@ -31,15 +31,53 @@ describe("$async", function() {
         }, 0);
     });
 
-    it("should cancel", function(done) {
-        var id = $async(callback, 0);
+    it("should allow multiple functions to be registered", function(done) {
+        var callback2 = jasmine.createSpy("callback2");
+        var callback3 = jasmine.createSpy("callback3");
+
+        $async(callback, 5);
+        $async(callback2, 0);
+        $async(callback3, 10);
+
+        expect(callback).not.toHaveBeenCalled();
+        expect(callback2).not.toHaveBeenCalled();
+        expect(callback3).not.toHaveBeenCalled();
+
+        window.setTimeout(function() {
+            expect(callback).toHaveBeenCalled();
+            expect(callback2).toHaveBeenCalled();
+            expect(callback3).toHaveBeenCalled();
+
+            done();
+        }, 10);
+    });
+
+    it("should allow function to be registered multiple times", function(done) {
+        $async(callback, 5);
+        $async(callback, 0);
+        $async(callback, 10);
+
         expect(callback).not.toHaveBeenCalled();
 
-        $async.cancel(id);
-
-        setTimeout(function() {
-            expect(callback).not.toHaveBeenCalled();
+        window.setTimeout(function() {
+            expect(callback.calls.count()).toEqual(3);
             done();
-        }, 0);
+        }, 10);
+    });
+
+    describe("cancel", function() {
+        it("should return id that can be used to cancel", function() {
+            expect($async(callback)).toBeDefined();
+        });
+
+        it("should cancel and not call", function(done) {
+            var id = $async(callback, 0);
+            $async.cancel(id);
+
+            window.setTimeout(function() {
+                expect(callback).not.toHaveBeenCalled();
+                done();
+            }, 0);
+        });
     });
 })

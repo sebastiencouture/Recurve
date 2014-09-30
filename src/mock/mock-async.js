@@ -2,24 +2,23 @@
 
 function addMockAsyncService(module) {
     module.factory("$async", null, function() {
-        function timeoutGroup(time, flushTime) {
-            if (isUndefined(flushTime)) {
-                flushTime = 0;
-            }
-
-            time += flushTime;
-
+        function timeoutGroup(timeMs) {
             var timeouts = [];
 
             function remove(id) {
+                var removed = false;
                 recurve.forEach(timeouts, function(timeout, index) {
                     if (timeout.id !== id) {
                         return;
                     }
 
                     removeAtIndex(timeout.id, index);
+                    removed = true;
+
                     return false;
                 });
+
+                return removed;
             }
 
             function removeAtIndex(id, index) {
@@ -28,8 +27,7 @@ function addMockAsyncService(module) {
             }
 
             return {
-                time: time,
-                flushTime: flushTime,
+                timeMs: timeMs,
 
                 add: function(id, fn) {
                     timeouts.push({id: id, fn: fn});
@@ -37,8 +35,6 @@ function addMockAsyncService(module) {
 
                 remove: remove,
 
-                // Doesn't take into consideration flush, but doesn't need to since should only be called when window timeout
-                // expires
                 invoke: function(id) {
                     recurve.forEach(timeouts, function(timeout, index) {
                         if (timeout.id !== id) {
@@ -60,26 +56,17 @@ function addMockAsyncService(module) {
                         timeout.fn();
                         window.clearTimeout(timeout.id);
                     }
-                },
-
-                resetFlushTime: function() {
-                    this.time -= this.flushTime;
-                    this.flushTime = 0;
                 }
             }
         }
 
         var timeoutGroups = [];
-        var flushTime = 0;
+        var elapsedTimeMs = 0;
 
-        function getTimeoutGroupByTime(time, flushTime) {
-            if (isUndefined(flushTime)) {
-                flushTime = 0;
-            }
-
+        function getTimeoutGroupByTime(timeMs) {
             var group = null;
             recurve.forEach(timeoutGroups, function(possibleGroup) {
-                if (possibleGroup.time === time && possibleGroup.flushTime === flushTime) {
+                if (possibleGroup.timeMs === timeMs) {
                     group = possibleGroup;
                     return false;
                 }
@@ -88,18 +75,20 @@ function addMockAsyncService(module) {
             return group;
         }
 
-        function add(id, fn, time) {
-            if (isUndefined(time)) {
-                time = 0;
+        function add(id, fn, timeMs) {
+            if (isUndefined(timeMs)) {
+                timeMs = 0;
             }
 
-            var group = getTimeoutGroupByTime(time, flushTime);
+            timeMs += elapsedTimeMs;
+
+            var group = getTimeoutGroupByTime(timeMs);
             if (!group) {
-                group = timeoutGroup(time, flushTime);
+                group = timeoutGroup(timeMs);
 
                 var added;
                 recurve.forEach(timeoutGroups, function(existingGroup, index) {
-                    if (existingGroup.time > time) {
+                    if (existingGroup.timeMs > timeMs) {
                         timeoutGroups.splice(index, 0, group);
                         added = true;
                         return false;
@@ -117,39 +106,19 @@ function addMockAsyncService(module) {
 
         // Doesn't take into consideration flush, but doesn't need to since should only be called when window timeout
         // expires
-        function invoke(id, time) {
-            var group = getTimeoutGroupByTime(time);
+        function invoke(id, timeMs) {
+            var group = getTimeoutGroupByTime(timeMs);
             if (group) {
                 group.invoke(id);
             }
         }
 
-        function resetFlushTime() {
-            flushTime = 0;
-
-            recurve.forEach(timeoutGroups, function(group) {
-                group.resetFlushTime();
-            });
-
-            recurve.stableSort(timeoutGroups, function defaultComparison(left, right) {
-                if (left.time == right.time) {
-                    return 0;
-                }
-                else if (left.time < right.time) {
-                    return -1;
-                }
-                else {
-                    return 1;
-                }
-            });
-        }
-
-        var $async = function(fn, time) {
+        var $async = function(fn, timeMs) {
             var id = window.setTimeout(function() {
-                invoke(id, time);
-            }, time);
+                invoke(id, timeMs);
+            }, timeMs);
 
-            add(id, fn, time);
+            add(id, fn, timeMs);
 
             return id;
         };
@@ -157,32 +126,33 @@ function addMockAsyncService(module) {
         return recurve.extend($async, {
             cancel: function(id) {
                 recurve.forEach(timeoutGroups, function(group) {
-                    group.remove(id);
+                    if (group.remove(id)) {
+                        return false;
+                    }
                 });
             },
 
-            flush: function(maxTime) {
-                if (0 === timeoutGroups.length) {
-                    return;
-                }
-
-                flushTime = 0;
+            flush: function(timeMs) {
+                var startTimeMs = elapsedTimeMs;
+                var maxTimeMs = elapsedTimeMs + timeMs;
 
                 // ensure timeouts added during invocation also get called
                 while (timeoutGroups.length) {
                     var group = timeoutGroups[0];
 
-                    if (!isUndefined(maxTime) && maxTime < group.time) {
-                        timeoutGroups.unshift(group);
+                    if (maxTimeMs < group.timeMs) {
                         break;
                     }
 
+                    elapsedTimeMs += group.timeMs;
+
                     timeoutGroups.shift();
-                    flushTime = group.time;
                     group.invokeAll();
                 }
 
-                resetFlushTime();
+                elapsedTimeMs = startTimeMs + timeMs;
+
+                return elapsedTimeMs;
             }
         });
     });

@@ -4,13 +4,13 @@ function addTimeoutService(module) {
     module.factory("$timeout", ["$async", "$promise"], function($async, $promise) {
         var deferreds = {};
 
-        var $timeout = function(time) {
+        var $timeout = function(timeMs) {
             var deferred = $promise.defer();
 
             var id = $async(function() {
                 delete deferreds[id];
                 deferred.resolve(id);
-            }, time);
+            }, timeMs);
 
             deferred.promise._$timeoutId = id;
             deferreds[id] = deferred;

@@ -16,6 +16,7 @@ describe("$timeout decorator mock", function() {
         callback3 = jasmine.createSpy("callback3");
     });
 
+    // Most tests covered under $async
     describe("flush", function() {
         it("should invoke all pending synchronously", function() {
             $timeout(0).then(callback);
@@ -33,66 +34,28 @@ describe("$timeout decorator mock", function() {
             expect(callback3).toHaveBeenCalled();
         });
 
-        it("should invoke all pending in order by time", function() {
+        it("should invoke inner timeout calls in order", function() {
             callback.and.callFake(function() {
+                $timeout(5).then(callback2);
+
                 expect(callback2).not.toHaveBeenCalled();
                 expect(callback3).not.toHaveBeenCalled();
             });
 
             callback2.and.callFake(function() {
                 expect(callback).toHaveBeenCalled();
-                expect(callback3).not.toHaveBeenCalled();
+                expect(callback3).toHaveBeenCalled();
             });
 
             callback3.and.callFake(function() {
                 expect(callback).toHaveBeenCalled();
-                expect(callback2).toHaveBeenCalled();
-            });
-
-            $timeout(0).then(callback);
-            $timeout(5).then(callback2);
-            $timeout(10).then(callback3);
-
-            $timeout.flush();
-        });
-
-        it("should invoke all pending in order by add order as tie breaker", function() {
-            callback.and.callFake(function() {
                 expect(callback2).not.toHaveBeenCalled();
-                expect(callback3).not.toHaveBeenCalled();
             });
 
-            callback2.and.callFake(function() {
-                expect(callback).toHaveBeenCalled();
-                expect(callback3).not.toHaveBeenCalled();
-            });
-
-            callback3.and.callFake(function() {
-                expect(callback).toHaveBeenCalled();
-                expect(callback2).toHaveBeenCalled();
-            });
-
-            $timeout(0).then(callback);
-            $timeout(0).then(callback2);
-            $timeout(0).then(callback3);
+            $timeout(5).then(callback);
+            $timeout(7).then(callback3);
 
             $timeout.flush();
-        });
-
-        it("should only invoke up to and including max time", function() {
-            $timeout(0).then(callback);
-            $timeout(1).then(callback2);
-            $timeout(10).then(callback3);
-
-            $timeout.flush(1);
-
-            expect(callback).toHaveBeenCalled();
-            expect(callback2).toHaveBeenCalled();
-            expect(callback3).not.toHaveBeenCalled();
-
-            $timeout.flush();
-
-            expect(callback3).toHaveBeenCalled();
         });
     });
 });

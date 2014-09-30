@@ -2,8 +2,8 @@
 
 function addAsyncService(module) {
     module.factory("$async", null, function() {
-        var $async = function(fn, time) {
-            return window.setTimeout(fn, time);
+        var $async = function(fn, timeMs) {
+            return window.setTimeout(fn, timeMs);
         };
 
         return extend($async, {

@@ -29,7 +29,7 @@ describe("$async mock", function() {
             }, 10);
         });
 
-        it("should all multiple functions to be registered", function(done) {
+        it("should allow multiple functions to be registered", function(done) {
             var callback2 = jasmine.createSpy("callback2");
             var callback3 = jasmine.createSpy("callback3");
 
@@ -46,6 +46,19 @@ describe("$async mock", function() {
                 expect(callback2).toHaveBeenCalled();
                 expect(callback3).toHaveBeenCalled();
 
+                done();
+            }, 10);
+        });
+
+        it("should allow same function to be registered multiple times", function(done) {
+            $async(callback, 5);
+            $async(callback, 0);
+            $async(callback, 10);
+
+            expect(callback).not.toHaveBeenCalled();
+
+            window.setTimeout(function() {
+                expect(callback.calls.count()).toEqual(3);
                 done();
             }, 10);
         });
@@ -74,6 +87,11 @@ describe("$async mock", function() {
         beforeEach(function() {
             callback2 = jasmine.createSpy("callback2");
             callback3 = jasmine.createSpy("callback3");
+        });
+
+        it("should return elapsed time", function() {
+            expect($async.flush(5)).toEqual(5);
+            expect($async.flush(10)).toEqual(15);
         });
 
         it("should invoke all pending synchronously", function() {
@@ -105,7 +123,7 @@ describe("$async mock", function() {
             expect(callback3.calls.count()).toEqual(1);
         });
 
-        it("should not call again on timeout timer complete", function(done) {
+        it("should not call again on timer complete", function(done) {
             $async(callback, 0);
             $async(callback2, 0);
             $async(callback3, 0);
@@ -167,7 +185,7 @@ describe("$async mock", function() {
             $async.flush();
         });
 
-        it("should only invoke up to and including max time", function(done) {
+        it("should only invoke up to and including elapsed time", function() {
             $async(callback, 0);
             $async(callback2, 1);
             $async(callback3, 10);
@@ -177,14 +195,9 @@ describe("$async mock", function() {
             expect(callback).toHaveBeenCalled();
             expect(callback2).toHaveBeenCalled();
             expect(callback3).not.toHaveBeenCalled();
-
-            window.setTimeout(function() {
-                expect(callback3).toHaveBeenCalled();
-                done();
-            }, 10);
         });
 
-        it("should invoke none if none before max time", function(done) {
+        it("should invoke none if none before elapsed time", function() {
             $async(callback, 5);
             $async(callback2, 5);
             $async(callback3, 10);
@@ -194,14 +207,46 @@ describe("$async mock", function() {
             expect(callback).not.toHaveBeenCalled();
             expect(callback2).not.toHaveBeenCalled();
             expect(callback3).not.toHaveBeenCalled();
+        });
 
-            window.setTimeout(function() {
+        it("should invoke remaining after flush up to elapsed time", function() {
+            $async(callback, 5);
+            $async(callback2, 5);
+            $async(callback3, 10);
+
+            $async.flush(5);
+
+            expect(callback).toHaveBeenCalled();
+            expect(callback2).toHaveBeenCalled();
+            expect(callback3).not.toHaveBeenCalled();
+
+            $async.flush(5);
+
+            expect(callback3).toHaveBeenCalled();
+        });
+
+        it("should invoke inner async calls in order", function() {
+            callback.and.callFake(function() {
+                $async(callback2, 5);
+
+                expect(callback2).not.toHaveBeenCalled();
+                expect(callback3).not.toHaveBeenCalled();
+            });
+
+            callback2.and.callFake(function() {
                 expect(callback).toHaveBeenCalled();
-                expect(callback2).toHaveBeenCalled();
                 expect(callback3).toHaveBeenCalled();
+            });
 
-                done();
-            }, 10);
+            callback3.and.callFake(function() {
+                expect(callback).toHaveBeenCalled();
+                expect(callback2).not.toHaveBeenCalled();
+            });
+
+            $async(callback, 5);
+            $async(callback3, 7);
+
+            $async.flush();
         });
 
         it("should not invoke completed", function(done) {
@@ -218,7 +263,7 @@ describe("$async mock", function() {
                 expect(callback3).toHaveBeenCalled();
 
                 done();
-            });
+            }, 0);
         });
 
         it("should not invoke canceled", function() {
