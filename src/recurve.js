@@ -6,6 +6,7 @@ function publishApi(recurve) {
         extend: extend,
         clone: clone,
         find: find,
+        stableSort: stableSort,
         protectedInvoke: protectedInvoke,
         areEqual: areEqual,
         isNaN: isNaN,
@@ -28,6 +29,7 @@ function publishApi(recurve) {
 
     addDocumentService(recurveModule);
     addWindowService(recurveModule);
+    addAsyncService(recurveModule);
     addTimeoutService(recurveModule);
     addSignalService(recurveModule);
     addEventEmitterService(recurveModule);

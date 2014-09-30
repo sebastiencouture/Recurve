@@ -1,25 +1,25 @@
 "use strict";
 
-describe("$timeout mock", function() {
-    var $timeout;
+describe("$async mock", function() {
+    var $async;
     var callback;
 
     beforeEach(function() {
         callback = jasmine.createSpy("callback");
 
-        $invoke(["$timeout"], function(timeout) {
-            $timeout = timeout;
+        $invoke(["$async"], function(async) {
+            $async = async;
         });
     });
 
     it("should be invokable", function() {
-        expect($timeout).toBeDefined();
-        expect(isFunction($timeout)).toEqual(true);
+        expect($async).toBeDefined();
+        expect(isFunction($async)).toEqual(true);
     });
 
     describe("factory", function() {
         it("should call function after elapsed time", function(done) {
-            $timeout(callback, 0);
+            $async(callback, 0);
 
             expect(callback).not.toHaveBeenCalled();
 
@@ -33,9 +33,9 @@ describe("$timeout mock", function() {
             var callback2 = jasmine.createSpy("callback2");
             var callback3 = jasmine.createSpy("callback3");
 
-            $timeout(callback, 5);
-            $timeout(callback2, 0);
-            $timeout(callback3, 10);
+            $async(callback, 5);
+            $async(callback2, 0);
+            $async(callback3, 10);
 
             expect(callback).not.toHaveBeenCalled();
             expect(callback2).not.toHaveBeenCalled();
@@ -53,12 +53,12 @@ describe("$timeout mock", function() {
 
     describe("cancel", function() {
         it("should return id that can be used to cancel", function() {
-            expect($timeout(callback)).toBeDefined();
+            expect($async(callback)).toBeDefined();
         });
 
         it("should cancel and not call", function(done) {
-            var id = $timeout(callback, 0);
-            $timeout.cancel(id);
+            var id = $async(callback, 0);
+            $async.cancel(id);
 
             window.setTimeout(function() {
                 expect(callback).not.toHaveBeenCalled();
@@ -77,15 +77,15 @@ describe("$timeout mock", function() {
         });
 
         it("should invoke all pending synchronously", function() {
-            $timeout(callback, 0);
-            $timeout(callback2, 0);
-            $timeout(callback3, 0);
+            $async(callback, 0);
+            $async(callback2, 0);
+            $async(callback3, 0);
 
             expect(callback).not.toHaveBeenCalled();
             expect(callback2).not.toHaveBeenCalled();
             expect(callback3).not.toHaveBeenCalled();
 
-            $timeout.flush();
+            $async.flush();
 
             expect(callback).toHaveBeenCalled();
             expect(callback2).toHaveBeenCalled();
@@ -93,12 +93,12 @@ describe("$timeout mock", function() {
         });
 
         it("should only invoke once", function() {
-            $timeout(callback, 0);
-            $timeout(callback2, 0);
-            $timeout(callback3, 0);
+            $async(callback, 0);
+            $async(callback2, 0);
+            $async(callback3, 0);
 
-            $timeout.flush();
-            $timeout.flush();
+            $async.flush();
+            $async.flush();
 
             expect(callback.calls.count()).toEqual(1);
             expect(callback2.calls.count()).toEqual(1);
@@ -106,11 +106,11 @@ describe("$timeout mock", function() {
         });
 
         it("should not call again on timeout timer complete", function(done) {
-            $timeout(callback, 0);
-            $timeout(callback2, 0);
-            $timeout(callback3, 0);
+            $async(callback, 0);
+            $async(callback2, 0);
+            $async(callback3, 0);
 
-            $timeout.flush();
+            $async.flush();
 
             window.setTimeout(function() {
                 expect(callback.calls.count()).toEqual(1);
@@ -137,11 +137,11 @@ describe("$timeout mock", function() {
                 expect(callback2).toHaveBeenCalled();
             });
 
-            $timeout(callback, 0);
-            $timeout(callback2, 5);
-            $timeout(callback3, 10);
+            $async(callback, 0);
+            $async(callback2, 5);
+            $async(callback3, 10);
 
-            $timeout.flush();
+            $async.flush();
         });
 
         it("should invoke all pending in order by add order as tie breaker", function() {
@@ -160,19 +160,19 @@ describe("$timeout mock", function() {
                 expect(callback2).toHaveBeenCalled();
             });
 
-            $timeout(callback, 0);
-            $timeout(callback2, 0);
-            $timeout(callback3, 0);
+            $async(callback, 0);
+            $async(callback2, 0);
+            $async(callback3, 0);
 
-            $timeout.flush();
+            $async.flush();
         });
 
         it("should only invoke up to and including max time", function(done) {
-            $timeout(callback, 0);
-            $timeout(callback2, 1);
-            $timeout(callback3, 10);
+            $async(callback, 0);
+            $async(callback2, 1);
+            $async(callback3, 10);
 
-            $timeout.flush(1);
+            $async.flush(1);
 
             expect(callback).toHaveBeenCalled();
             expect(callback2).toHaveBeenCalled();
@@ -185,11 +185,11 @@ describe("$timeout mock", function() {
         });
 
         it("should invoke none if none before max time", function(done) {
-            $timeout(callback, 5);
-            $timeout(callback2, 5);
-            $timeout(callback3, 10);
+            $async(callback, 5);
+            $async(callback2, 5);
+            $async(callback3, 10);
 
-            $timeout.flush(0);
+            $async.flush(0);
 
             expect(callback).not.toHaveBeenCalled();
             expect(callback2).not.toHaveBeenCalled();
@@ -205,13 +205,13 @@ describe("$timeout mock", function() {
         });
 
         it("should not invoke completed", function(done) {
-            $timeout(callback, 0);
-            $timeout(callback2, 10);
-            $timeout(callback3, 10);
+            $async(callback, 0);
+            $async(callback2, 10);
+            $async(callback3, 10);
 
             window.setTimeout(function() {
                 expect(callback).toHaveBeenCalled();
-                $timeout.flush();
+                $async.flush();
 
                 expect(callback.calls.count()).toEqual(1);
                 expect(callback2).toHaveBeenCalled();
@@ -222,12 +222,12 @@ describe("$timeout mock", function() {
         });
 
         it("should not invoke canceled", function() {
-            var id = $timeout(callback, 10);
-            $timeout(callback2, 10);
-            $timeout(callback3, 10);
+            var id = $async(callback, 10);
+            $async(callback2, 10);
+            $async(callback3, 10);
 
-            $timeout.cancel(id);
-            $timeout.flush();
+            $async.cancel(id);
+            $async.flush();
 
             expect(callback).not.toHaveBeenCalled();
             expect(callback2).toHaveBeenCalled();

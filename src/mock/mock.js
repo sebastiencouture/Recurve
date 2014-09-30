@@ -7,7 +7,8 @@
     function addMockModules(){
         var mockModule = recurve.mock.$module = recurve.module();
 
-        addMockTimeoutService(mockModule);
+        addMockAsyncService(mockModule);
+        addMockTimeoutDecorator(mockModule);
         addMockLogService(mockModule);
         addMockCookiesService(mockModule);
     }

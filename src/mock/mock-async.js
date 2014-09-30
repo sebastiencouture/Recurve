@@ -1,8 +1,14 @@
 "use strict";
 
-function addMockTimeoutService(module) {
-    module.factory("$timeout", null, function() {
-        function timeoutGroup(time) {
+function addMockAsyncService(module) {
+    module.factory("$async", null, function() {
+        function timeoutGroup(time, flushTime) {
+            if (isUndefined(flushTime)) {
+                flushTime = 0;
+            }
+
+            time += flushTime;
+
             var timeouts = [];
 
             function remove(id) {
@@ -23,6 +29,7 @@ function addMockTimeoutService(module) {
 
             return {
                 time: time,
+                flushTime: flushTime,
 
                 add: function(id, fn) {
                     timeouts.push({id: id, fn: fn});
@@ -30,6 +37,8 @@ function addMockTimeoutService(module) {
 
                 remove: remove,
 
+                // Doesn't take into consideration flush, but doesn't need to since should only be called when window timeout
+                // expires
                 invoke: function(id) {
                     recurve.forEach(timeouts, function(timeout, index) {
                         if (timeout.id !== id) {
@@ -44,22 +53,33 @@ function addMockTimeoutService(module) {
                 },
 
                 invokeAll: function() {
-                    recurve.forEach(timeouts, function(timeout) {
+                    // ensure handle timeouts added while invoking
+                    while (timeouts.length) {
+                        var timeout = timeouts.shift();
+
                         timeout.fn();
                         window.clearTimeout(timeout.id);
-                    });
+                    }
+                },
 
-                    timeouts = [];
+                resetFlushTime: function() {
+                    this.time -= this.flushTime;
+                    this.flushTime = 0;
                 }
             }
         }
 
         var timeoutGroups = [];
+        var flushTime = 0;
 
-        function getTimeoutGroupByTime(time) {
+        function getTimeoutGroupByTime(time, flushTime) {
+            if (isUndefined(flushTime)) {
+                flushTime = 0;
+            }
+
             var group = null;
             recurve.forEach(timeoutGroups, function(possibleGroup) {
-                if (possibleGroup.time === time) {
+                if (possibleGroup.time === time && possibleGroup.flushTime === flushTime) {
                     group = possibleGroup;
                     return false;
                 }
@@ -69,9 +89,13 @@ function addMockTimeoutService(module) {
         }
 
         function add(id, fn, time) {
-            var group = getTimeoutGroupByTime(time);
+            if (isUndefined(time)) {
+                time = 0;
+            }
+
+            var group = getTimeoutGroupByTime(time, flushTime);
             if (!group) {
-                group = timeoutGroup(time);
+                group = timeoutGroup(time, flushTime);
 
                 var added;
                 recurve.forEach(timeoutGroups, function(existingGroup, index) {
@@ -91,6 +115,8 @@ function addMockTimeoutService(module) {
             group.add(id, fn);
         }
 
+        // Doesn't take into consideration flush, but doesn't need to since should only be called when window timeout
+        // expires
         function invoke(id, time) {
             var group = getTimeoutGroupByTime(time);
             if (group) {
@@ -98,7 +124,27 @@ function addMockTimeoutService(module) {
             }
         }
 
-        var $timeout = function(fn, time) {
+        function resetFlushTime() {
+            flushTime = 0;
+
+            recurve.forEach(timeoutGroups, function(group) {
+                group.resetFlushTime();
+            });
+
+            recurve.stableSort(timeoutGroups, function defaultComparison(left, right) {
+                if (left.time == right.time) {
+                    return 0;
+                }
+                else if (left.time < right.time) {
+                    return -1;
+                }
+                else {
+                    return 1;
+                }
+            });
+        }
+
+        var $async = function(fn, time) {
             var id = window.setTimeout(function() {
                 invoke(id, time);
             }, time);
@@ -108,7 +154,7 @@ function addMockTimeoutService(module) {
             return id;
         };
 
-        return recurve.extend($timeout, {
+        return recurve.extend($async, {
             cancel: function(id) {
                 recurve.forEach(timeoutGroups, function(group) {
                     group.remove(id);
@@ -116,19 +162,27 @@ function addMockTimeoutService(module) {
             },
 
             flush: function(maxTime) {
-                var maxIndex = undefined;
-                forEach(timeoutGroups, function(group, index) {
-                    if (maxTime < group.time) {
-                        return;
+                if (0 === timeoutGroups.length) {
+                    return;
+                }
+
+                flushTime = 0;
+
+                // ensure timeouts added during invocation also get called
+                while (timeoutGroups.length) {
+                    var group = timeoutGroups[0];
+
+                    if (!isUndefined(maxTime) && maxTime < group.time) {
+                        timeoutGroups.unshift(group);
+                        break;
                     }
 
+                    timeoutGroups.shift();
+                    flushTime = group.time;
                     group.invokeAll();
-                    maxIndex = index;
-                });
-
-                if (!recurve.isUndefined(maxIndex)) {
-                    timeoutGroups.splice(0, maxIndex + 1);
                 }
+
+                resetFlushTime();
             }
         });
     });

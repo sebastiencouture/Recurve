@@ -8,6 +8,7 @@ var recurveFiles = {
         "src/di/module.js",
         "src/core/window.js",
         "src/core/document.js",
+        "src/core/async.js",
         "src/core/timeout.js",
         "src/core/signal.js",
         "src/core/event-emitter.js",
@@ -28,7 +29,8 @@ var recurveFiles = {
 
     "recurveModules" : {
         "mock" : [
-            "src/mock/mock-timeout.js",
+            "src/mock/mock-async.js",
+            "src/mock/mock-timeout-decorator.js",
             "src/mock/mock-log.js",
             "src/mock/mock-cookies.js",
             "src/mock/mock.js"

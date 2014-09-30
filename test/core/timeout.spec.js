@@ -2,18 +2,16 @@
 
 describe("$timeout", function() {
     var $timeout;
-    var callback;
+    var promise;
+    var fn;
 
     beforeEach(function() {
-        callback = jasmine.createSpy("callback");
-
-        $include(null, function($mockable) {
-            addTimeoutService($mockable);
-        });
-
         $invoke(["$timeout"], function(timeout) {
             $timeout = timeout;
         });
+
+        promise = $timeout(0);
+        fn = jasmine.createSpy("fn");
     });
 
     it("should be invokable", function() {
@@ -21,25 +19,28 @@ describe("$timeout", function() {
         expect(isFunction($timeout)).toEqual(true);
     });
 
-    it("should call function after elapsed time", function(done) {
-        $timeout(callback, 0);
-        expect(callback).not.toHaveBeenCalled();
-
-        setTimeout(function() {
-            expect(callback).toHaveBeenCalled();
-            done();
-        }, 0);
+    it("should return promise", function() {
+        expect(promise).toBeDefined();
+        expect(promise.then).toBeDefined();
     });
 
-    it("should cancel", function(done) {
-        var id = $timeout(callback, 0);
-        expect(callback).not.toHaveBeenCalled();
+    it("should resolve promise on timeout", function(done) {
+        promise.then(fn);
+        expect(fn).not.toHaveBeenCalled();
 
-        $timeout.cancel(id);
-
-        setTimeout(function() {
-            expect(callback).not.toHaveBeenCalled();
-            done();
-        }, 0);
+        window.setTimeout(function() {
+            expect(fn).toHaveBeenCalled();
+            done()
+        }, 30);
     });
-})
+
+    it("should reject promise on cancel", function(done) {
+        promise.then(null, fn);
+        $timeout.cancel(promise);
+
+        window.setTimeout(function() {
+            expect(fn).toHaveBeenCalledWith("canceled");
+            done();
+        }, 30);
+    });
+});

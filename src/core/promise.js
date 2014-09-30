@@ -1,14 +1,14 @@
 "use strict";
 
 function addPromiseService(module) {
-    module.factory("$promise", ["$timeout"], function($timeout) {
+    module.factory("$promise", ["$async"], function($async) {
 
         function isPromiseLike(obj) {
             return obj && isFunction(obj.then);
         }
 
         function async(fn) {
-            $timeout(fn, 0);
+            $async(fn, 0);
         }
 
         function invokeCallback(callback, value, deferred) {
@@ -190,7 +190,6 @@ function addPromiseService(module) {
 
             resolve: function(value) {
                 //if (isPromiseLike(value)) {
-                //    console.log("adas");
                 //    return value;
                 //}
 
