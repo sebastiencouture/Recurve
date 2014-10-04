@@ -16,8 +16,10 @@ describe("$httpXhr", function() {
         assert(false, "fulfilled or rejected promise callback called when should not be");
     }
 
+    var $async;
     var $httpXhr;
     var instance;
+    var callback;
 
     beforeEach(function() {
         instance = null;
@@ -28,17 +30,16 @@ describe("$httpXhr", function() {
                     protocol: ""
                 },
 
-                setTimeout: function(fn, timeout) {
-                    window.setTimeout(fn, timeout);
-                },
-
                 XMLHttpRequest: MockXMLHttpRequest
             });
         });
 
-        $invoke(["$httpXhr"], function(httpXhr) {
+        $invoke(["$async", "$httpXhr"], function(async, httpXhr) {
+            $async = async;
             $httpXhr = httpXhr;
         });
+
+        callback = jasmine.createSpy("callback");
     })
 
     it("should be invokable", function() {
@@ -97,42 +98,39 @@ describe("$httpXhr", function() {
             expect(promise.then).toBeDefined();
         });
 
-        it("should resolve promise on success", function(done) {
+        it("should resolve promise on success", function() {
             promise.then(function(response) {
                 expect(response).toBeDefined();
-                done();
             }, shouldNotBeCalled);
 
             instance.readyState = 4;
             instance.status = 200;
             instance.onreadystatechange();
+
+            $async.flush();
         });
 
-        it("should reject promise on error", function(done) {
+        it("should reject promise on error", function() {
             promise.then(shouldNotBeCalled, function(response) {
                 expect(response).toBeDefined();
-                done();
             });
 
             instance.readyState = 4;
             instance.status = 404;
             instance.onreadystatechange();
+
+            $async.flush();
         });
 
-        it("should only complete on readystate 4", function(done) {
-            var called = false;
-            promise.then(function() {
-                called = true;
-            }, shouldNotBeCalled);
+        it("should only complete on readystate 4", function() {
+            promise.then(callback, shouldNotBeCalled);
 
             instance.readyState = 3;
             instance.status = 200;
             instance.onreadystatechange();
 
-            setTimeout(function() {
-                expect(called).toEqual(false);
-                done();
-            }, 0);
+            $async.flush();
+            expect(callback).not.toHaveBeenCalled();
         });
     });
 
@@ -148,43 +146,42 @@ describe("$httpXhr", function() {
         });
 
         describe("status code", function() {
-            it("should return success for valid status code", function(done) {
-                promise.then(function() {
-                    done();
-                }, shouldNotBeCalled);
+            it("should return success for valid status code", function() {
+                promise.then(callback, shouldNotBeCalled);
 
                 instance.status = 200;
                 instance.onreadystatechange();
+
+                $async.flush();
+                expect(callback).toHaveBeenCalled();
             });
 
-            it("should return error for error status code", function(done) {
-                promise.then(shouldNotBeCalled, function() {
-                    done();
-                });
+            it("should return error for error status code", function() {
+                promise.then(shouldNotBeCalled, callback);
 
                 instance.status = 404;
                 instance.onreadystatechange();
+
+                $async.flush();
+                expect(callback).toHaveBeenCalled();
             });
 
-            it("should return status", function(done) {
+            it("should return status", function() {
                 promise.then(function(response) {
                     expect(response.status).toEqual(200);
-                    done();
                 }, shouldNotBeCalled);
 
                 instance.status = 200;
                 instance.onreadystatechange();
+
+                $async.flush();
             });
 
-            it("should fix 0 status when accessing files but no data returned", function(done) {
+            it("should fix 0 status when accessing files but no data returned", function() {
                 $include(null, function($mockable) {
                     $mockable.value("$window", {
                         location: {
                             protocol: "file:"
-                        },
-
-                        setTimeout: function(fn, timeout) {
-                            window.setTimeout(fn, timeout);
                         },
 
                         XMLHttpRequest: MockXMLHttpRequest
@@ -200,42 +197,44 @@ describe("$httpXhr", function() {
 
                 promise.then(shouldNotBeCalled, function(response) {
                     expect(response.status).toEqual(404);
-                    done();
                 });
 
                 instance.status = 0;
                 instance.onreadystatechange();
+
+                $async.flush();
             });
 
-            it("should fix 0 status when data returned", function(done) {
+            it("should fix 0 status when data returned", function() {
                 promise.then(function(response) {
                     expect(response.status).toEqual(200);
-                    done();
                 }, shouldNotBeCalled);
 
                 instance.responseText = "a";
                 instance.status = 0;
                 instance.onreadystatechange();
+
+                $async.flush();
             });
 
-            it("should fix IE status 1223", function(done) {
+            it("should fix IE status 1223", function() {
                 promise.then(function(response) {
                     expect(response.status).toEqual(204);
-                    done();
                 }, shouldNotBeCalled);
 
                 instance.status = 1223;
                 instance.onreadystatechange();
+
+                $async.flush();
             });
         });
 
         describe("response data", function() {
-            it("should return text for anything but xml accept type or content type", function(done) {
+            it("should return text for anything but xml accept type or content type", function() {
                 promise = $httpXhr({method: "get", headers: {"Accept": "application/json"}}).send();
 
                 promise.then(function(response) {
                     expect(response.data).toEqual('{"a":1}');
-                    done();
                 }, shouldNotBeCalled);
 
                 instance.readyState = 4;
@@ -243,14 +242,15 @@ describe("$httpXhr", function() {
                 instance.responseXML = "a";
                 instance.status = 200;
                 instance.onreadystatechange();
+
+                $async.flush();
             });
 
-            it("should return xml for xml accept type", function(done) {
+            it("should return xml for xml accept type", function() {
                 promise = $httpXhr({method: "get", headers: {"Accept": "text/xml"}}).send();
 
                 promise.then(function(response) {
                     expect(response.data).toEqual("a");
-                    done();
                 }, shouldNotBeCalled);
 
                 instance.readyState = 4;
@@ -258,12 +258,13 @@ describe("$httpXhr", function() {
                 instance.responseXML = "a";
                 instance.status = 200;
                 instance.onreadystatechange();
+
+                $async.flush();
             });
 
-            it("should derive accept type from content-type if no accept type", function(done) {
+            it("should derive accept type from content-type if no accept type", function() {
                 promise.then(function(response) {
                     expect(response.data).toEqual("a");
-                    done();
                 }, shouldNotBeCalled);
 
                 instance.responseText = '{"a":1}';
@@ -271,24 +272,26 @@ describe("$httpXhr", function() {
                 instance.status = 200;
                 instance.getResponseHeader.and.returnValue("application/xml; text");
                 instance.onreadystatechange();
+
+                $async.flush();
             });
         });
 
-        it("should return status text", function(done) {
+        it("should return status text", function() {
             promise.then(function(response) {
                 expect(response.statusText).toEqual("a");
-                done();
             }, shouldNotBeCalled);
 
             instance.statusText = "a";
             instance.status = 200;
             instance.onreadystatechange();
+
+            $async.flush();
         });
 
-        it("should return headers", function(done) {
+        it("should return headers", function() {
             promise.then(function(response) {
                 expect(response.headers).toEqual("a: b");
-                done();
             }, shouldNotBeCalled);
 
             instance.statusText = "a";
@@ -296,31 +299,35 @@ describe("$httpXhr", function() {
             instance.getAllResponseHeaders.and.returnValue("a: b");
 
             instance.onreadystatechange();
+
+            $async.flush();
         });
 
-        it("should return passed in options", function(done) {
+        it("should return passed in options", function() {
             promise.then(function(response) {
                 expect(response.options).toEqual({method: "get"});
-                done();
             }, shouldNotBeCalled);
 
             instance.status = 200;
             instance.onreadystatechange();
+
+            $async.flush();
         });
 
         describe("cancel/abort", function() {
-            it("should cancel request and reject promise", function(done) {
+            it("should cancel request and reject promise", function() {
                 promise.then(shouldNotBeCalled, function(response) {
                     expect(response.canceled).toEqual(true);
-                    done();
                 });
 
                 instance.status = 200;
                 httpXhr.cancel();
                 instance.onreadystatechange();
+
+                $async.flush();
             });
 
-            it("should not read properties", function(done) {
+            it("should not read properties", function() {
                 promise.then(shouldNotBeCalled, function(response) {
                     expect(instance.getAllResponseHeaders).not.toHaveBeenCalled();
                     expect(instance.getResponseHeader).not.toHaveBeenCalled();
@@ -328,13 +335,14 @@ describe("$httpXhr", function() {
                     expect(response.statusText).toEqual("");
                     expect(response.headers).toEqual(null);
                     expect(response.data).toEqual(null);
-                    done();
                 });
 
                 instance.status = 200;
                 httpXhr.cancel();
                 expect(instance.abort).toHaveBeenCalled();
                 instance.onreadystatechange();
+
+                $async.flush();
             });
         });
     });

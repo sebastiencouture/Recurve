@@ -1,6 +1,6 @@
 "use strict";
 
-describe("$timeout decorator mock", function() {
+describe("recurveMock-$timeout decorator", function() {
     var $timeout;
     var callback;
     var callback2;

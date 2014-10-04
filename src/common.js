@@ -531,61 +531,6 @@ function removeParameterFromUrl(url, parameter) {
 
 ///
 
-// Stable sort
-// http://jsperf.com/array-sort-stable/2
-function stableSort(array, comparison) {
-    if (2 > array.length) {
-        return array;
-    }
-
-    if (isUndefined(comparison)) {
-        comparison = defaultComparison;
-    }
-
-    var middle = parseInt(array.length / 2);
-    var left = array.slice(0, middle);
-    var right = array.slice(middle, array.length);
-
-    return merge(stableSort(left, comparison), stableSort(right, comparison), comparison);
-}
-
-function merge(left, right, comparison) {
-    var result = [];
-
-    while (left.length && right.length) {
-        if (0 >= comparison(left[0], right[0])) {
-            result.push(left.shift());
-        }
-        else {
-            result.push(right.shift());
-        }
-    }
-
-    while (left.length) {
-        result.push(left.shift());
-    }
-
-    while (right.length) {
-        result.push(right.shift());
-    }
-
-    return result;
-}
-
-function defaultComparison(left, right) {
-    if (left == right) {
-        return 0;
-    }
-    else if (left < right) {
-        return -1;
-    }
-    else {
-        return 1;
-    }
-}
-
-///
-
 function assert(condition, message) {
     if (!!condition) {
         return;

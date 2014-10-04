@@ -33,6 +33,7 @@ var recurveFiles = {
             "src/mock/mock-timeout-decorator.js",
             "src/mock/mock-log.js",
             "src/mock/mock-cookies.js",
+            "src/mock/mock-http-provider.js",
             "src/mock/mock.js"
         ]
     },

@@ -1,10 +1,6 @@
 "use strict";
 
 describe("$httpJsonp", function() {
-    var scriptEl;
-    var $window;
-    var $document;
-    var $httpJsonp;
 
     function getCallbackId() {
         return scriptEl.src.substring(scriptEl.src.indexOf("=") +1);
@@ -17,6 +13,13 @@ describe("$httpJsonp", function() {
     function shouldNotBeCalled() {
         assert(false, "fulfilled or rejected promise callback called when should not be");
     }
+
+    var scriptEl;
+    var $window;
+    var $document;
+    var $async;
+    var $httpJsonp;
+    var callback;
 
     beforeEach(function() {
         scriptEl = {};
@@ -37,19 +40,16 @@ describe("$httpJsonp", function() {
                     appendChild: jasmine.createSpy("appendChild")
                 }
             });
-
-            $mockable.value("$window", {
-                setTimeout: function(fn, time) {
-                    window.setTimeout(fn, time);
-                }
-            });
         });
 
-        $invoke(["$window", "$document", "$httpJsonp"], function(window, document, httpJsonp) {
+        $invoke(["$window", "$document", "$async", "$httpJsonp"], function(window, document, async, httpJsonp) {
             $window = window;
             $document = document;
+            $async = async;
             $httpJsonp = httpJsonp;
         });
+
+        callback = jasmine.createSpy();
     });
 
     it("should be invokable", function() {
@@ -99,20 +99,22 @@ describe("$httpJsonp", function() {
             expect(promise.then).toBeDefined();
         });
 
-        it("should resolve promise on success", function(done) {
-            promise.then(function() {
-                done();
-            }, shouldNotBeCalled);
+        it("should resolve promise on success", function() {
+            promise.then(callback, shouldNotBeCalled);
 
             getCallback()();
+
+            $async.flush();
+            expect(callback).toHaveBeenCalled();
         });
 
-        it("should reject promise on error", function(done) {
-            promise.then(shouldNotBeCalled, function() {
-                done();
-            });
+        it("should reject promise on error", function() {
+            promise.then(shouldNotBeCalled, callback);
 
             scriptEl.eventListener({type: "load"});
+
+            $async.flush();
+            expect(callback).toHaveBeenCalled();
         });
     });
 
@@ -123,33 +125,31 @@ describe("$httpJsonp", function() {
             promise = $httpJsonp({url: "www.test.com"}).send();
         });
 
-        it("should return data on success", function(done) {
+        it("should return data on success", function() {
             promise.then(function(response) {
                 expect(response.data).toEqual({a:1});
-                done();
             }, shouldNotBeCalled);
 
             getCallback()({a:1});
+            $async.flush();
         });
 
-        it("should return 200 status on success", function(done) {
+        it("should return 200 status on success", function() {
             promise.then(function(response) {
                 expect(response.status).toEqual(200);
-                done();
             }, shouldNotBeCalled);
 
             getCallback()();
+            $async.flush();
         });
 
-        it("should return 404 status on fail to load", function(done) {
-            promise.then(function() {
-                assert();
-            }, function(response) {
+        it("should return 404 status on fail to load", function() {
+            promise.then(shouldNotBeCalled, function(response) {
                 expect(response.status).toEqual(404);
-                done();
             });
 
             scriptEl.eventListener({type: "load"});
+            $async.flush();
         });
     });
 
@@ -196,24 +196,26 @@ describe("$httpJsonp", function() {
             promise = httpJsonp.send();
         });
 
-        it("should reject and return no data", function(done) {
+        it("should reject and return no data", function() {
             promise.then(shouldNotBeCalled, function(response) {
                 expect(response.data).toBeUndefined();
-                done();
             });
 
             httpJsonp.cancel();
             getCallback()();
+
+            $async.flush();
         });
 
-        it("should return 0 status code", function(done) {
+        it("should return 0 status code", function() {
             promise.then(shouldNotBeCalled, function(response) {
                 expect(response.status).toEqual(0);
-                done();
             });
 
             httpJsonp.cancel();
             getCallback()();
+
+            $async.flush();
         });
     });
 });

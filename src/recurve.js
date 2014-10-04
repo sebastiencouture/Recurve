@@ -1,12 +1,11 @@
 "use strict";
 
-function publishApi(recurve) {
+function createApi(recurve) {
     extend(recurve, {
         forEach: forEach,
         extend: extend,
         clone: clone,
-        find: find,
-        stableSort: stableSort,
+        format: format,
         protectedInvoke: protectedInvoke,
         areEqual: areEqual,
         isNaN: isNaN,

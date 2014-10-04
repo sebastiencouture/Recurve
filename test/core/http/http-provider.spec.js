@@ -20,6 +20,8 @@ describe("$httpProvider", function() {
         });
 
         $include(null, function($mockable) {
+            addHttpProviderService($mockable);
+
             $mockable.value("$httpJsonp", httpJsonp);
             $mockable.value("$httpXhr", httpXhr);
 

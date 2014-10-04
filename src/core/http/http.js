@@ -16,6 +16,7 @@ function addHttpService(module) {
         }
 
         function mergeHeaders(method, options) {
+            method = method || "get";
             method = method.toLowerCase();
 
             extend(options, defaults.headers.all);

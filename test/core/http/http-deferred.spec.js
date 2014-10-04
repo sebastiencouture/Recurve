@@ -2,11 +2,16 @@
 
 describe("$httpDeferred", function() {
     var httpDeferred;
+    var $async;
+    var callback;
 
     beforeEach(function() {
-        $invoke(["$httpDeferred"], function($httpDeferred) {
+        $invoke(["$async", "$httpDeferred"], function(async, $httpDeferred) {
+            $async = async;
             httpDeferred = $httpDeferred();
-        })
+        });
+
+        callback = jasmine.createSpy("callback");
     });
 
     it("should return deferred promise", function() {
@@ -25,21 +30,15 @@ describe("$httpDeferred", function() {
             httpDeferred.resolve({});
         });
 
-        it("should return all arguments", function(done) {
-            httpDeferred.promise.success(function(data, status, statusText, headers, options, canceled) {
-                expect(data).toEqual(1);
-                expect(status).toEqual(2);
-                expect(statusText).toEqual(3);
-                expect(headers).toEqual({a: 1});
-                expect(options).toEqual({b: 2});
-                expect(canceled).toEqual(false);
-
-                done();
-            });
+        it("should return all arguments", function() {
+            httpDeferred.promise.success(callback);
 
             httpDeferred.resolve(
                 {data: 1, status: 2, statusText: 3,
                 headers: {a: 1}, options: {b: 2}, canceled: false});
+
+            $async.flush();
+            expect(callback).toHaveBeenCalledWith(1, 2, 3, {a: 1}, {b: 2}, false);
         });
 
         it("should return the deferred promise to chain success/error", function() {
@@ -49,29 +48,24 @@ describe("$httpDeferred", function() {
     });
 
     describe("error", function() {
-        it("should call on reject", function(done) {
-            httpDeferred.promise.error(function() {
-                done();
-            });
+        it("should call on reject", function() {
+            httpDeferred.promise.error(callback);
 
             httpDeferred.reject({});
+
+            $async.flush();
+            expect(callback).toHaveBeenCalled();
         });
 
-        it("should return all arguments", function(done) {
-            httpDeferred.promise.error(function(data, status, statusText, headers, options, canceled) {
-                expect(data).toEqual(1);
-                expect(status).toEqual(2);
-                expect(statusText).toEqual(3);
-                expect(headers).toEqual({a: 1});
-                expect(options).toEqual({b: 2});
-                expect(canceled).toEqual(true);
-
-                done();
-            });
+        it("should return all arguments", function() {
+            httpDeferred.promise.error(callback);
 
             httpDeferred.reject(
                 {data: 1, status: 2, statusText: 3,
                     headers: {a: 1}, options: {b: 2}, canceled: true});
+
+            $async.flush();
+            expect(callback).toHaveBeenCalledWith(1, 2, 3, {a: 1}, {b: 2}, true);
         });
 
         it("should return the deferred promise to chain success/error", function() {

@@ -1,6 +1,6 @@
 "use strict";
 
-describe("$async mock", function() {
+describe("recurveMock-$async", function() {
     var $async;
     var callback;
 

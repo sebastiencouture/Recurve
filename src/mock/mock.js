@@ -11,6 +11,7 @@
         addMockTimeoutDecorator(mockModule);
         addMockLogService(mockModule);
         addMockCookiesService(mockModule);
+        addMockHttpProviderService(mockModule);
     }
 
     function setupForJasmineMocha() {
