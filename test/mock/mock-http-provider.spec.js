@@ -470,6 +470,17 @@ describe("recurveMock-$httpProvider", function() {
             }).not.toThrow();
         });
 
+        it("should meet expectations for partial options object parameters", function() {
+            handler.expect({data: {a: 1}});
+
+            $httpProvider.send({method: "GET", url: "www.a.com", data: {a: 1, b: 2}}, $httpDeferred());
+            $httpProvider.flush();
+
+            expect(function() {
+                $httpProvider.verifyExpectations();
+            }).not.toThrow();
+        });
+
         it("should not meet expectations if expected options don't match request options", function() {
             handler.expect({data: "a"});
 
@@ -501,6 +512,29 @@ describe("recurveMock-$httpProvider", function() {
             expect(function() {
                 $httpProvider.verifyExpectations();
             }).toThrow();
+        });
+
+        it("should meet expectations for url with params option object not included in handler url", function() {
+            handler.expect();
+
+            $httpProvider.send({method: "get", url: "www.a.com", params: {a: 1}}, $httpDeferred());
+            $httpProvider.flush();
+
+            expect(function() {
+                $httpProvider.verifyExpectations();
+            }).not.toThrow();
+        });
+
+        it("should meet expectations for url with query parameters included in handler url", function() {
+            handler = $httpProvider.on("GET", "www.a.com?a=2");
+            handler.expect();
+
+            $httpProvider.send({method: "get", url: "www.a.com?a=2"}, $httpDeferred());
+            $httpProvider.flush();
+
+            expect(function() {
+                $httpProvider.verifyExpectations();
+            }).not.toThrow();
         });
     });
 

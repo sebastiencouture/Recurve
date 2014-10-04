@@ -5,15 +5,50 @@ function addMockHttpProviderService(module) {
         var requests = [];
         var handlers = [];
 
+        function removeParameterFromUrl(url, parameter) {
+            if (!url || !parameter) {
+                return url;
+            }
+
+            var search = encodeURIComponent(parameter) + "=";
+            var startIndex = url.indexOf(search);
+
+            if (-1 === startIndex) {
+                return url;
+            }
+
+            var endIndex = url.indexOf("&", startIndex);
+
+            if (-1 < endIndex) {
+                url = url.substr(0, Math.max(startIndex - 1, 0)) + url.substr(endIndex);
+            }
+            else {
+                url = url.substr(0, Math.max(startIndex - 1, 0));
+            }
+
+            if (!contains(url, "?")) {
+                url = url.replace("&", "?");
+            }
+
+            return url;
+        }
+
         function requestHandler(method, url) {
             method = method.toUpperCase();
 
             function optionsMatch(expectOptions, options) {
                 var match = true;
                 recurve.forEach(expectOptions, function(value, key) {
-                    if (!recurve.areEqual(options[key], value)) {
+                    if (recurve.isObject(value)) {
+                        match = optionsMatch(value, options[key])
+                        return false;
+                    }
+                    else if (!recurve.areEqual(options[key], value)) {
                         match = false;
                         return false;
+                    }
+                    else {
+                        // do nothing
                     }
                 });
 
@@ -94,6 +129,14 @@ function addMockHttpProviderService(module) {
 
         return {
             send: function(options, httpDeferred) {
+                // don't require handlers to match params on the url, instead should check against
+                // the params object
+                if (options) {
+                    recurve.forEach(options.params, function(value, param) {
+                        options.url = removeParameterFromUrl(options.url, param);
+                    });
+                }
+
                 requests.push({options: options, httpDeferred: httpDeferred});
                 return httpDeferred.promise;
             },

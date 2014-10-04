@@ -14,6 +14,7 @@ describe("$http", function() {
     afterEach(function() {
         $httpProvider.flush();
         $httpProvider.verifyExpectations();
+        $httpProvider.verifyPending();
     });
 
     it("should be invokable", function() {
@@ -48,12 +49,27 @@ describe("$http", function() {
             $http({url: "www.a.com"});
         });
 
-        // TODO TBD others
+        it("should default to not cross domain", function() {
+            handler.expect({crossDomain: false});
+            $http({url: "www.a.com"});
+        });
+
+        it("should override defaults", function() {
+            handler.expect({emulateHttp: true});
+            $http({url: "www.a.com", emulateHttp: true});
+        });
     });
 
     describe("headers", function() {
-        it("should override default headers", function() {
+        var handler;
 
+        beforeEach(function() {
+            handler = $httpProvider.on("post", "www.a.com");
+        });
+
+        it("should override default headers", function() {
+            handler.expect({headers: {"Content-Type": "text"}});
+            $http({url: "www.a.com", method: "post", headers: {"Content-Type": "text"}});
         });
 
         it("should override in case insensitive manner", function() {
@@ -61,31 +77,67 @@ describe("$http", function() {
         });
 
         it("should add X-Requested-With if not set", function() {
+            handler.expect({headers: {"X-Requested-With":"XMLHttpRequest"}});
+            $http({url: "www.a.com", method: "post"});
+        });
 
+        it("should not override X-Requested-With", function() {
+            handler.expect({headers: {"X-Requested-With":"a"}});
+            $http({url: "www.a.com", method: "post", headers: {"X-Requested-With":"a"}});
         });
 
         it("should add X-Requested-With only if not cross domain", function() {
+            handler.expect({headers: {"X-Requested-With":"XMLHttpRequest"}}).respond({});
+            $http({url: "www.a.com", method: "post", crossDomain: true});
 
+            $httpProvider.flush();
+
+            expect(function() {
+                $httpProvider.verifyExpectations();
+            }).toThrow();
+
+            $httpProvider.clearExpectations();
         });
 
         it("should not send content-type if no data", function() {
+            handler.expect({headers: {"Content-Type" : "application/json; charset=UTF-8"}}).respond({});
+            $http({url: "www.a.com", method: "post", crossDomain: true});
 
+            $httpProvider.flush();
+
+            expect(function() {
+                $httpProvider.verifyExpectations();
+            }).toThrow();
+
+            $httpProvider.clearExpectations();
         });
 
         it("should set defaults for custom HTTP type", function() {
-
+            handler = $httpProvider.on("custom", "www.a.com");
+            handler.expect({dataType: "json"});
+            $http({url: "www.a.com", method: "custom"});
         });
     });
 
     describe("url", function() {
-        it("should append random parameter to prevent browser cache", function() {
+        var handler;
 
+        beforeEach(function() {
+            handler = $httpProvider.on("get", "www.a.com");
+        });
+
+        // TODO TBD add a expect urlWithParams? or need to figure out another way to test
+        // this properly
+        it("should append random parameter to prevent browser cache", function() {
+            handler.expect({params: {cache: Date.now()}});
+            $http({url: "www.a.com", cache: false});
         });
 
         // in-depth testing of adding parameters to URL is already
-        // covered in common.spec for addParametersToUrl
+        // covered in common.spec for addParametersToUrl(..)
         it("should add parameters", function() {
-
+            handler.expect({params: {a: 1, b: 2}});
+            $http({url: "www.a.com", params: {a: 1, b: 2}});
         });
     });
 

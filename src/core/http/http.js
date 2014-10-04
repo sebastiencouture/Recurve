@@ -25,6 +25,7 @@ function addHttpService(module) {
 
         function updateUrl(options) {
             if (!options.cache) {
+                options.params = options.params || {};
                 options.params.cache = Date.now();
             }
 
@@ -186,8 +187,8 @@ function addHttpService(module) {
         dataType: "json",
 
         cache: true,
-
         emulateHttp: false,
+        crossDomain: false,
 
         serialize: function(data, contentType) {
             var ignoreCase = true;
