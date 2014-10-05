@@ -560,6 +560,22 @@ describe("recurveMock-$httpProvider", function() {
         }).not.toThrow();
     });
 
+    it("should clear handlers", function() {
+        handler.expect();
+        $httpProvider.on("get", "www.b.com").expect();
+
+        $httpProvider.clearHandlers();
+        $httpProvider.verifyExpectations();
+    });
+
+    it("should clear pending", function() {
+        $httpProvider.send({method: "GET", url: "www.a.com"}, $httpDeferred());
+        $httpProvider.send({method: "GET", url: "www.b.com"}, $httpDeferred());
+
+        $httpProvider.clearPending();
+        $httpProvider.verifyPending();
+    });
+
     it("should invoke handler for multiple requests with same method and url", function() {
         handler.respond({});
         handler.expect(null, 3);

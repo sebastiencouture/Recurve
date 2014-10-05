@@ -3,6 +3,7 @@
 describe("$http", function() {
     var $httpProvider;
     var $http;
+    var handler;
 
     beforeEach(function() {
         $invoke(["$httpProvider", "$http"], function(httpProvider, http) {
@@ -23,8 +24,6 @@ describe("$http", function() {
     });
 
     describe("defaults", function() {
-        var handler;
-
         beforeEach(function() {
             handler = $httpProvider.on("get", "www.a.com");
         });
@@ -61,8 +60,6 @@ describe("$http", function() {
     });
 
     describe("headers", function() {
-        var handler;
-
         beforeEach(function() {
             handler = $httpProvider.on("post", "www.a.com");
         });
@@ -120,14 +117,12 @@ describe("$http", function() {
     });
 
     describe("url", function() {
-        var handler;
-
         beforeEach(function() {
             handler = $httpProvider.on("get", "www.a.com");
         });
 
-        // TODO TBD add a expect urlWithParams? or need to figure out another way to test
-        // this properly
+        // TODO TBD need to figure out better way to test this and look at the
+        // actual generated URL
         it("should append random parameter to prevent browser cache", function() {
             handler.expect({params: {cache: Date.now()}});
             $http({url: "www.a.com", cache: false});
@@ -139,19 +134,45 @@ describe("$http", function() {
             handler.expect({params: {a: 1, b: 2}});
             $http({url: "www.a.com", params: {a: 1, b: 2}});
         });
+
+        it("should replace query parameters", function() {
+            handler = $httpProvider.on("get", "www.a.com?a=99");
+            handler.expect({params: {a: 1, b: 2}});
+            $http({url: "www.a.com?a=99", params: {a: 1, b: 2}});
+        });
     });
 
     describe("emulateHttp", function() {
-        it("should emulate put", function() {
+        function test(method) {
+            handler = $httpProvider.on(method, "www.a.com");
+            handler.expect({data: {_method: method}});
+            $http({url: "www.a.com", method: method, emulateHttp: true});
+        }
 
+        it("should emulate put", function() {
+            test("put");
         });
 
         it("should emulate patch", function() {
-
+            test("patch");
         });
 
         it("should emulate delete", function() {
+            test("delete");
+        });
 
+        it("should not emulate others", function() {
+            handler = $httpProvider.on("get", "www.a.com").respond({});
+            handler.expect({data: {_method: "get"}});
+            $http({url: "www.a.com", method: "get", emulateHttp: true});
+
+            $httpProvider.flush();
+
+            expect(function() {
+                $httpProvider.verifyExpectations();
+            }).toThrow();
+
+            $httpProvider.clearExpectations();
         });
     });
 

@@ -528,6 +528,39 @@ function removeParameterFromUrl(url, parameter) {
     return url;
 }
 
+// No support for decoding values
+function getParametersOfUrl(url) {
+    var params = {};
+    if (!url) {
+        return params;
+    }
+
+    var startIndex = url.indexOf("?") + 1;
+    if (startIndex === url.length) {
+        return params;
+    }
+
+    while (0 < startIndex) {
+        var endIndex = url.indexOf("&", startIndex);
+        if (-1 === endIndex) {
+            endIndex = undefined;
+        }
+
+        var keyValue = url.slice(startIndex, endIndex);
+
+        var split = keyValue.split("=");
+        var key = decodeURIComponent(split[0]);
+        // No support for decoding value, too difficult. No need yet for this either
+        var value = 1 < split.length ? split[1] : null;
+
+        params[key] = value;
+
+        startIndex = endIndex + 1;
+    }
+
+    return params;
+}
+
 
 ///
 

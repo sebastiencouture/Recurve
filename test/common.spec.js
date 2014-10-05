@@ -1149,6 +1149,52 @@ describe("common", function(){
         });
     });
 
+    describe("getParametersOfUrl", function() {
+        it("should return parameter as key value pairs", function() {
+            expect(getParametersOfUrl("www.test.com?a=b")).toEqual({a: "b"});
+        });
+
+        it("should return all values as string", function() {
+            expect(getParametersOfUrl("www.test.com?a=1")).toEqual({a: "1"});
+        });
+
+        it("should decode key", function() {
+            expect(getParametersOfUrl("www.test.com?%24=1")).toEqual({"$": "1"});
+        });
+
+        it("should not decode value", function() {
+            expect(getParametersOfUrl("www.test.com?a=%24")).toEqual({a: "%24"});
+        });
+
+        it("should return multiple parameters", function() {
+            expect(getParametersOfUrl("www.test.com?a=1&b=2&c=3")).toEqual({a: "1", b: "2", c: "3"});
+        });
+
+        it("should return empty object if no query parameters", function() {
+            expect(getParametersOfUrl("www.test.com")).toEqual({});
+        });
+
+        it("should return empty object if no key values after ?", function() {
+            expect(getParametersOfUrl("www.test.com?")).toEqual({});
+        });
+
+        it("should return empty string value if empty after key '='", function() {
+            expect(getParametersOfUrl("www.test.com?a=&b=")).toEqual({a: "", b: ""});
+        });
+
+        it("should return null value if no '=' separator between key and value", function() {
+            expect(getParametersOfUrl("www.test.com?a&b")).toEqual({a: null, b: null});
+        });
+
+        it("should return empty object for null url", function() {
+            expect(getParametersOfUrl(null)).toEqual({});
+        });
+
+        it("should return empty object for empty string", function() {
+            expect(getParametersOfUrl("")).toEqual({});
+        });
+    });
+
     describe("assert", function(){
         it("should throw for false", function(){
             expect(function(){assert(false)}).toThrow();

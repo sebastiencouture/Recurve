@@ -29,7 +29,11 @@ function addHttpService(module) {
                 options.params.cache = Date.now();
             }
 
-            options.url = addParametersToUrl(options.url, options.params);
+            var paramsOnUrl = getParametersOfUrl(options.url);
+            var params = extend({}, options.params);
+            extend(params, paramsOnUrl);
+
+            options.url = addParametersToUrl(options.url, params);
         }
 
         function updateHeaders(options) {
@@ -93,12 +97,13 @@ function addHttpService(module) {
                 return;
             }
 
-            if (!isEqualIgnoreCase("put", options.method) ||
-                !isEqualIgnoreCase("patch", options.method) ||
+            if (!isEqualIgnoreCase("put", options.method) &&
+                !isEqualIgnoreCase("patch", options.method) &&
                 !isEqualIgnoreCase("delete", options.method)) {
                 return;
             }
 
+            options.data = options.data || {};
             options.data._method = options.method.toLowerCase();
         }
 

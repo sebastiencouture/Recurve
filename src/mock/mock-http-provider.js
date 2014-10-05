@@ -37,6 +37,10 @@ function addMockHttpProviderService(module) {
             method = method.toUpperCase();
 
             function optionsMatch(expectOptions, options) {
+                if (!options) {
+                    return false;
+                }
+
                 var match = true;
                 recurve.forEach(expectOptions, function(value, key) {
                     if (recurve.isObject(value)) {
@@ -223,6 +227,14 @@ function addMockHttpProviderService(module) {
                 recurve.forEach(handlers, function(handler) {
                     handler.clearExpectations();
                 });
+            },
+
+            clearHandlers: function() {
+                handlers = [];
+            },
+
+            clearPending: function() {
+                requests = [];
             },
 
             verifyExpectations: function() {
