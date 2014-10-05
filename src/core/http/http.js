@@ -6,21 +6,50 @@ function addHttpService(module) {
 
         function createOptionsWithDefaults(options) {
             var withDefaults = extend({}, defaults);
-
             withDefaults.headers = {};
-            mergeHeaders(options.method, withDefaults);
+
+            withDefaults.methpd = withDefaults.method || "get";
+            withDefaults.method = withDefaults.method.toLowerCase();
 
             extend(withDefaults, options);
+            mergeHeaders(withDefaults);
 
             return withDefaults;
         }
 
-        function mergeHeaders(method, options) {
-            method = method || "get";
-            method = method.toLowerCase();
+        function mergeHeaders(options) {
+            options.headers = options.headers || {};
+            forEach(options.headers, function(value, header) {
+                options.headers[upperCaseHeader(header)] = value;
+            });
 
-            extend(options, defaults.headers.all);
-            extend(options, defaults.headers[method]);
+            var defaultHeaders = getDefaultHeaders(options.method);
+            forEach(defaultHeaders, function(value, header) {
+                header = upperCaseHeader(header);
+
+                if (!options.headers.hasOwnProperty(header)) {
+                    options.headers[header] = value;
+                }
+            });
+        }
+
+        function getDefaultHeaders(method) {
+            var headers = {};
+
+            extend(headers, defaults.headers.all);
+            extend(headers, defaults.headers[method]);
+
+            return headers;
+        }
+
+        function upperCaseHeader(header) {
+            var splits = header.split("-");
+
+            forEach(splits, function(split, index) {
+                splits[index] = split.charAt(0).toUpperCase() + split.slice(1);
+            });
+
+            return splits.join("-");
         }
 
         function updateUrl(options) {
@@ -81,12 +110,12 @@ function addHttpService(module) {
         }
 
         function removeContentType(options) {
-            if (!options.data) {
+            if (options.data) {
                 return;
             }
 
             forEach(options.headers, function(value, header) {
-                if (isEqualIgnoreCase("content-type", header)) {
+                if ("Content-Type" === header) {
                     delete options.headers[header];
                 }
             });
@@ -114,7 +143,10 @@ function addHttpService(module) {
             updateHeaders(withDefaults);
             updateData(withDefaults);
 
-            options.data = withDefaults.serialize(options.data, options.contentType);
+            if (withDefaults.hasOwnProperty("data")) {
+                withDefaults.data = withDefaults.serialize(
+                    withDefaults.data, withDefaults.headers["Content-Type"]);
+            }
 
             var httpDeferred = $httpDeferred();
 
@@ -197,7 +229,6 @@ function addHttpService(module) {
 
         serialize: function(data, contentType) {
             var ignoreCase = true;
-
             if (contains(contentType, "application/x-www-form-urlencoded", ignoreCase)) {
                 if (isObject(data) && !isFile(data)) {
                     data = toFormData(data);

@@ -64,13 +64,73 @@ describe("$http", function() {
             handler = $httpProvider.on("post", "www.a.com");
         });
 
+        it("should merge default all headers with method specific defaults", function() {
+            $include(null, function($mockable) {
+                $mockable.config("$http", {
+                    headers: {
+                        all: {
+                            A: 1
+                        },
+
+                        get: {
+                            B: 2
+                        }
+                    },
+
+                    method: "get"
+                });
+            });
+
+            $invoke(["$httpProvider", "$http"], function(httpProvider, http) {
+                $httpProvider = httpProvider;
+                $http = http;
+            });
+
+            handler = $httpProvider.on("get", "www.a.com");
+            handler.expect({headers: {A: 1, B: 2}});
+            $http({url: "www.a.com"});
+        });
+
+        it("should override default all headers with method specific headers", function() {
+            $include(null, function($mockable) {
+                $mockable.config("$http", {
+                    headers: {
+                        all: {
+                            A: 1
+                        },
+
+                        get: {
+                            A: 2
+                        }
+                    },
+
+                    method: "get"
+                });
+            });
+
+            $invoke(["$httpProvider", "$http"], function(httpProvider, http) {
+                $httpProvider = httpProvider;
+                $http = http;
+            });
+
+            handler = $httpProvider.on("get", "www.a.com");
+            handler.expect({headers: {A: 2}});
+            $http({url: "www.a.com"});
+        });
+
+        // TOOD TBD should it do this?
+        it("should upper case first letter of each header key word", function() {
+
+        });
+
         it("should override default headers", function() {
             handler.expect({headers: {"Content-Type": "text"}});
-            $http({url: "www.a.com", method: "post", headers: {"Content-Type": "text"}});
+            $http({url: "www.a.com", method: "post",data: {}, headers: {"Content-Type": "text"}});
         });
 
         it("should override in case insensitive manner", function() {
-
+            handler.expect({headers: {"Content-Type": "text"}});
+            $http({url: "www.a.com", method: "post", data: {}, headers: {"content-type": "text"}});
         });
 
         it("should add X-Requested-With if not set", function() {
@@ -177,23 +237,30 @@ describe("$http", function() {
     });
 
     describe("serialize", function() {
-        it("should serialize object to json", function() {
-
+        beforeEach(function() {
+            handler = $httpProvider.on("post", "www.a.com");
         });
 
+        // toJson covered in detail in common.spec
+        it("should serialize object to json", function() {
+            handler.expect({data: '{"a":1,"b":2}'});
+            $http({url: "www.a.com",method: "post", data: {a: 1, b: 2}});
+        });
+
+        // toFormData covered in detail in common.spec
         it("should serialize object to form data", function() {
 
         });
 
-        it("should ignore strings", function() {
+        it("should pass through for strings", function() {
 
         });
 
-        it("should ignore File objects", function() {
+        it("should pass through File objects", function() {
 
         });
 
-        it("should ignore Blob objects", function() {
+        it("should pass through Blob objects", function() {
 
         });
 
