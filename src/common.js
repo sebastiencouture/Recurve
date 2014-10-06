@@ -197,6 +197,10 @@ function isNumber(value) {
     return "[object Number]" === Object.prototype.toString.call(value);
 }
 
+function isBlob(value) {
+    return "[object Blob]" === Object.prototype.toString.call(value);
+}
+
 function extend(dest, src) {
     if (!dest || !src) {
         return dest;

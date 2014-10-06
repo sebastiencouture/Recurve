@@ -106,7 +106,7 @@ function addMockHttpProviderService(module) {
                 },
 
                 isEqual: function(otherMethod, otherUrl) {
-                    return method === otherMethod.toUpperCase() && url === otherUrl;
+                    return method === otherMethod && url === otherUrl;
                 },
 
                 toString: function() {
@@ -139,6 +139,10 @@ function addMockHttpProviderService(module) {
                     recurve.forEach(options.params, function(value, param) {
                         options.url = removeParameterFromUrl(options.url, param);
                     });
+
+                    if (options.method) {
+                        options.method = options.method.toUpperCase();
+                    }
                 }
 
                 requests.push({options: options, httpDeferred: httpDeferred});
@@ -146,6 +150,10 @@ function addMockHttpProviderService(module) {
             },
 
             on: function(method, url) {
+                if (method) {
+                    method = method.toUpperCase();
+                }
+
                 var handler;
                 recurve.forEach(handlers, function(existing) {
                     if (existing.isEqual(method, url)) {
@@ -174,7 +182,7 @@ function addMockHttpProviderService(module) {
                             }
 
                             if (options && options.method) {
-                                options.method = options.method.toLowerCase();
+                                options.method = options.method.toUpperCase();
                             }
 
                             handler.expectCount = count;

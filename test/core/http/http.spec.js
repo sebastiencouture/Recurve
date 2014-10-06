@@ -25,11 +25,11 @@ describe("$http", function() {
 
     describe("defaults", function() {
         beforeEach(function() {
-            handler = $httpProvider.on("get", "www.a.com");
+            handler = $httpProvider.on("GET", "www.a.com");
         });
 
         it("should default to get", function() {
-            handler.expect({method: "get"});
+            handler.expect({method: "GET"});
             $http({url: "www.a.com"});
         });
 
@@ -59,9 +59,15 @@ describe("$http", function() {
         });
     });
 
+    // TODO TBD need to test at XHR level since this will pass due to mock http provider
+    it("should upper case method", function() {
+        handler = $httpProvider.on("GET", "www.a.com").expect();
+        $http({url: "www.a.com", method: "gEt"});
+    });
+
     describe("headers", function() {
         beforeEach(function() {
-            handler = $httpProvider.on("post", "www.a.com");
+            handler = $httpProvider.on("POST", "www.a.com");
         });
 
         it("should merge default all headers with method specific defaults", function() {
@@ -86,7 +92,7 @@ describe("$http", function() {
                 $http = http;
             });
 
-            handler = $httpProvider.on("get", "www.a.com");
+            handler = $httpProvider.on("GET", "www.a.com");
             handler.expect({headers: {A: 1, B: 2}});
             $http({url: "www.a.com"});
         });
@@ -104,7 +110,7 @@ describe("$http", function() {
                         }
                     },
 
-                    method: "get"
+                    method: "GET"
                 });
             });
 
@@ -113,39 +119,39 @@ describe("$http", function() {
                 $http = http;
             });
 
-            handler = $httpProvider.on("get", "www.a.com");
+            handler = $httpProvider.on("GET", "www.a.com");
             handler.expect({headers: {A: 2}});
             $http({url: "www.a.com"});
         });
 
-        // TOOD TBD should it do this?
-        it("should upper case first letter of each header key word", function() {
-
+        it("should upper camel case header keys", function() {
+            handler.expect({headers: {"Content-Type": "text"}});
+            $http({url: "www.a.com", method: "POST", data: {}, headers: {"content-type": "text"}});
         });
 
         it("should override default headers", function() {
             handler.expect({headers: {"Content-Type": "text"}});
-            $http({url: "www.a.com", method: "post",data: {}, headers: {"Content-Type": "text"}});
+            $http({url: "www.a.com", method: "POST",data: {}, headers: {"Content-Type": "text"}});
         });
 
         it("should override in case insensitive manner", function() {
             handler.expect({headers: {"Content-Type": "text"}});
-            $http({url: "www.a.com", method: "post", data: {}, headers: {"content-type": "text"}});
+            $http({url: "www.a.com", method: "POST", data: {}, headers: {"content-type": "text"}});
         });
 
         it("should add X-Requested-With if not set", function() {
             handler.expect({headers: {"X-Requested-With":"XMLHttpRequest"}});
-            $http({url: "www.a.com", method: "post"});
+            $http({url: "www.a.com", method: "POST"});
         });
 
         it("should not override X-Requested-With", function() {
             handler.expect({headers: {"X-Requested-With":"a"}});
-            $http({url: "www.a.com", method: "post", headers: {"X-Requested-With":"a"}});
+            $http({url: "www.a.com", method: "POST", headers: {"X-Requested-With":"a"}});
         });
 
         it("should add X-Requested-With only if not cross domain", function() {
             handler.expect({headers: {"X-Requested-With":"XMLHttpRequest"}}).respond({});
-            $http({url: "www.a.com", method: "post", crossDomain: true});
+            $http({url: "www.a.com", method: "POST", crossDomain: true});
 
             $httpProvider.flush();
 
@@ -158,7 +164,7 @@ describe("$http", function() {
 
         it("should not send content-type if no data", function() {
             handler.expect({headers: {"Content-Type" : "application/json; charset=UTF-8"}}).respond({});
-            $http({url: "www.a.com", method: "post", crossDomain: true});
+            $http({url: "www.a.com", method: "POST", crossDomain: true});
 
             $httpProvider.flush();
 
@@ -170,19 +176,17 @@ describe("$http", function() {
         });
 
         it("should set defaults for custom HTTP type", function() {
-            handler = $httpProvider.on("custom", "www.a.com");
+            handler = $httpProvider.on("TRACE", "www.a.com");
             handler.expect({dataType: "json"});
-            $http({url: "www.a.com", method: "custom"});
+            $http({url: "www.a.com", method: "TRACE"});
         });
     });
 
     describe("url", function() {
         beforeEach(function() {
-            handler = $httpProvider.on("get", "www.a.com");
+            handler = $httpProvider.on("GET", "www.a.com");
         });
 
-        // TODO TBD need to figure out better way to test this and look at the
-        // actual generated URL
         it("should append random parameter to prevent browser cache", function() {
             handler.expect({params: {cache: Date.now()}});
             $http({url: "www.a.com", cache: false});
@@ -196,7 +200,7 @@ describe("$http", function() {
         });
 
         it("should replace query parameters", function() {
-            handler = $httpProvider.on("get", "www.a.com?a=99");
+            handler = $httpProvider.on("GET", "www.a.com?a=99");
             handler.expect({params: {a: 1, b: 2}});
             $http({url: "www.a.com?a=99", params: {a: 1, b: 2}});
         });
@@ -210,21 +214,21 @@ describe("$http", function() {
         }
 
         it("should emulate put", function() {
-            test("put");
+            test("PUT");
         });
 
         it("should emulate patch", function() {
-            test("patch");
+            test("PATCH");
         });
 
         it("should emulate delete", function() {
-            test("delete");
+            test("DELETE");
         });
 
         it("should not emulate others", function() {
             handler = $httpProvider.on("get", "www.a.com").respond({});
-            handler.expect({data: {_method: "get"}});
-            $http({url: "www.a.com", method: "get", emulateHttp: true});
+            handler.expect({data: {_method: "GET"}});
+            $http({url: "www.a.com", method: "GET", emulateHttp: true});
 
             $httpProvider.flush();
 
@@ -238,39 +242,69 @@ describe("$http", function() {
 
     describe("serialize", function() {
         beforeEach(function() {
-            handler = $httpProvider.on("post", "www.a.com");
+            handler = $httpProvider.on("POST", "www.a.com");
         });
 
         // toJson covered in detail in common.spec
         it("should serialize object to json", function() {
             handler.expect({data: '{"a":1,"b":2}'});
-            $http({url: "www.a.com",method: "post", data: {a: 1, b: 2}});
+            $http({url: "www.a.com", method: "POST", data: {a: 1, b: 2}});
         });
 
         // toFormData covered in detail in common.spec
         it("should serialize object to form data", function() {
-
+            handler.expect({data: "a=1&b=2"});
+            $http({url: "www.a.com", method: "POST", headers: {"Content-Type": "application/x-www-form-urlencoded"}, data: {a: 1, b: 2}});
         });
 
         it("should pass through for strings", function() {
-
+            handler.expect({data: "a"});
+            $http({url: "www.a.com", method: "POST", data: "a"});
         });
 
         it("should pass through File objects", function() {
-
+            // TODO TBD can't think of any non shitty way of doing this...
         });
 
-        it("should pass through Blob objects", function() {
+        if (window.Blob) {
+            it("should pass through Blob objects", function() {
+                var blob;
 
-        });
+                // Phantomjs: https://code.google.com/p/phantomjs/issues/detail?id=1013
+                if (typeof(Blob) === typeof(Function)) {
+                    blob = new Blob([]);
+                }
+                else {
+                    var builder = new WebKitBlobBuilder();
+                    builder.append("a");
+                    blob = builder.getBlob();
+                }
 
-        it("should allow to override", function() {
+                handler.expect({data: blob});
+                $http({url: "www.a.com", method: "POST", data: blob});
+            });
+        }
 
-        });
+        describe("override", function() {
+            var serialize;
 
-        it("should have access to content type", function() {
+            beforeEach(function() {
+                serialize = jasmine.createSpy("serialize").and.callFake(function(data) {
+                    return data;
+                });
 
-        });
+                handler = $httpProvider.on("POST", "www.a.com").expect();
+                $http({url: "www.a.com", method: "POST", data: "a", serialize: serialize});
+            });
+
+            it("should allow to override", function() {
+                expect(serialize).toHaveBeenCalled();
+            });
+
+            it("should pass in data and content type", function() {
+                expect(serialize).toHaveBeenCalledWith('a', 'application/json; charset=UTF-8');
+            });
+        })
     });
 
     describe("parse", function() {

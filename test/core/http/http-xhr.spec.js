@@ -77,6 +77,11 @@ describe("$httpXhr", function() {
     });
 
     it("should open with method, url, and always be async", function() {
+        $httpXhr({method: "GET", url: "www.test.com"}).send();
+        expect(instance.open).toHaveBeenCalledWith("GET", "www.test.com", true);
+    });
+
+    it("should upper case method", function() {
         $httpXhr({method: "get", url: "www.test.com"}).send();
         expect(instance.open).toHaveBeenCalledWith("GET", "www.test.com", true);
     });

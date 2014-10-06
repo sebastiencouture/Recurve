@@ -4,12 +4,16 @@ function addHttpService(module) {
     module.factory("$http", ["$httpProvider", "$httpDeferred", "$promise", "$config"], function($httpProvider, $httpDeferred, $promise, config) {
         var defaults = config;
 
+        forEach(defaults.headers, function() {
+
+        });
+
         function createOptionsWithDefaults(options) {
             var withDefaults = extend({}, defaults);
             withDefaults.headers = {};
 
-            withDefaults.methpd = withDefaults.method || "get";
-            withDefaults.method = withDefaults.method.toLowerCase();
+            withDefaults.method = withDefaults.method || "GET";
+            withDefaults.method = withDefaults.method.toUpperCase();
 
             extend(withDefaults, options);
             mergeHeaders(withDefaults);
@@ -18,26 +22,25 @@ function addHttpService(module) {
         }
 
         function mergeHeaders(options) {
-            options.headers = options.headers || {};
-            forEach(options.headers, function(value, header) {
-                options.headers[upperCaseHeader(header)] = value;
-            });
-
+            var headers = {};
             var defaultHeaders = getDefaultHeaders(options.method);
-            forEach(defaultHeaders, function(value, header) {
-                header = upperCaseHeader(header);
 
-                if (!options.headers.hasOwnProperty(header)) {
-                    options.headers[header] = value;
-                }
+            forEach(defaultHeaders, function(value, header) {
+                headers[upperCaseHeader(header)] = value;
             });
+
+            forEach(options.headers, function(value, header) {
+                headers[upperCaseHeader(header)] = value;
+            });
+
+            options.headers = headers;
         }
 
         function getDefaultHeaders(method) {
             var headers = {};
 
             extend(headers, defaults.headers.all);
-            extend(headers, defaults.headers[method]);
+            extend(headers, defaults.headers[method.toLowerCase()]);
 
             return headers;
         }
@@ -133,7 +136,7 @@ function addHttpService(module) {
             }
 
             options.data = options.data || {};
-            options.data._method = options.method.toLowerCase();
+            options.data._method = options.method;
         }
 
         var http = function(options) {
@@ -168,37 +171,37 @@ function addHttpService(module) {
             defaults : defaults,
 
             get: function(url, options) {
-                options = extend(options, {method: "get", url: url});
+                options = extend(options, {method: "GET", url: url});
                 return http(options);
             },
 
             post: function(url, data, options) {
-                options = extend(options, {method: "post", url: url, data: data});
+                options = extend(options, {method: "POST", url: url, data: data});
                 return http(options);
             },
 
             jsonp: function(url, options) {
-                options = extend(options, {method: "jsonp", url: url});
+                options = extend(options, {method: "JSONP", url: url});
                 return http(options);
             },
 
             "delete": function(url, options) {
-                options = extend(options, {method: "delete", url: url});
+                options = extend(options, {method: "DELETE", url: url});
                 return http(options);
             },
 
             head: function(url, options) {
-                options = extend(options, {method: "head", url: url});
+                options = extend(options, {method: "HEAD", url: url});
                 return http(options);
             },
 
             put: function(url, data, options) {
-                options = extend(options, {method: "put", url: url, data: data});
+                options = extend(options, {method: "PUT", url: url, data: data});
                 return http(options);
             },
 
             patch: function(url, data, options) {
-                options = extend(options, {method: "patch", url: url, data: data});
+                options = extend(options, {method: "PATCH", url: url, data: data});
                 return http(options);
             }
         });
@@ -220,7 +223,7 @@ function addHttpService(module) {
             jsonp: {}
         },
 
-        method: "get",
+        method: "GET",
         dataType: "json",
 
         cache: true,
@@ -230,12 +233,12 @@ function addHttpService(module) {
         serialize: function(data, contentType) {
             var ignoreCase = true;
             if (contains(contentType, "application/x-www-form-urlencoded", ignoreCase)) {
-                if (isObject(data) && !isFile(data)) {
+                if (isObject(data) && !isFile(data) && !isBlob(data)) {
                     data = toFormData(data);
                 }
             }
             else if (contains(contentType, "application/json", ignoreCase)) {
-                if (isObject(data) && !isFile(data)) {
+                if (isObject(data) && !isFile(data) && !isBlob(data)) {
                     data = toJson(data);
                 }
             }
