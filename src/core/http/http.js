@@ -129,9 +129,9 @@ function addHttpService(module) {
                 return;
             }
 
-            if (!isEqualIgnoreCase("put", options.method) &&
-                !isEqualIgnoreCase("patch", options.method) &&
-                !isEqualIgnoreCase("delete", options.method)) {
+            if ("PUT" != options.method &&
+                "PATCH" != options.method &&
+                "DELETE" != options.method) {
                 return;
             }
 
@@ -146,7 +146,7 @@ function addHttpService(module) {
             updateHeaders(withDefaults);
             updateData(withDefaults);
 
-            if (withDefaults.hasOwnProperty("data")) {
+            if (withDefaults.data) {
                 withDefaults.data = withDefaults.serialize(
                     withDefaults.data, withDefaults.headers["Content-Type"]);
             }
@@ -154,12 +154,18 @@ function addHttpService(module) {
             var httpDeferred = $httpDeferred();
 
             function parseResponseSuccess(response) {
-                response.data = withDefaults.parse(response.data);
+                if (response.data) {
+                    response.data = withDefaults.parse(response.data);
+                }
+
                 httpDeferred.resolve(response);
             }
 
             function parseResponseError(response) {
-                response.data = withDefaults.parse(response.data);
+                if (response.data) {
+                    response.data = withDefaults.parse(response.data);
+                }
+
                 httpDeferred.reject(response);
             }
 
@@ -171,37 +177,51 @@ function addHttpService(module) {
             defaults : defaults,
 
             get: function(url, options) {
+                options = options || {};
                 options = extend(options, {method: "GET", url: url});
+
                 return http(options);
             },
 
             post: function(url, data, options) {
+                options = options || {};
                 options = extend(options, {method: "POST", url: url, data: data});
+
                 return http(options);
             },
 
             jsonp: function(url, options) {
+                options = options || {};
                 options = extend(options, {method: "JSONP", url: url});
+
                 return http(options);
             },
 
             "delete": function(url, options) {
+                options = options || {};
                 options = extend(options, {method: "DELETE", url: url});
+
                 return http(options);
             },
 
             head: function(url, options) {
+                options = options || {};
                 options = extend(options, {method: "HEAD", url: url});
+
                 return http(options);
             },
 
             put: function(url, data, options) {
+                options = options || {};
                 options = extend(options, {method: "PUT", url: url, data: data});
+
                 return http(options);
             },
 
             patch: function(url, data, options) {
+                options = options || {};
                 options = extend(options, {method: "PATCH", url: url, data: data});
+
                 return http(options);
             }
         });
@@ -252,7 +272,7 @@ function addHttpService(module) {
         parse: function(data) {
             if (data) {
                 try {
-                    data = toJson(data);
+                    data = fromJson(data);
                 }
                 catch (error) {
                     // do nothing - not json, or invalid json
