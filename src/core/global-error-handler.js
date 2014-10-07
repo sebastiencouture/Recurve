@@ -29,8 +29,13 @@ function addGlobalErrorHandlerService(module){
             if (0 <= line) {
                 description += ", line: " + line;
             }
-            if (error && error.stack) {
-                description += ", stack: " + error.stack;
+            if (error) {
+                if (error.stack) {
+                    description += ", stack: " + error.stack;
+                }
+                if (!description) {
+                    description = error.toString();
+                }
             }
 
             return description;
@@ -56,6 +61,10 @@ function addGlobalErrorHandlerService(module){
                 }
 
                 disabled = value;
+            },
+
+            handle: function(error) {
+                errorHandler(null, null, null, null, error);
             },
 
             errored: errored

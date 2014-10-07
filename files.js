@@ -34,6 +34,7 @@ var recurveFiles = {
             "src/mock/mock-log.js",
             "src/mock/mock-cookies.js",
             "src/mock/mock-http-provider.js",
+            "src/mock/mock-global-error-handler.js",
             "src/mock/mock.js"
         ]
     },
