@@ -228,6 +228,16 @@ describe("$cookies", function() {
             expect($cookies.exists("a")).toEqual(true);
         });
 
+        it("should return false if only exists for different path", function() {
+            $cookies.set("a", "b", {path: "/a"});
+            expect($cookies.exists("a")).toEqual(false);
+        });
+
+        it("should return false if only exists for different domain", function() {
+            $cookies.set("a", "b", {domain: ".test.com"});
+            expect($cookies.exists("a")).toEqual(false);
+        });
+
         it("should return false if doesn't exist", function() {
             expect($cookies.exists("a")).toEqual(false);
         });
