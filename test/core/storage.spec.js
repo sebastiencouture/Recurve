@@ -1,6 +1,6 @@
 "use strict";
 
-describe("storage", function() {
+describe("$storage", function() {
     
     describe("$localStorage", spec("$localStorage", window.localStorage));
     describe("$localStorage with cache", spec("$localStorage", window.localStorage, true));
@@ -16,6 +16,8 @@ describe("storage", function() {
 
             beforeEach(function(){
                 $include(null, function($mockable) {
+                    addStorageServices($mockable);
+
                     $mockable.config(name, {
                         cache: cache
                     });
@@ -215,12 +217,10 @@ describe("storage", function() {
                 $storage.clear();
 
                 if (disableNative) {
-                    var count = 0;
-                    $storage.forEach(function(){
-                        count++;
-                    });
+                    var callback = jasmine.createSpy("callback");
+                    $storage.forEach(callback);
 
-                    expect(count).toEqual(0);
+                    expect(callback).not.toHaveBeenCalled();
                 }
                 else {
                     expect(provider.length).toEqual(0);

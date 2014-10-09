@@ -15,7 +15,8 @@ var recurveFiles = {
         "src/core/cache.js",
         "src/core/log/log.js",
         "src/core/log/log-console.js",
-        "src/core/global-error-handler.js",
+        "src/core/error-handler.js",
+        "src/core/uncaught-error-handler.js",
         "src/core/performance.js",
         "src/core/cookies.js",
         "src/core/storage.js",
@@ -33,8 +34,9 @@ var recurveFiles = {
             "src/mock/mock-timeout-decorator.js",
             "src/mock/mock-log.js",
             "src/mock/mock-cookies.js",
+            "src/mock/mock-storage.js",
             "src/mock/mock-http-provider.js",
-            "src/mock/mock-global-error-handler.js",
+            "src/mock/mock-error-handler-decorator.js",
             "src/mock/mock.js"
         ]
     },

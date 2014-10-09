@@ -35,7 +35,8 @@ function createApi(recurve) {
     addCacheService(recurveModule);
     addLogService(recurveModule);
     addLogConsoleService(recurveModule);
-    addGlobalErrorHandlerService(recurveModule);
+    addErrorHandlerService(recurveModule);
+    addUncaughtErrorHandlerService(recurveModule);
     addPerformanceService(recurveModule);
     addCookiesService(recurveModule);
     addStorageServices(recurveModule);

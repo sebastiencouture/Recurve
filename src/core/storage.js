@@ -129,24 +129,22 @@ function addStorageServices(module) {
     }
 
     module.factory("$localStorage", ["$window", "$config", "$cache", "$log"], function($window, config, $cache, $log) {
-        config.cacheName = "localStorage";
+        config.cacheName = "$localStorage";
         return storage($window.localStorage, config, $cache, $log);
     });
 
     module.config("$localStorage", {
         cache: false,
-        cacheName: "$localStorage",
         cacheCountLimit: 0
     });
 
     module.factory("$sessionStorage", ["$window", "$config", "$cache", "$log"], function($window, config, $cache, $log) {
-        config.cacheName = "sessionStorage";
+        config.cacheName = "$sessionStorage";
         return storage($window.sessionStorage, config, $cache, $log);
     });
 
     module.config("$sessionStorage", {
         cache: false,
-        cacheName: "$sessionStorage",
         cacheCountLimit: 0
     });
 }
