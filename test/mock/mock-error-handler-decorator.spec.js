@@ -1,7 +1,6 @@
 "use strict";
 
 describe("recurveMock-$errorHandler decorator", function() {
-    var $window;
     var $log;
     var $errorHandler;
 
