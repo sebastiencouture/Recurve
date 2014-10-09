@@ -14,7 +14,7 @@ describe("recurveMock-$log", function() {
         expect(isFunction($log)).toEqual(false);
     });
 
-    function testType(name) {
+    function testLevel(name) {
         describe(name, function() {
             it("should log to logs", function() {
                 $log[name]("a");
@@ -48,10 +48,10 @@ describe("recurveMock-$log", function() {
         });
     }
 
-    testType("info");
-    testType("debug");
-    testType("warn");
-    testType("error");
+    testLevel("info");
+    testLevel("debug");
+    testLevel("warn");
+    testLevel("error");
 
     it("should disable all", function() {
         $log.disable();
