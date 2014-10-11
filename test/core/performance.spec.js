@@ -73,7 +73,7 @@ describe("$performance", function(){
         timer = $performance.start("a");
         $performance.end(timer);
 
-        expect($log.logs.info.shift()).toEqual(["a: 0 ms"]);
+        expect($log.logs.info.first()).toEqual(["a: 0 ms"]);
         expect(logs.performance).toEqual([0, 1]);
     });
 
@@ -92,7 +92,7 @@ describe("$performance", function(){
         timer = $performance.start("a");
         $performance.end(timer);
 
-        expect(startsWith($log.logs.info.shift()[0], "a:")).toEqual(true);
+        expect(startsWith($log.logs.info.first()[0], "a:")).toEqual(true);
         expect(logs.performance.length).toEqual(0);
     });
 
@@ -112,7 +112,7 @@ describe("$performance", function(){
         timer = $performance.start("a");
         $performance.end(timer, "b");
 
-        expect($log.logs.info.shift()).toEqual(["b"]);
+        expect($log.logs.info.first()).toEqual(["b"]);
     });
 
     describe("end", function(){

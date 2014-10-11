@@ -4,10 +4,6 @@ function addHttpService(module) {
     module.factory("$http", ["$httpProvider", "$httpDeferred", "$promise", "$config"], function($httpProvider, $httpDeferred, $promise, config) {
         var defaults = config;
 
-        forEach(defaults.headers, function() {
-
-        });
-
         function createOptionsWithDefaults(options) {
             var withDefaults = extend({}, defaults);
             withDefaults.headers = {};

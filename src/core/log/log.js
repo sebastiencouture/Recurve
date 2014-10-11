@@ -3,29 +3,48 @@
 function addLogService(module) {
     module.factory("$log", ["$config"], function($config) {
         var targets = $config.targets;
+        var includeTimestamp = $config.includeTimestamp;
+
+        var logDisabled = $config.disabled;
         var debugDisabled = $config.disabled;
         var infoDisabled = $config.disabled;
         var warnDisabled = $config.disabled;
         var errorDisabled = $config.disabled;
 
-        function log(type, message, args) {
+        function logType(type, message, args) {
             args = argumentsToArray(args, 1);
-            var description = describe(type.toUpperCase());
+            var description = describe();
 
             forEach(targets, function(target) {
-                var targetForType = target[type];
+                var targetForType = type ? target[type] : target;
+                var contextForType = type ? target : null;
+
                 if (targetForType) {
-                    targetForType.apply(target, [description, message].concat(args));
+                    targetForType.apply(contextForType, [description, message].concat(args));
                 }
             });
         }
 
-        function describe(type) {
-            var time = formatTime(new Date());
-            return "[" + type + "] " + time;
+        function describe() {
+            return includeTimestamp ? formatTime(new Date()) : "";
         }
 
-        return {
+        /**
+         * Log to all targets
+         *
+         * @param message
+         * @param [, obj2, ..., objN], list of objects to output. The string representations of
+         * each of these objects are appended together in the order listed and output (same as console.log)
+         */
+        function log(message) {
+            if (logDisabled) {
+                return;
+            }
+
+            logType(null, message, arguments);
+        }
+
+        return extend(log, {
             /**
              * Log info to all targets
              *
@@ -38,7 +57,7 @@ function addLogService(module) {
                     return;
                 }
 
-                log("info", message, arguments);
+                logType("info", message, arguments);
             },
 
             /**
@@ -53,7 +72,7 @@ function addLogService(module) {
                     return;
                 }
 
-                log("debug", message, arguments);
+                logType("debug", message, arguments);
             },
 
             /**
@@ -68,7 +87,7 @@ function addLogService(module) {
                     return;
                 }
 
-                log("warn", message, arguments);
+                logType("warn", message, arguments);
             },
 
             /**
@@ -83,7 +102,7 @@ function addLogService(module) {
                     return;
                 }
 
-                log("error", message, arguments);
+                logType("error", message, arguments);
             },
 
             /**
@@ -100,14 +119,23 @@ function addLogService(module) {
              * @param value, defaults to true
              */
             disable: function(value) {
-                if (undefined === value) {
+                if (isUndefined(value)) {
                     value = true;
                 }
 
+                logDisabled = value;
                 debugDisabled = value;
                 infoDisabled = value;
                 warnDisabled = value;
                 errorDisabled = value;
+            },
+
+            logDisable: function(value) {
+                if (isUndefined(value)) {
+                    value = true;
+                }
+
+                logDisabled = value;
             },
 
             /**
@@ -115,7 +143,7 @@ function addLogService(module) {
              * @param value, defaults to true
              */
             debugDisable: function(value) {
-                if (undefined === value) {
+                if (isUndefined(value)) {
                     value = true;
                 }
 
@@ -127,7 +155,7 @@ function addLogService(module) {
              * @param value, defaults to true
              */
             infoDisable: function(value) {
-                if (undefined === value) {
+                if (isUndefined(value)) {
                     value = true;
                 }
 
@@ -139,7 +167,7 @@ function addLogService(module) {
              * @param value, defaults to true
              */
             warnDisable: function(value) {
-                if (undefined === value) {
+                if (isUndefined(value)) {
                     value = true;
                 }
 
@@ -151,18 +179,19 @@ function addLogService(module) {
              * @param value, defaults to true
              */
             errorDisable: function(value) {
-                if (undefined === value) {
+                if (isUndefined(value)) {
                     value = true;
                 }
 
                 errorDisabled = value;
             }
-        };
+        });
     });
 
     module.factory("config.$log", ["$logConsole"], function($logConsole) {
         return {
             disabled: false,
+            includeTimestamp: false,
             targets: [$logConsole]
         };
     });

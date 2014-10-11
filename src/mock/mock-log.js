@@ -2,64 +2,121 @@
 
 function addMockLogService(module) {
     module.factory("$log", null, function() {
+        var logDisabled;
         var debugDisabled;
         var infoDisabled;
         var warnDisabled;
         var errorDisabled;
 
-        return {
-            logs: {
-                info: [],
-                debug: [],
-                warn: [],
-                error: []
-            },
+        function spy() {
+            var calls = [];
+
+            return {
+                add: function() {
+                    calls.push(Array.prototype.slice.call(arguments, 0));
+                },
+
+                any: function() {
+                    return 0 < calls.length;
+                },
+
+                count: function() {
+                    return calls.length;
+                },
+
+                argsFor: function(index) {
+                    return 0 <= index && index < this.count() ? calls[index].slice() : undefined;
+                },
+
+                allArgs: function() {
+                    return calls.slice();
+                },
+
+                mostRecent: function() {
+                    return this.argsFor(calls.length - 1);
+                },
+
+                first: function() {
+                    return this.argsFor(0);
+                },
+
+                clear: function() {
+                    calls = [];
+                }
+            }
+        }
+
+        function log() {
+            if (!logDisabled) {
+                logs.log.add.apply(logs.log, arguments);
+            }
+        }
+
+        var logs = {
+            log: spy(),
+            info: spy(),
+            debug: spy(),
+            warn: spy(),
+            error: spy()
+        };
+
+        return recurve.extend(log, {
+            logs: logs,
 
             info: function() {
                 if (!infoDisabled) {
-                    this.logs.info.push(Array.prototype.slice.call(arguments));
+                    logs.info.add.apply(logs.info, arguments);
                 }
             },
 
             debug: function() {
                 if (!debugDisabled) {
-                    this.logs.debug.push(Array.prototype.slice.call(arguments));
+                    logs.debug.add.apply(logs.debug, arguments);
                 }
             },
 
             warn: function() {
                 if (!warnDisabled) {
-                    this.logs.warn.push(Array.prototype.slice.call(arguments));
-
+                    logs.warn.add.apply(logs.warn, arguments);
                 }
             },
 
             error: function() {
                 if (!errorDisabled) {
-                    this.logs.error.push(Array.prototype.slice.call(arguments));
+                    logs.error.add.apply(logs.error, arguments);
                 }
             },
 
             clear: function() {
-                this.logs.info = [];
-                this.logs.debug = [];
-                this.logs.warn = [];
-                this.logs.error = [];
+                logs.log.clear();
+                logs.info.clear();
+                logs.debug.clear();
+                logs.warn.clear();
+                logs.error.clear();
             },
 
             disable: function(value) {
-                if (undefined === value) {
+                if (recurve.isUndefined(value)) {
                     value = true;
                 }
 
+                logDisabled = value;
                 debugDisabled = value;
                 infoDisabled = value;
                 warnDisabled = value;
                 errorDisabled = value;
             },
 
+            logDisable: function(value) {
+                if (recurve.isUndefined(value)) {
+                    value = true;
+                }
+
+                logDisabled = value;
+            },
+
             debugDisable: function(value) {
-                if (undefined === value) {
+                if (recurve.isUndefined(value)) {
                     value = true;
                 }
 
@@ -67,7 +124,7 @@ function addMockLogService(module) {
             },
 
             infoDisable: function(value) {
-                if (undefined === value) {
+                if (recurve.isUndefined(value)) {
                     value = true;
                 }
 
@@ -75,7 +132,7 @@ function addMockLogService(module) {
             },
 
             warnDisable: function(value) {
-                if (undefined === value) {
+                if (recurve.isUndefined(value)) {
                     value = true;
                 }
 
@@ -83,12 +140,12 @@ function addMockLogService(module) {
             },
 
             errorDisable: function(value) {
-                if (undefined === value) {
+                if (recurve.isUndefined(value)) {
                     value = true;
                 }
 
                 errorDisabled = value;
             }
-        };
+        });
     });
 }

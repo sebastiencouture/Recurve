@@ -24,7 +24,7 @@ describe("$errorHandler", function() {
 
     it("should log to log.error", function() {
         $errorHandler(new Error("a"));
-        expect($log.logs.error[0][0]).toEqual(new Error("a"));
+        expect($log.logs.error.first()[0]).toEqual(new Error("a"));
     });
 
     describe("protectedInvoke", function() {
@@ -40,7 +40,7 @@ describe("$errorHandler", function() {
                 throw new Error("a");
             });
 
-            expect($log.logs.error[0][0]).toEqual(new Error("a"));
+            expect($log.logs.error.first()[0]).toEqual(new Error("a"));
         });
     });
 });

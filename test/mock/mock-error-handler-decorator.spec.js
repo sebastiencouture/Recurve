@@ -5,7 +5,7 @@ describe("recurveMock-$errorHandler decorator", function() {
     var $errorHandler;
 
     function getLoggedError() {
-        return $log.logs.error[0][0];
+        return $log.logs.error.first()[0];
     }
 
     beforeEach(function() {
@@ -81,7 +81,7 @@ describe("recurveMock-$errorHandler decorator", function() {
 
     it("should allow to switch between logging and re-throwing errors", function() {
         $errorHandler(new Error("a"));
-        expect($log.logs.error[0][0]).toEqual(new Error("a"));
+        expect($log.logs.error.mostRecent()[0]).toEqual(new Error("a"));
         expect($errorHandler.errors[0]).toEqual(new Error("a"));
 
         $errorHandler.throwErrors();
@@ -94,7 +94,7 @@ describe("recurveMock-$errorHandler decorator", function() {
         $errorHandler.logErrors();
 
         $errorHandler(new Error("c"));
-        expect($log.logs.error[1][0]).toEqual(new Error("c"));
+        expect($log.logs.error.mostRecent()[0]).toEqual(new Error("c"));
         expect($errorHandler.errors[2]).toEqual(new Error("c"));
     });
 });

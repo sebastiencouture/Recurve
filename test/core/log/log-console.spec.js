@@ -1,6 +1,6 @@
 "use strict";
 
-describe("$log-console", function(){
+describe("$log-console", function() {
     var $logConsole;
     var logs = [];
     var log;
@@ -32,7 +32,7 @@ describe("$log-console", function(){
             logs = []
         };
 
-        $include(null, function($mockable){
+        $include(null, function($mockable) {
             $mockable.value("$window", {
                 console: {
                     log: log,
@@ -45,26 +45,27 @@ describe("$log-console", function(){
             });
         });
 
-        $invoke(["$logConsole"], function(logConsole){
+        $invoke(["$logConsole"], function(logConsole) {
             $logConsole = logConsole;
         });
     });
 
-    it("should be invokable", function(){
+    it("should be invokable", function() {
         expect($logConsole).toBeDefined();
-        expect(isFunction($logConsole)).toEqual(false);
+        expect(isFunction($logConsole)).toEqual(true);
     });
 
-    it("should use console if present", function(){
+    it("should use console if present", function() {
+        $logConsole("a");
         $logConsole.info("a");
         $logConsole.debug("a");
         $logConsole.warn("a");
         $logConsole.error("a");
 
-        expect(logs).toEqual(["info", "debug", "warn", "error"]);
+        expect(logs).toEqual(["log", "info", "debug", "warn", "error"]);
     });
 
-    it("should use console.log if others are not present", function(){
+    it("should use console.log if others are not present", function() {
         $include(null, function($mockable){
             $mockable.value("$window", {
                 console: {
@@ -77,12 +78,13 @@ describe("$log-console", function(){
             $logConsole = logConsole;
         });
 
+        $logConsole("a");
         $logConsole.info("a");
         $logConsole.debug("a");
         $logConsole.warn("a");
         $logConsole.error("a");
 
-        expect(logs).toEqual(["log", "log", "log", "log"]);
+        expect(logs).toEqual(["log", "log", "log", "log", "log"]);
     });
 
     it("should do nothing if no console", function(){
@@ -96,6 +98,7 @@ describe("$log-console", function(){
             $logConsole = logConsole;
         });
 
+        $logConsole("a");
         $logConsole.info("a");
         $logConsole.debug("a");
         $logConsole.warn("a");
@@ -104,7 +107,8 @@ describe("$log-console", function(){
         expect(logs.length).toEqual(0);
     });
 
-    it("should clear if available", function(){
+    it("should clear if available", function() {
+        $logConsole("a");
         $logConsole.info("a");
         $logConsole.debug("a");
         $logConsole.warn("a");
@@ -115,8 +119,8 @@ describe("$log-console", function(){
         expect(logs.length).toEqual(0);
     });
 
-    it("should do nothing if clear not available", function(){
-        $include(null, function($mockable){
+    it("should not clear if clear not available", function() {
+        $include(null, function($mockable) {
             $mockable.value("$window", {
                 console: {
                     log: log,
@@ -128,10 +132,11 @@ describe("$log-console", function(){
             });
         });
 
-        $invoke(["$logConsole"], function(logConsole){
+        $invoke(["$logConsole"], function(logConsole) {
             $logConsole = logConsole;
         });
 
+        $logConsole("a")
         $logConsole.info("a");
         $logConsole.debug("a");
         $logConsole.warn("a");
@@ -139,10 +144,10 @@ describe("$log-console", function(){
 
         $logConsole.clear();
 
-        expect(logs).toEqual(["info", "debug", "warn", "error"]);
+        expect(logs).toEqual(["log", "info", "debug", "warn", "error"]);
     });
 
-    describe("IE apply", function(){
+    describe("IE apply", function() {
         beforeEach(function(){
             function logger(type) {
                 return function(){
@@ -162,7 +167,7 @@ describe("$log-console", function(){
             debug.apply = debug.call = null;
             error.apply = error.call = null;
 
-            $include(recurve.module(), function($mockable){
+            $include(recurve.module(), function($mockable) {
                 $mockable.value("$window", {
                     console: {
                         log: log,
@@ -175,36 +180,39 @@ describe("$log-console", function(){
                 });
             });
 
-            $invoke(["$logConsole"], function(logConsole){
+            $invoke(["$logConsole"], function(logConsole) {
                 $logConsole = logConsole;
             });
         });
 
-        it("should log first argument (description)", function(){
+        it("should log first argument (description)", function() {
+            $logConsole("a");
             $logConsole.info("a");
             $logConsole.debug("a");
             $logConsole.warn("a");
             $logConsole.error("a");
 
-            expect(logs).toEqual(["info;a", "debug;a", "warn;a", "error;a"]);
+            expect(logs).toEqual(["log;a", "info;a", "debug;a", "warn;a", "error;a"]);
         });
 
-        it("should log second argument (message) if included", function(){
+        it("should log second argument (message) if included", function() {
+            $logConsole("a", 1);
             $logConsole.info("a", 1);
             $logConsole.debug("a", 1);
             $logConsole.warn("a", 1);
             $logConsole.error("a", 1);
 
-            expect(logs).toEqual(["info;a;1", "debug;a;1", "warn;a;1", "error;a;1"]);
+            expect(logs).toEqual(["log;a;1", "info;a;1", "debug;a;1", "warn;a;1", "error;a;1"]);
         });
 
-        it("should log third argument (first additional arg) if included", function(){
+        it("should log third argument (first additional arg) if included", function() {
+            $logConsole("a", 1, 2);
             $logConsole.info("a", 1, 2);
             $logConsole.debug("a", 1, 2);
             $logConsole.warn("a", 1, 2);
             $logConsole.error("a", 1, 2);
 
-            expect(logs).toEqual(["info;a;1;2", "debug;a;1;2", "warn;a;1;2", "error;a;1;2"]);
+            expect(logs).toEqual(["log;a;1;2", "info;a;1;2", "debug;a;1;2", "warn;a;1;2", "error;a;1;2"]);
         });
     });
 });

@@ -1,6 +1,6 @@
 "use strict";
 
-function addMockGlobalErrorHandlerDecorator(module) {
+function addMockErrorHandlerDecorator(module) {
     module.decorator("$errorHandler", ["$log"], function($delegate, $log) {
         var logErrors = true;
         var errors = [];
@@ -16,14 +16,7 @@ function addMockGlobalErrorHandlerDecorator(module) {
             }
         }
 
-        errorHandler.protectedInvoke = function(fn) {
-            try {
-                fn();
-            }
-            catch (error) {
-                errorHandler(error);
-            }
-        };
+        errorHandler.protectedInvoke = $delegate.protectedInvoke;
 
         errorHandler.errors = errors;
 

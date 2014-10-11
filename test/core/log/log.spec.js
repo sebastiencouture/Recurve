@@ -1,30 +1,31 @@
 "use strict";
 
 describe("$log", function() {
-    var targetDescriptions = [];
+    var targetTimestamps = [];
     var targetMessages = [];
     var consoleLogs = [];
 
     var $log;
 
-    function targetLog(description) {
-        targetDescriptions.push(description);
+    function logTarget(timestamp) {
+        targetTimestamps.push(timestamp);
         targetMessages.push(argumentsToArray(arguments, 1));
-    }
-
-    var logTarget = {
-        info: targetLog,
-        debug: targetLog,
-        warn: targetLog,
-        error: targetLog,
-        clear: function(){
-            targetDescriptions = [];
-            targetMessages = [];
-        }
     };
 
-    beforeEach(function(){
-        targetDescriptions = [];
+    extend(logTarget, {
+        info: logTarget,
+        debug: logTarget,
+        warn: logTarget,
+        error: logTarget,
+
+        clear: function() {
+            targetTimestamps = [];
+            targetMessages = [];
+        }
+    });
+
+    function setup(includeTimestamp) {
+        targetTimestamps = [];
         targetMessages = [];
         consoleLogs = [];
 
@@ -54,110 +55,96 @@ describe("$log", function() {
                 }
             });
 
-            $mockable.factory("config.$log", ["$logConsole"], function($logConsole){
+            $mockable.factory("config.$log", ["$logConsole"], function($logConsole) {
                 return {
-                    targets: [$logConsole, logTarget]
+                    targets: [$logConsole, logTarget],
+                    includeTimestamp: includeTimestamp
                 };
             });
         });
 
-        $invoke(["$log"], function(log){
+        $invoke(["$log"], function(log) {
             $log = log;
         });
+    }
+
+    beforeEach(function() {
+        setup(false);
     });
 
-    it("should be invokable", function(){
+    it("should be invokable", function() {
         expect($log).toBeDefined();
-        expect(isFunction($log)).toEqual(false);
+        expect(isFunction($log)).toEqual(true);
     });
 
-    describe("info", function(){
-        it("should log message", function(){
-            $log.info("a");
+    function testLevel(level) {
+        describe(level, function() {
+            var log;
 
-            expect(startsWith(targetDescriptions[0], "[INFO]")).toEqual(true);
-            expect(targetMessages[0]).toEqual(["a"]);
+            beforeEach(function() {
+               log = "log" === level ? $log : $log[level];
+            });
+
+            it("should log message", function() {
+                log("a");
+
+                expect(targetMessages[0]).toEqual(["a"]);
+            });
+
+            it("should not if disabled", function() {
+                $log[level + "Disable"]();
+                log("a");
+
+                expect(targetMessages.length).toEqual(0);
+            });
+
+            it("should log to target", function() {
+                log("a");
+                expect(consoleLogs).toEqual([level]);
+            });
+
+            it("should not log timestamp if disabled", function() {
+                log("a");
+                expect(targetTimestamps[0].length).toEqual(0);
+            });
+
+            it("should log timestamp if enabled", function() {
+                setup(true);
+                log = "log" === level ? $log : $log[level];
+
+                log("a");
+                expect(targetTimestamps[0]).toMatch(/[0-9]{2}:[0-9]{2}:[0-9]{2}:[0-9]{2,3}/);
+            });
         });
+    }
 
-        it("should skip if disabled", function(){
-            $log.infoDisable();
-            $log.info("a");
+    testLevel("log");
+    testLevel("info");
+    testLevel("debug");
+    testLevel("warn");
+    testLevel("error");
 
-            expect(targetDescriptions.length).toEqual(0);
-            expect(targetMessages.length).toEqual(0);
-        });
-    });
-
-    describe("debug", function(){
-        it("should log message", function(){
-            $log.debug("a");
-
-            expect(startsWith(targetDescriptions[0], "[DEBUG]")).toEqual(true);
-            expect(targetMessages[0]).toEqual(["a"]);
-        });
-
-        it("should skip if disabled", function(){
-            $log.debugDisable();
-            $log.debug("a");
-
-            expect(targetDescriptions.length).toEqual(0);
-            expect(targetMessages.length).toEqual(0);
-        });
-    });
-
-    describe("warn", function(){
-        it("should log message", function(){
-            $log.warn("a");
-
-            expect(startsWith(targetDescriptions[0], "[WARN]")).toEqual(true);
-            expect(targetMessages[0]).toEqual(["a"]);
-        });
-
-        it("should skip if disabled", function(){
-            $log.warnDisable();
-            $log.warn("a");
-
-            expect(targetDescriptions.length).toEqual(0);
-            expect(targetMessages.length).toEqual(0);
-        });
-    });
-
-    describe("error", function(){
-        it("should log", function(){
-            $log.error("a");
-
-            expect(startsWith(targetDescriptions[0], "[ERROR]")).toEqual(true);
-            expect(targetMessages[0]).toEqual(["a"]);
-        });
-
-        it("should skip if disabled", function(){
-            $log.errorDisable();
-            $log.error("a");
-
-            expect(targetDescriptions.length).toEqual(0);
-            expect(targetMessages.length).toEqual(0);
-        });
-    });
-
-    it("should log with additional parameters", function(){
-        $log.info("a", 1, 2, 3);
+    it("should log with additional parameters", function() {
+        $log("a", 1, 2, 3);
 
         expect(targetMessages[0]).toEqual(["a", 1, 2, 3]);
     });
 
-    it("should log to all targets", function(){
+    it("should log to all targets", function() {
+        $log("a");
         $log.info("a");
         $log.debug("a");
         $log.warn("a");
         $log.error("a");
 
-        expect(targetMessages).toEqual([["a"], ["a"], ["a"], ["a"]]);
-        expect(consoleLogs).toEqual(["info", "debug", "warn", "error"]);
+        expect(targetMessages).toEqual([["a"], ["a"], ["a"], ["a"], ["a"]]);
+        expect(consoleLogs).toEqual(["log", "info", "debug", "warn", "error"]);
     });
 
-    it("should disable all: info, debug, warn, and error", function(){
+    it("should disable all: log, info, debug, warn, and error", function() {
         $log.disable();
 
+        $log("a");
         $log.info("a");
         $log.debug("a");
         $log.warn("a");
@@ -167,7 +154,8 @@ describe("$log", function() {
         expect(consoleLogs.length).toEqual(0);
     });
 
-    it("should clear all targets", function(){
+    it("should clear all targets", function() {
+        $log("a");
         $log.info("a");
         $log.debug("a");
         $log.warn("a");

@@ -2,7 +2,7 @@
 
 function addLogConsoleService(module) {
     module.factory("$logConsole", ["$window"], function($window) {
-        function log(type) {
+        function logType(type) {
             if (!$window.console) {
                 return function(){
                     // do nothing - can't log
@@ -26,6 +26,7 @@ function addLogConsoleService(module) {
                 };
             }
 
+            // No apply available, so just handle up to 3 arguments
             return function(description, message, obj) {
                 if (message && obj) {
                     logger(description, message, obj);
@@ -39,14 +40,22 @@ function addLogConsoleService(module) {
             }
         }
 
-        return {
+        /**
+         *
+         * @param message
+         * @param [, obj2, ..., objN], list of objects to output. The string representations of
+         * each of these objects are appended together in the order listed and output (same as console.log)
+         */
+        var log = logType("log");
+
+        return extend(log, {
             /**
              *
              * @param message
              * @param [, obj2, ..., objN], list of objects to output. The string representations of
              * each of these objects are appended together in the order listed and output (same as console.log)
              */
-            info: log("info"),
+            info: logType("info"),
 
             /**
              *
@@ -54,7 +63,7 @@ function addLogConsoleService(module) {
              * @param [, obj2, ..., objN], list of objects to output. The string representations of
              * each of these objects are appended together in the order listed and output (same as console.log)
              */
-            debug: log("debug"),
+            debug: logType("debug"),
 
             /**
              *
@@ -62,7 +71,7 @@ function addLogConsoleService(module) {
              * @param [, obj2, ..., objN], list of objects to output. The string representations of
              * each of these objects are appended together in the order listed and output (same as console.log)
              */
-            warn: log("warn"),
+            warn: logType("warn"),
 
             /**
              *
@@ -70,11 +79,11 @@ function addLogConsoleService(module) {
              * @param [, obj2, ..., objN], list of objects to output. The string representations of
              * each of these objects are appended together in the order listed and output (same as console.log)
              */
-            error: log("error"),
+            error: logType("error"),
 
             clear: function() {
                 $window.console && $window.console.clear && $window.console.clear();
             }
-        }
+        });
     });
 }

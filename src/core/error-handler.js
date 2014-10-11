@@ -11,7 +11,7 @@ function addErrorHandlerService(module) {
                 fn();
             }
             catch (error) {
-                errorHandler(error);
+                this(error);
             }
         }
 
