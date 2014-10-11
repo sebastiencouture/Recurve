@@ -64,7 +64,7 @@ function addHttpXhrService(module) {
                     data: data,
                     status : status,
                     statusText : statusText,
-                    headers : responseHeaders,
+                    headers : parseResponseHeaders(responseHeaders),
                     options : options,
                     canceled : canceled
                 };
@@ -75,6 +75,28 @@ function addHttpXhrService(module) {
                 else {
                     deferred.reject(response);
                 }
+            }
+
+            function parseResponseHeaders(str) {
+                var headers = {};
+                if (!str) {
+                    return headers;
+                }
+
+                var split = str.split("\n");
+
+                forEach(split, function(keyValue) {
+                    var index = keyValue.indexOf(":");
+                    if (0 < index) {
+                        var key = keyValue.substring(0, index).toLowerCase();
+                        var value = keyValue.substring(index + 1);
+                        value = value ? value.trim() : "";
+
+                        headers[key] = value;
+                    }
+                });
+
+                return headers;
             }
 
             function getStatus(data) {

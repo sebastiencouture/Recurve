@@ -294,18 +294,52 @@ describe("$httpXhr", function() {
             $async.flush();
         });
 
-        it("should return headers", function() {
-            promise.then(function(response) {
-                expect(response.headers).toEqual("a: b");
-            }, shouldNotBeCalled);
+        describe("response headers", function() {
+            function test(headers, expected) {
+                promise.then(function(response) {
+                    expect(response.headers).toEqual(expected);
+                }, shouldNotBeCalled);
 
-            instance.statusText = "a";
-            instance.status = 200;
-            instance.getAllResponseHeaders.and.returnValue("a: b");
+                instance.getAllResponseHeaders.and.returnValue(headers);
+                instance.onreadystatechange();
+                $async.flush();
+            }
 
-            instance.onreadystatechange();
+            beforeEach(function() {
+                instance.status = 200;
+            });
 
-            $async.flush();
+            it("should return parsed headers", function() {
+                test("a: b", {a: "b"});
+            });
+
+            it("should parse multiple headers", function() {
+                test("a: b\nc: d", {a: "b", c: "d"});
+            });
+
+            it("should parse if the header value includes colon", function() {
+                test("a: b:1", {a: "b:1"});
+            });
+
+            it("should allow keys without values", function() {
+                test("a:", {a: ""});
+            });
+
+            it("should parse if no space after colon", function() {
+                test("a:b", {a: "b"});
+            });
+
+            it("should trim values", function() {
+                test("a:   b    ", {a: "b"});
+            });
+
+            it("should lower case keys", function() {
+                test("aBc:b", {abc: "b"});
+            });
+
+            it("should merge same keys", function() {
+                test("a: b\na: d", {a: "d"});
+            });
         });
 
         it("should return passed in options", function() {
@@ -338,7 +372,7 @@ describe("$httpXhr", function() {
                     expect(instance.getResponseHeader).not.toHaveBeenCalled();
                     expect(response.status).toEqual(0);
                     expect(response.statusText).toEqual("");
-                    expect(response.headers).toEqual(null);
+                    expect(response.headers).toEqual({});
                     expect(response.data).toEqual(null);
                 });
 
