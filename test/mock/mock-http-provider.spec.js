@@ -481,6 +481,39 @@ describe("recurveMock-$httpProvider", function() {
             }).not.toThrow();
         });
 
+        it("should meet expectations for values that match regexp", function() {
+            handler.expect({data: {a: /[0-9]{3}/}});
+
+            $httpProvider.send({method: "GET", url: "www.a.com", data: {a: "123"}}, $httpDeferred());
+            $httpProvider.flush();
+
+            expect(function() {
+                $httpProvider.verifyExpectations();
+            }).not.toThrow();
+        });
+
+        it("should meet expections for number values that match regexp", function() {
+            handler.expect({data: {a: /[0-9]{3}/}});
+
+            $httpProvider.send({method: "GET", url: "www.a.com", data: {a: 123}}, $httpDeferred());
+            $httpProvider.flush();
+
+            expect(function() {
+                $httpProvider.verifyExpectations();
+            }).not.toThrow();
+        });
+
+        it("should not meet expectations for values that do not match regexp", function() {
+            handler.expect({data: {a: /a/}});
+
+            $httpProvider.send({method: "GET", url: "www.a.com", data: {a: "123"}}, $httpDeferred());
+            $httpProvider.flush();
+
+            expect(function() {
+                $httpProvider.verifyExpectations();
+            }).toThrow();
+        });
+
         it("should not meet expectations if expected options don't match request options", function() {
             handler.expect({data: "a"});
 

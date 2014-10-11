@@ -33,31 +33,34 @@ function addMockHttpProviderService(module) {
             return url;
         }
 
-        function requestHandler(method, url) {
-            method = method.toUpperCase();
+        function optionsMatch(expectOptions, options) {
+            if (!options) {
+                return false;
+            }
 
-            function optionsMatch(expectOptions, options) {
-                if (!options) {
+            var match = true;
+            recurve.forEach(expectOptions, function(value, key) {
+                if (recurve.isRegExp(value)) {
+                    match = recurve.toJson(options[key]).match(value);
+                }
+                else if (recurve.isObject(value)) {
+                    match = optionsMatch(value, options[key])
                     return false;
                 }
+                else if (!recurve.areEqual(options[key], value)) {
+                    match = false;
+                    return false;
+                }
+                else {
+                    // do nothing
+                }
+            });
 
-                var match = true;
-                recurve.forEach(expectOptions, function(value, key) {
-                    if (recurve.isObject(value)) {
-                        match = optionsMatch(value, options[key])
-                        return false;
-                    }
-                    else if (!recurve.areEqual(options[key], value)) {
-                        match = false;
-                        return false;
-                    }
-                    else {
-                        // do nothing
-                    }
-                });
+            return match;
+        }
 
-                return match;
-            }
+        function requestHandler(method, url) {
+            method = method.toUpperCase();
 
             var lastRequestOptions;
 
@@ -66,7 +69,7 @@ function addMockHttpProviderService(module) {
                 expectedOptions: {},
 
                 respond: function(request) {
-                    if (!this.isEqual(request.options.method, request.options.url)) {
+                    if (!this.urlMatch(request.options.method, request.options.url)) {
                         return false;
                     }
 
@@ -105,7 +108,7 @@ function addMockHttpProviderService(module) {
                     this.expectOptions = {};
                 },
 
-                isEqual: function(otherMethod, otherUrl) {
+                urlMatch: function(otherMethod, otherUrl) {
                     return method === otherMethod && url === otherUrl;
                 },
 
@@ -115,16 +118,20 @@ function addMockHttpProviderService(module) {
                         method, url, this.expectCount || 0, this.callCount);
 
                     if (this.expectOptions) {
-                        str += ", expected options: " + recurve.toJson(this.expectOptions);
+                        str += ", expected options: " + prettyPrint(this.expectOptions);
 
                         if (lastRequestOptions) {
-                            str += ", actual: " + recurve.toJson(lastRequestOptions);
+                            str += ", actual: " + prettyPrint(lastRequestOptions);
                         }
                     }
 
                     return str;
                 }
             };
+        }
+
+        function prettyPrint(data) {
+            return recurve.toJson(data);
         }
 
         function successful(status) {
@@ -156,7 +163,7 @@ function addMockHttpProviderService(module) {
 
                 var handler;
                 recurve.forEach(handlers, function(existing) {
-                    if (existing.isEqual(method, url)) {
+                    if (existing.urlMatch(method, url)) {
                         handler = existing;
                         return false;
                     }

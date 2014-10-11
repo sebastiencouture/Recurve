@@ -18,6 +18,7 @@ function createApi(recurve) {
         isFunction: isFunction,
         isDate: isDate,
         isNumber: isNumber,
+        isRegExp: isRegExp,
         toJson: toJson,
         fromJson: fromJson,
 

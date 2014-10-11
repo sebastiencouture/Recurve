@@ -488,6 +488,36 @@ describe("common", function(){
         });
     });
 
+    describe("isRegExp", function() {
+        it("should detect /../", function() {
+            expect(isRegExp(/1/)).toEqual(true);
+        });
+
+        it("should detect new RegExp()", function() {
+            expect(isRegExp(new RegExp(("1")))).toEqual(true);
+        });
+
+        it("should not detect number", function() {
+            expect(isRegExp(1)).toEqual(false);
+        });
+
+        it("should not detect string", function() {
+            expect(isRegExp("a")).toEqual(false);
+        });
+
+        it("should not detect object", function() {
+            expect(isRegExp({})).toEqual(false);
+        });
+
+        it("should not detect undefined", function() {
+            expect(isRegExp(undefined)).toEqual(false);
+        });
+
+        it("should not detect null", function() {
+            expect(isRegExp(null)).toEqual(false);
+        });
+    });
+
     describe("extend", function(){
         it("should extend existing object with set of properties", function(){
             var a = {a:1, b:2};

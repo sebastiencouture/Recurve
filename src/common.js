@@ -201,6 +201,10 @@ function isBlob(value) {
     return "[object Blob]" === Object.prototype.toString.call(value);
 }
 
+function isRegExp(value) {
+    return "[object RegExp]" === Object.prototype.toString.call(value);
+}
+
 function extend(dest, src) {
     if (!dest || !src) {
         return dest;

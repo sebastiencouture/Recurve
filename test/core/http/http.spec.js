@@ -218,9 +218,8 @@ describe("$http", function() {
         });
 
         it("should append random parameter to prevent browser cache", function() {
-            // TODO TBD this can possibly give false negative due to the time
-            //handler.expect({params: {cache: Date.now()}});
-            //$http({url: "www.a.com", cache: false});
+            handler.expect({params: {cache: /[0-9]{13}/}});
+            $http({url: "www.a.com", cache: false});
         });
 
         // in-depth testing of adding parameters to URL is already
