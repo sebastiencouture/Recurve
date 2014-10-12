@@ -40,7 +40,7 @@ describe("$httpXhr", function() {
         });
 
         callback = jasmine.createSpy("callback");
-    })
+    });
 
     it("should be invokable", function() {
         expect($httpXhr).toBeDefined();
@@ -144,7 +144,7 @@ describe("$httpXhr", function() {
         var httpXhr;
 
         beforeEach(function() {
-            httpXhr = $httpXhr({method: "get"})
+            httpXhr = $httpXhr({method: "get"});
             promise = httpXhr.send();
 
             instance.readyState = 4;

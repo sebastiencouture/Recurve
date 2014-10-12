@@ -30,7 +30,7 @@ describe("$timeout", function() {
 
         window.setTimeout(function() {
             expect(fn).toHaveBeenCalled();
-            done()
+            done();
         }, 30);
     });
 

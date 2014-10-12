@@ -203,7 +203,7 @@ describe("container", function(){
             containerA.invoke(["a", "b"], function(a, b){
                 expect(a).toEqual(1);
                 expect(b).toEqual(2);
-            })
+            });
         });
 
         it("should throw an error if unable to resolve", function(){
@@ -313,7 +313,7 @@ describe("container", function(){
                        describe: function(){
                            return "meow";
                        }
-                   }
+                   };
                 });
 
                 moduleA.decorator("a", null, function($delegate) {
@@ -385,7 +385,7 @@ describe("container", function(){
                         describe: function(){
                             return "meow";
                         }
-                    }
+                    };
                 });
                 moduleA.value("b", 2);
 
@@ -472,19 +472,19 @@ describe("container", function(){
 
         it("should throw error if doesn't exist", function(){
             expect(function(){
-                container(moduleA).get("a")
+                container(moduleA).get("a");
             }).toThrow(new Error("no service exists with the name a"));
         });
 
         it("should throw error for null", function(){
             expect(function(){
-                container(moduleA).get(null)
+                container(moduleA).get(null);
             }).toThrow(new Error("no service exists with the name null"));
         });
 
         it("should throw error undefined", function(){
             expect(function(){
-                container(moduleA).get(undefined)
+                container(moduleA).get(undefined);
             }).toThrow(new Error("no service exists with the name {0}"));
         });
     });
@@ -595,7 +595,7 @@ describe("container", function(){
             moduleB.exports(["b"]);
 
             expect(function(){
-                container(moduleB).load()
+                container(moduleB).load();
             }).toThrow(new Error("export name b doesn't map to a service"));
         });
     });

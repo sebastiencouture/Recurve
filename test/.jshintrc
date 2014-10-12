@@ -1,5 +1,8 @@
 {
     "extends": "../.jshintrc-common",
+    "lastsemic": true,
+    "jasmine": true,
+
     "globals": {
         "module": false,
         "container": false,
@@ -50,6 +53,9 @@
         "addParametersToUrl": false,
         "removeParameterFromUrl": false,
         "getParametersOfUrl": false,
-        "assert": false
+        "assert": false,
+
+        "$invoke": false,
+        "$include": false
     }
 }

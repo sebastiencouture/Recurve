@@ -70,7 +70,7 @@ describe("common", function(){
 
         it("should not throw error for undefined object", function() {
             forEach(undefined);
-        })
+        });
 
         it("should throw error for null iterator", function() {
             expect(function() {
@@ -187,7 +187,7 @@ describe("common", function(){
 
             equal = areEqual(a, b);
             expect(equal).toBe(false);
-        })
+        });
 
         it("should detect both are NaN", function(){
             equal = areEqual(NaN, NaN);
@@ -269,7 +269,7 @@ describe("common", function(){
         });
 
         it("should not detect string literal same as new String", function(){
-           expect(isSameType("1", new String("1"))).toEqual(false);
+           expect(isSameType("1", new String("1"))).toEqual(false); // jshint ignore:line
         });
     });
 
@@ -282,7 +282,7 @@ describe("common", function(){
         });
 
         it("should detect new Object()", function() {
-            object = new Object();
+            object = new Object(); // jshint ignore:line
             expect(isObject(object)).toEqual(true);
         });
 
@@ -322,7 +322,7 @@ describe("common", function(){
         });
 
         it("should detect new String()", function(){
-           expect(isObject(new String("sebastien"))).toEqual(true);
+           expect(isObject(new String("sebastien"))).toEqual(true); // jshint ignore:line
         });
 
         it("should not detect number", function(){
@@ -331,7 +331,7 @@ describe("common", function(){
 
         it("should not detect boolean", function(){
             expect(isObject(true)).toEqual(false);
-        })
+        });
     });
 
     describe("isUndefined", function() {
@@ -386,7 +386,7 @@ describe("common", function(){
         });
 
         it("should detect new String()", function() {
-            string = new String("test string");
+            string = new String("test string"); // jshint ignore:line
             expect(isString(string)).toEqual(true);
         });
 
@@ -409,7 +409,7 @@ describe("common", function(){
         });
 
         it("should detect new Array()", function() {
-            array = new Array();
+            array = new Array(); // jshint ignore:line
             expect(isArray(array)).toEqual(true);
         });
 
@@ -423,7 +423,7 @@ describe("common", function(){
             }
 
             test();
-        })
+        });
     });
 
     describe("isFunction", function() {
@@ -554,7 +554,7 @@ describe("common", function(){
 
             result = extend(null);
             expect(result).toBe(null);
-        })
+        });
     });
 
     describe("clone", function(){
@@ -642,8 +642,8 @@ describe("common", function(){
 
         it("should throw error for invalid string", function(){
             var str = "{a:b";
-            expect(function(){fromJson(str)}).toThrow();
-        })
+            expect(function(){fromJson(str)}).toThrow(); // jshint ignore:line
+        });
     });
 
     describe("toFromData", function(){
@@ -720,7 +720,7 @@ describe("common", function(){
 
         it("should return null for undefined", function(){
             expect(format()).toEqual(null);
-        })
+        });
     });
 
     describe("pad", function(){
@@ -901,7 +901,7 @@ describe("common", function(){
 
         it("should not contain if case doesn't match", function(){
             expect(contains("example test str", "Test")).toEqual(false);
-        })
+        });
 
         it("should contain ignoring case", function(){
             expect(contains("example test str", "Test", true)).toEqual(true);

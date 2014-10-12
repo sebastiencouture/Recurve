@@ -47,7 +47,8 @@ module.exports = function(grunt) {
                 jshintrc: true,
             },
             recurve: files.recurveSrc,
-            recurveMock: files.recurveModules.mock
+            recurveMock: files.recurveModules.mock,
+            test: files.test
         },
 
         uglify: {

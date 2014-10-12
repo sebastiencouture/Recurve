@@ -251,7 +251,7 @@ describe("$promise", function() {
                 deferred.resolve("a");
 
                 $async.flush();
-                expect(onFulfilled).toHaveBeenCalledWith("a")
+                expect(onFulfilled).toHaveBeenCalledWith("a");
             });
 
             it("it must not be called before promise is fulfilled", function() {
@@ -405,7 +405,7 @@ describe("$promise", function() {
             it("if either onFulfilled or onRejected throws an exception e, promise2 must be rejected with e as the reason", function() {
                 var error = new Error("e");
                 var promise2 = deferred.promise.then(function() {
-                    throw error
+                    throw error;
                 }, shouldNotBeCalled);
 
                 promise2.then(shouldNotBeCalled, onRejected);

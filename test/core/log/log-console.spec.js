@@ -29,7 +29,7 @@ describe("$log-console", function() {
             logs.push("error");
         };
         clear = function() {
-            logs = []
+            logs = [];
         };
 
         $include(null, function($mockable) {
@@ -136,7 +136,7 @@ describe("$log-console", function() {
             $logConsole = logConsole;
         });
 
-        $logConsole("a")
+        $logConsole("a");
         $logConsole.info("a");
         $logConsole.debug("a");
         $logConsole.warn("a");
@@ -152,8 +152,8 @@ describe("$log-console", function() {
             function logger(type) {
                 return function(){
                     logs.push(type + ";" + argumentsToArray(arguments).join(";"));
-                }
-            };
+                };
+            }
 
             log = logger("log");
             info = logger("info");

@@ -11,7 +11,7 @@ describe("recurveMock-$storage", function() {
         beforeEach(function() {
             $invoke([name], function(storage) {
                 $storage = storage;
-            })
+            });
         });
 
         it("should be invokable", function() {

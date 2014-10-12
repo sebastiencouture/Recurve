@@ -19,7 +19,7 @@ describe("$performance", function(){
             logs.performance.push(logs.performance.length);
             return 0;
         }
-    }
+    };
 
     beforeEach(function(){
         logs.time = [];
@@ -35,7 +35,7 @@ describe("$performance", function(){
                     timeEnd: timeEnd
                 },
                 performance: performance
-            })
+            });
         });
 
         $invoke(["$performance", "$log"], function(performance, log){
@@ -62,7 +62,7 @@ describe("$performance", function(){
             $mockable.value("$window", {
                 console: {},
                 performance: performance
-            })
+            });
         });
 
         $invoke(["$performance", "$log"], function(performance, log){
@@ -81,7 +81,7 @@ describe("$performance", function(){
         $include(null, function($mockable){
             $mockable.value("$window", {
                 console: {}
-            })
+            });
         });
 
         $invoke(["$performance", "$log"], function(performance, log){

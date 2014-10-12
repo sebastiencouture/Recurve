@@ -25,7 +25,7 @@ describe("$uncaughtErrorHandler", function() {
             $mockable.value("$errorHandler", jasmine.createSpy("$errorHandler"));
             $mockable.decorator("$errorHandler", null, function($delegate) {
                 return $delegate;
-            })
+            });
         });
 
         $invoke(["$window", "$errorHandler", "$uncaughtErrorHandler"], function(window, errorHandler, uncaughtErrorHandler) {
@@ -36,7 +36,7 @@ describe("$uncaughtErrorHandler", function() {
 
         $window.onerror("a");
         expect($errorHandler).toHaveBeenCalledWith(new Error("a"));
-    })
+    });
 
     describe("error", function() {
         function getError() {

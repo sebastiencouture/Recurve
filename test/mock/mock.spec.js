@@ -14,7 +14,7 @@ describe("recurveMock", function() {
         $invoke(["$window", "$promise"], function($window, $promise) {
             expect($window).toBeDefined();
             expect($promise).toBeDefined();
-        })
+        });
     });
 
     it("should instantiate services of included module", function() {

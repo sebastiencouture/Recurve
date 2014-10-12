@@ -10,7 +10,7 @@ describe("$log", function() {
     function logTarget(timestamp) {
         targetTimestamps.push(timestamp);
         targetMessages.push(argumentsToArray(arguments, 1));
-    };
+    }
 
     extend(logTarget, {
         info: logTarget,

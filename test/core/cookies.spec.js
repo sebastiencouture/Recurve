@@ -184,7 +184,7 @@ describe("$cookies", function() {
         it("should return true if exists", function(){
             $cookies.set("a", "b");
             expect($cookies.remove("a")).toEqual(true);
-        })
+        });
 
         it("should return false if doesn't exist", function() {
             expect($cookies.remove("a")).toEqual(false);

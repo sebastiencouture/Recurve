@@ -80,4 +80,4 @@ describe("$async", function() {
             }, 0);
         });
     });
-})
+});
