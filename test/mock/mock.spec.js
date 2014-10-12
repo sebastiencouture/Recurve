@@ -19,6 +19,15 @@ describe("recurveMock", function() {
         });
     });
 
+    it("should throw error if service doesn't exist", function() {
+        var module = recurve.module();
+        $include(module);
+
+        expect(function() {
+            $invoke(["$a"], function() {});
+        }).toThrow();
+    });
+
     it("should include multiple modules", function() {
         var module = recurve.module();
         module.value("$a", 1);
