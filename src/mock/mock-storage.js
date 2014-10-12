@@ -4,7 +4,7 @@ function addMockStorageServices(module) {
     function storage(config, $cache) {
         function parse(value) {
             try {
-                return fromJson(value);
+                return recurve.fromJson(value);
             }
             catch(e) {
                 return value;

@@ -26,7 +26,7 @@ function addMockHttpProviderService(module) {
                 url = url.substr(0, Math.max(startIndex - 1, 0));
             }
 
-            if (!contains(url, "?")) {
+            if (!recurve.contains(url, "?")) {
                 url = url.replace("&", "?");
             }
 
@@ -44,7 +44,7 @@ function addMockHttpProviderService(module) {
                     match = recurve.toJson(actual[key]).match(value);
                 }
                 else if (recurve.isObject(value)) {
-                    match = expectationsMatch(value, actual[key])
+                    match = expectationsMatch(value, actual[key]);
                     return false;
                 }
                 else if (!recurve.areEqual(actual[key], value)) {
@@ -309,6 +309,6 @@ function addMockHttpProviderService(module) {
 
                 throw new Error(description);
             }
-        }
+        };
     });
 }

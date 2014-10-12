@@ -1,0 +1,10 @@
+{
+    "eqnull": true,
+    "globalstrict": true,
+    "bitwise": true,
+    "curly": true,
+    "nonew": true,
+    "undef": true,
+    "loopfunc": true,
+    "browser": true
+}

@@ -10,7 +10,7 @@ function addMockCookiesService(module) {
             }
 
             return (options.domain && options.domain != $document.location.host) ||
-                (options.path && "/" != options.path && "" != options.path);
+                (options.path && "/" !== options.path && "" !== options.path);
         }
 
         function addDaysFromNow(days) {
@@ -77,6 +77,6 @@ function addMockCookiesService(module) {
             clear: function() {
                 cookies = [];
             }
-       }
+       };
     });
 }

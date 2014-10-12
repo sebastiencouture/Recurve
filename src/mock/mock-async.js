@@ -57,7 +57,7 @@ function addMockAsyncService(module) {
                         window.clearTimeout(timeout.id);
                     }
                 }
-            }
+            };
         }
 
         var timeoutGroups = [];
@@ -76,7 +76,7 @@ function addMockAsyncService(module) {
         }
 
         function add(id, fn, timeMs) {
-            if (isUndefined(timeMs)) {
+            if (recurve.isUndefined(timeMs)) {
                 timeMs = 0;
             }
 

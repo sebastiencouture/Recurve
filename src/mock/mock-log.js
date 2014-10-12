@@ -43,7 +43,7 @@ function addMockLogService(module) {
                 clear: function() {
                     calls = [];
                 }
-            }
+            };
         }
 
         function log() {

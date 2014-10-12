@@ -1,4 +1,15 @@
+/* global addMockAsyncService,
+ addMockTimeoutDecorator,
+ addMockLogService,
+ addMockCookiesService,
+ addMockStorageServices,
+ addMockHttpProviderService,
+ addMockErrorHandlerDecorator
+ */
+
 (function() {
+    "use strict";
+
     recurve.mock = {};
 
     addMockModules();
