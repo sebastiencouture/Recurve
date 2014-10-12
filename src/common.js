@@ -1,18 +1,64 @@
+/* global forEach: true,
+ find: true,
+ areEqual: true,
+ isEmpty: true,
+ isNaN: true,
+ isSameType: true,
+ isString: true,
+ isUndefined: true,
+ isError: true,
+ isObject: true,
+ isArray: true,
+ isArguments: true,
+ isFunction: true,
+ isDate: true,
+ isFile: true,
+ isNumber: true,
+ isBlob: true,
+ isRegExp: true,
+ extend: true,
+ clone: true,
+ toJson: true,
+ fromJson: true,
+ toFormData: true,
+ format: true,
+ pad: true,
+ startsWith: true,
+ endsWith: true,
+ formatTime: true,
+ formatMonthDayYear: true,
+ isEqualIgnoreCase: true,
+ contains: true,
+ beforeSeparator: true,
+ afterSeparator: true,
+ generateUUID: true,
+ removeItem: true,
+ removeAt: true,
+ argumentsToArray: true,
+ createElement: true,
+ addEventListener: true,
+ removeEventListener: true,
+ elementSupportsEvent: true,
+ addParametersToUrl: true,
+ removeParameterFromUrl: true,
+ getParametersOfUrl: true,
+ assert: true
+*/
+
 "use strict";
-
-var recurve = window.recurve || (window.recurve = {});
-
 
 function forEach(obj, iterator, context) {
     if (!obj) {
         return obj;
     }
 
+    var index;
+
     if (obj.forEach && obj.forEach === Object.forEach) {
         obj.forEach(iterator, context);
     }
     else if (isArray(obj)) {
-        for (var index = 0; index < obj.length; index++) {
+        for (index = 0; index < obj.length; index++) {
             if (false === iterator.call(context, obj[index], index, obj)) {
                 break;
             }
@@ -20,7 +66,7 @@ function forEach(obj, iterator, context) {
     }
     else {
         var keys = Object.keys(obj);
-        for (var index = 0; index < keys.length; index++) {
+        for (index = 0; index < keys.length; index++) {
             var key = keys[index];
             if (false === iterator.call(context, obj[key], key, obj)) {
                 break;
@@ -114,7 +160,7 @@ function areEqual(value, other) {
             keysOfValue[key] = true;
         }
 
-        for (var key in other) {
+        for (key in other) {
             if (isFunction(other[key])) {
                 continue;
             }
@@ -251,21 +297,6 @@ function toFormData(obj) {
     return values.join("&");
 }
 
-/**
- * Wrap method in try..catch and handle error without raising uncaught error
- *
- * @param fn
- * @param [, arg2, ..., argN], list of arguments for method
- */
-function protectedInvoke(fn) {
-    try {
-        var args = ArrayUtils.argumentsToArray(arguments, 1);
-        fn.apply(null, args);
-    }
-    catch (error) {
-    }
-}
-
 ///
 
 function format(value) {
@@ -280,7 +311,7 @@ function format(value) {
 }
 
 function pad(value, padCount, padValue) {
-    if (!value && 0 != value) {
+    if (!value && 0 !== value) {
         return null;
     }
 
@@ -298,7 +329,7 @@ function pad(value, padCount, padValue) {
 }
 
 function startsWith(str, value) {
-    return str && 0 == str.indexOf(value);
+    return str && 0 === str.indexOf(value);
 }
 
 function endsWith(str, value) {
@@ -395,8 +426,10 @@ function generateUUID() {
     // http://stackoverflow.com/a/8809472
     var now = Date.now();
     var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(character) {
+        // jshint bitwise: false
         var random = (now + Math.random()*16)%16 | 0;
         now = Math.floor(now/16);
+        // jshint bitwise: false
         return (character=='x' ? random : (random&0x3|0x8)).toString(16);
     });
 
@@ -437,7 +470,7 @@ function argumentsToArray(args, sliceCount) {
 ///
 
 function createElement(name, attributes) {
-    var element = document.createElement(name);
+    var element = window.document.createElement(name);
 
     forEach(attributes, function(value, key) {
         element.setAttribute(key, value);
@@ -578,7 +611,7 @@ function assert(condition, message) {
     }
 
     Array.prototype.shift.apply(arguments);
-    message = format.apply(this, arguments) || "";
+    message = format.apply(null, arguments) || "";
 
     throw new Error(message);
-};
+}

@@ -37,7 +37,7 @@ function addLogConsoleService(module) {
                 else {
                     logger(description);
                 }
-            }
+            };
         }
 
         /**
@@ -82,7 +82,9 @@ function addLogConsoleService(module) {
             error: logType("error"),
 
             clear: function() {
-                $window.console && $window.console.clear && $window.console.clear();
+                if ($window.console && $window.console.clear) {
+                    $window.console.clear();
+                }
             }
         });
     });

@@ -20,7 +20,7 @@ function addCacheService(module) {
 
             var cache = {};
 
-            return caches[name] = {
+            caches[name] = {
                 get: function(key) {
                     var value = cache[key];
                     return value ? value.value : null;
@@ -136,6 +136,8 @@ function addCacheService(module) {
 
                 return exists;
             }
+
+            return caches[name];
         };
 
         return extend($cache, {
@@ -156,5 +158,5 @@ function addCacheService(module) {
                 caches = {};
             }
         });
-    })
+    });
 }

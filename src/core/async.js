@@ -1,3 +1,5 @@
+/*global window: false */
+
 "use strict";
 
 function addAsyncService(module) {

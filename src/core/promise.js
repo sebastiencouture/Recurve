@@ -52,7 +52,7 @@ function addPromiseService(module) {
                         });
                     }
                 }
-            }
+            };
         };
 
         var $promise = function(resolver) {
@@ -144,7 +144,7 @@ function addPromiseService(module) {
                 "catch": function(onRejected) {
                     return this.then(null, onRejected);
                 }
-            }
+            };
         };
 
         return extend($promise, {
@@ -228,8 +228,8 @@ function addPromiseService(module) {
 
                     function resolveHandler(index) {
                         return function(value) {
-                            resolveWithValueHandler(index, value)
-                        }
+                            resolveWithValueHandler(index, value);
+                        };
                     }
 
                     forEach(iterable, function(value, index) {

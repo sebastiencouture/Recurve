@@ -1,3 +1,5 @@
+/* global container: true */
+
 "use strict";
 
 function container(modules) {

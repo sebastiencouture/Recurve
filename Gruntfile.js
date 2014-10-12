@@ -1,5 +1,9 @@
-/*global module:false*/
+/*global module:false,
+ require: false
+*/
 module.exports = function(grunt) {
+    "use strict";
+
     var banner =
         '/*!\n<%= pkg.name %>.js - v<%= pkg.version %>\n' +
             'Created by <%= pkg.author %> on <%=grunt.template.today("yyyy-mm-dd") %>.\n\n' +
@@ -39,9 +43,11 @@ module.exports = function(grunt) {
         },
 
         jshint: {
-            all: ['Gruntfile.js', 'src/**/*.js', '<%= buildDir %>/<%= pkg.name %>.js'],
+            all: files.recurveSrc,
+            recurve: files.recurveSrc,
+            recurveMock: files.recurveModules.mock,
             options: {
-                eqnull: true
+                jshintrc: true,
             }
         },
 

@@ -104,8 +104,8 @@ function addSignalService(module) {
                     disabled = value;
                 }
             };
-        }
-    };
+        };
+    }
 
     function signalListener(callback, context, onlyOnce) {
         return Object.create(signalListenerPrototype).init(callback, context, onlyOnce);

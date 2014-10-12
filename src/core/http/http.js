@@ -150,7 +150,7 @@ function addHttpService(module) {
                 options = extend(options, {method: method, url: url, data: data});
 
                 return http(options);
-            }
+            };
         }
 
         var http = function(options) {

@@ -1270,14 +1270,4 @@ describe("common", function(){
             expect(function(){assert(false, "message: {0} {1}", "a", 1)}).toThrow(new Error("message: a 1"));
         });
     });
-
-    describe("protectedInvoke", function(){
-       it("should not throw an error", function(){
-            expect(function(){
-                protectedInvoke(function(){
-                    throw new Error("a");
-                });
-            }).not.toThrow();
-       })
-    });
 });

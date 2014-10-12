@@ -13,7 +13,7 @@ function addErrorHandlerService(module) {
             catch (error) {
                 this(error);
             }
-        }
+        };
 
         return errorHandler;
     });

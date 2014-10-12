@@ -28,7 +28,7 @@ function addStorageServices(module) {
                 provider.removeItem(key);
             }
             catch (e) {
-                $log.warn("storage is not supported")
+                $log.warn("storage is not supported");
                 return false;
             }
 

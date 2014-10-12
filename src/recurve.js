@@ -1,3 +1,24 @@
+/* global addDocumentService,
+ addWindowService,
+ addAsyncService,
+ addTimeoutService,
+ addSignalService,
+ addEventEmitterService,
+ addCacheService,
+ addLogService,
+ addLogConsoleService,
+ addErrorHandlerService,
+ addUncaughtErrorHandlerService,
+ addPerformanceService,
+ addCookiesService,
+ addStorageServices,
+ addPromiseService,
+ addHttpXhrService,
+ addHttpJsonpService,
+ addHttpDeferredService,
+ addHttpProviderService,
+ addHttpService
+ */
 "use strict";
 
 function createApi(recurve) {
@@ -6,7 +27,6 @@ function createApi(recurve) {
         extend: extend,
         clone: clone,
         format: format,
-        protectedInvoke: protectedInvoke,
         areEqual: areEqual,
         isNaN: isNaN,
         isSameType: isSameType,
