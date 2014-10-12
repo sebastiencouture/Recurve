@@ -27,6 +27,7 @@ function createApi(recurve) {
         extend: extend,
         clone: clone,
         format: format,
+        contains: contains,
         areEqual: areEqual,
         isNaN: isNaN,
         isSameType: isSameType,
