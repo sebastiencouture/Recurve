@@ -1,3 +1,5 @@
+/* global addAsyncService */
+
 "use strict";
 
 describe("$async", function() {

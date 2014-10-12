@@ -1,3 +1,5 @@
+/* global addStorageServices */
+
 "use strict";
 
 describe("$storage", function() {

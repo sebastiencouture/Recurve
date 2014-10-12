@@ -60,6 +60,7 @@ describe("$signal", function(){
             var that = this;
 
             function triggerHandler() {
+                /*jshint validthis:true */
                 expect(this).toBe(that);
             }
 
@@ -146,6 +147,7 @@ describe("$signal", function(){
             var that = this;
 
             function triggerHandler() {
+                /*jshint validthis:true */
                 expect(this).toBe(that);
             }
 

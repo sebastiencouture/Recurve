@@ -9,7 +9,7 @@
         "grunt": "~0.4.1",
         "grunt-karma": ">0.6.2",
         "grunt-contrib-jshint": "~0.10.0",
-        "grunt-contrib-watch": "git://github.com/edgecampus/grunt-contrib-watch#target-specific-events",
+        "grunt-contrib-watch": "~0.6.1",
         "grunt-contrib-connect": "~0.8.0",
         "grunt-contrib-uglify": "~0.5.1",
         "grunt-contrib-concat": "~0.5.0",

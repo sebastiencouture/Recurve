@@ -15,7 +15,7 @@ describe("module", function(){
             }
 
             moduleA.factory("a", null, factory);
-            var service = moduleA.exported().services["a"];
+            var service = moduleA.exported().services.a;
             expect(service).toEqual({dependencies: null, value: factory});
         });
 
@@ -37,7 +37,7 @@ describe("module", function(){
             moduleA.factory("a", null, factoryA);
             moduleA.factory("a", null, factoryB);
 
-            var service = moduleA.exported().services["a"];
+            var service = moduleA.exported().services.a;
             expect(service).toEqual({dependencies: null, value: factoryB});
         });
     });
@@ -46,7 +46,7 @@ describe("module", function(){
         it("should create a service", function(){
             moduleA.value("a", 1);
 
-            var service = moduleA.exported().services["a"];
+            var service = moduleA.exported().services.a;
             expect(service).toBeDefined();
         });
 
@@ -61,7 +61,7 @@ describe("module", function(){
             }
 
             moduleA.type("a", null, Type);
-            var service = moduleA.exported().services["a"];
+            var service = moduleA.exported().services.a;
             expect(service).toBeDefined();
         });
 
@@ -80,7 +80,7 @@ describe("module", function(){
             }
 
             moduleA.typeFactory("a", null, Type);
-            var service = moduleA.exported().services["a"];
+            var service = moduleA.exported().services.a;
             expect(service).toBeDefined();
         });
 
@@ -107,7 +107,7 @@ describe("module", function(){
             var services = moduleA.exported().services;
 
             expect(services["config.a"]).toBeDefined();
-            expect(services["a"]).not.toBeDefined();
+            expect(services.a).not.toBeDefined();
         });
 
         it("should require a name", function() {
@@ -121,7 +121,7 @@ describe("module", function(){
             }
 
             moduleA.decorator("a", null, decorator);
-            var service = moduleA.exported().decorators["a"];
+            var service = moduleA.exported().decorators.a;
             expect(service).toEqual({dependencies: null, value: decorator});
         });
 
@@ -143,7 +143,7 @@ describe("module", function(){
             moduleA.decorator("a", null, decoratorA);
             moduleA.decorator("a", null, decoratorB);
 
-            var service = moduleA.exported().decorators["a"];
+            var service = moduleA.exported().decorators.a;
             expect(service).toEqual({dependencies: null, value: decoratorB});
         });
     });
@@ -153,14 +153,14 @@ describe("module", function(){
             moduleA.value("valueA", 1);
 
             var services = moduleA.exported().services;
-            expect(services["valueA"]).toBeDefined();
+            expect(services.valueA).toBeDefined();
         });
 
         it("should export decorators", function(){
             moduleA.decorator("decoratorA", null, function(){});
 
             var decorators = moduleA.exported().decorators;
-            expect(decorators["decoratorA"]).toBeDefined();
+            expect(decorators.decoratorA).toBeDefined();
         });
 
         it("should only export public services", function(){
@@ -171,8 +171,8 @@ describe("module", function(){
 
             var services = moduleA.exported().services;
 
-            expect(services["a"]).toBeDefined();
-            expect(services["b"]).not.toBeDefined();
+            expect(services.a).toBeDefined();
+            expect(services.b).not.toBeDefined();
         });
 
         it("should only export public decorators", function(){
@@ -185,8 +185,8 @@ describe("module", function(){
 
             var decorators = moduleA.exported().decorators;
 
-            expect(decorators["a"]).toBeDefined();
-            expect(decorators["b"]).not.toBeDefined();
+            expect(decorators.a).toBeDefined();
+            expect(decorators.b).not.toBeDefined();
         });
     });
 

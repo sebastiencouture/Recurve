@@ -110,6 +110,7 @@ describe("$eventEmitter", function(){
             var that = this;
 
             function triggerHandler() {
+                /*jshint validthis:true */
                 expect(this).toBe(that);
             }
 
@@ -259,6 +260,7 @@ describe("$eventEmitter", function(){
             var that = this;
 
             function triggerHandler() {
+                /*jshint validthis:true */
                 expect(this).toBe(that);
             }
 

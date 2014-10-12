@@ -1,3 +1,5 @@
+/* global addHttpProviderService */
+
 "use strict";
 
 describe("$httpProvider", function() {

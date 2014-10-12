@@ -1,3 +1,5 @@
+/* global addCookiesService */
+
 "use strict";
 
 describe("$cookies", function() {

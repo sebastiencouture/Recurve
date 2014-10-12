@@ -1,3 +1,5 @@
+/* global WebKitBlobBuilder: false */
+
 "use strict";
 
 describe("$http", function() {
@@ -334,7 +336,7 @@ describe("$http", function() {
             it("should pass in data and content type", function() {
                 expect(serializer).toHaveBeenCalledWith('a', 'application/json; charset=UTF-8');
             });
-        })
+        });
     });
 
     // Covered in more detail in http-deferred spec
