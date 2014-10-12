@@ -2,6 +2,14 @@
 
 describe("recurveMock", function() {
 
+    it("should provide global shortcut methods for invoke and include", function() {
+        expect($include).toBeDefined();
+        expect($include).toBe(recurve.mock.include);
+
+        expect($invoke).toBeDefined();
+        expect($invoke).toBe(recurve.mock.invoke);
+    });
+
     it("should instantiate core services", function() {
         $invoke(["$window", "$promise"], function($window, $promise) {
             expect($window).toBeDefined();
