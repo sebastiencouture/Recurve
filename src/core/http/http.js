@@ -135,6 +135,24 @@ function addHttpService(module) {
             options.data._method = options.method;
         }
 
+        function createShortMethod(method) {
+            return function(url, options) {
+                options = options || {};
+                options = extend(options, {method: method, url: url});
+
+                return http(options);
+            };
+        }
+
+        function createShortDataMethod(method) {
+            return function(url, data, options) {
+                options = options || {};
+                options = extend(options, {method: method, url: url, data: data});
+
+                return http(options);
+            }
+        }
+
         var http = function(options) {
             var withDefaults = createOptionsWithDefaults(options);
 
@@ -172,54 +190,13 @@ function addHttpService(module) {
         return extend(http, {
             defaults : defaults,
 
-            get: function(url, options) {
-                options = options || {};
-                options = extend(options, {method: "GET", url: url});
-
-                return http(options);
-            },
-
-            post: function(url, data, options) {
-                options = options || {};
-                options = extend(options, {method: "POST", url: url, data: data});
-
-                return http(options);
-            },
-
-            jsonp: function(url, options) {
-                options = options || {};
-                options = extend(options, {method: "JSONP", url: url});
-
-                return http(options);
-            },
-
-            "delete": function(url, options) {
-                options = options || {};
-                options = extend(options, {method: "DELETE", url: url});
-
-                return http(options);
-            },
-
-            head: function(url, options) {
-                options = options || {};
-                options = extend(options, {method: "HEAD", url: url});
-
-                return http(options);
-            },
-
-            put: function(url, data, options) {
-                options = options || {};
-                options = extend(options, {method: "PUT", url: url, data: data});
-
-                return http(options);
-            },
-
-            patch: function(url, data, options) {
-                options = options || {};
-                options = extend(options, {method: "PATCH", url: url, data: data});
-
-                return http(options);
-            }
+            get: createShortMethod("GET"),
+            post: createShortDataMethod("POST"),
+            jsonp: createShortMethod("JSONP"),
+            "delete": createShortMethod("DELETE"),
+            head: createShortMethod("HEAD"),
+            put: createShortDataMethod("PUT"),
+            patch: createShortDataMethod("PATCH")
         });
     });
 

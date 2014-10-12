@@ -179,6 +179,12 @@ function addMockHttpProviderService(module) {
             return handler;
         }
 
+        function createShortMethod(method) {
+            return function(url) {
+                this.on(method, url);
+            };
+        }
+
         return {
             send: function(options, httpDeferred) {
                 // don't require handlers to match params on the url, instead should check against
@@ -217,6 +223,14 @@ function addMockHttpProviderService(module) {
 
                 return handler.interface;
             },
+
+            onGET: createShortMethod("GET"),
+            onPOST: createShortMethod("POST"),
+            onJSONP: createShortMethod("JSONP"),
+            onDELETE: createShortMethod("DELETE"),
+            onHEAD: createShortMethod("HEAD"),
+            onPUT: createShortMethod("PUT"),
+            onPATCH: createShortMethod("PATCH"),
 
             flush: function(count) {
                 var respondCount = 0;

@@ -571,6 +571,27 @@ describe("recurveMock-$httpProvider", function() {
         });
     });
 
+    describe("short methods", function() {
+        function spec(method) {
+            describe(method, function() {
+                it("should call on(..)", function() {
+                    spyOn($httpProvider, "on");
+                    handler = $httpProvider["on" + method]("www.a.com");
+
+                    expect($httpProvider.on).toHaveBeenCalledWith(method, "www.a.com");
+                });
+            });
+        }
+
+        spec("GET");
+        spec("POST");
+        spec("JSONP");
+        spec("DELETE");
+        spec("HEAD");
+        spec("PUT");
+        spec("PATCH");
+    });
+
     it("should clear expectations", function() {
         handler.respond({});
         handler.expect();
