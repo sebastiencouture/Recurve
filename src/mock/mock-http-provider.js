@@ -33,21 +33,21 @@ function addMockHttpProviderService(module) {
             return url;
         }
 
-        function optionsMatch(expectOptions, options) {
-            if (!options) {
+        function expectationsMatch(expect, actual) {
+            if (!actual) {
                 return false;
             }
 
             var match = true;
-            recurve.forEach(expectOptions, function(value, key) {
+            recurve.forEach(expect, function(value, key) {
                 if (recurve.isRegExp(value)) {
-                    match = recurve.toJson(options[key]).match(value);
+                    match = recurve.toJson(actual[key]).match(value);
                 }
                 else if (recurve.isObject(value)) {
-                    match = optionsMatch(value, options[key])
+                    match = expectationsMatch(value, actual[key])
                     return false;
                 }
-                else if (!recurve.areEqual(options[key], value)) {
+                else if (!recurve.areEqual(actual[key], value)) {
                     match = false;
                     return false;
                 }
@@ -68,16 +68,20 @@ function addMockHttpProviderService(module) {
                 callCount: 0,
                 expectedOptions: {},
 
-                respond: function(request) {
+                match: function(request) {
                     if (!this.urlMatch(request.options.method, request.options.url)) {
                         return false;
                     }
 
-                    if (!optionsMatch(this.expectOptions, request.options)) {
+                    if (!expectationsMatch(this.expect, request.options)) {
                         lastRequestOptions = request.options;
                         return false;
                     }
 
+                    return true;
+                },
+
+                respond: function(request) {
                     this.callCount++;
 
                     if (this.response) {
@@ -105,7 +109,7 @@ function addMockHttpProviderService(module) {
 
                 clearExpectations: function() {
                     this.expectCount = undefined;
-                    this.expectOptions = {};
+                    this.expect = {};
                 },
 
                 urlMatch: function(otherMethod, otherUrl) {
@@ -117,8 +121,8 @@ function addMockHttpProviderService(module) {
                         "method: {0}, url: {1}, expected calls: {2}, actual: {3}",
                         method, url, this.expectCount || 0, this.callCount);
 
-                    if (this.expectOptions) {
-                        str += ", expected options: " + prettyPrint(this.expectOptions);
+                    if (this.expect) {
+                        str += ", expected: " + prettyPrint(this.expect);
 
                         if (lastRequestOptions) {
                             str += ", actual: " + prettyPrint(lastRequestOptions);
@@ -136,6 +140,43 @@ function addMockHttpProviderService(module) {
 
         function successful(status) {
             return 200 <= status && 300 > status;
+        }
+
+        function createHandler(method, url) {
+            var handler = requestHandler(method, url);
+
+            // doing this to simplify unit testing...
+            handler.interface = {
+                respond: function(response) {
+                    if (response) {
+                        response.status = response.status || 200;
+                    }
+
+                    handler.response = response;
+                    return this;
+                },
+
+                expect: function(options, count) {
+                    if (recurve.isUndefined(count)) {
+                        count = 1;
+                    }
+
+                    if (options && options.method) {
+                        options.method = options.method.toUpperCase();
+                    }
+
+                    handler.expectCount = count;
+                    handler.expect = options;
+
+                    return this;
+                },
+
+                callCount: function() {
+                    return handler.callCount;
+                }
+            };
+
+            return handler;
         }
 
         return {
@@ -170,38 +211,7 @@ function addMockHttpProviderService(module) {
                 });
 
                 if (!handler) {
-                    handler = requestHandler(method, url);
-
-                    // doing this to simplify unit testing...
-                    handler.interface = {
-                        respond: function(response) {
-                            if (response) {
-                                response.status = response.status || 200;
-                            }
-
-                            handler.response = response;
-                            return this;
-                        },
-
-                        expect: function(options, count) {
-                            if (recurve.isUndefined(count)) {
-                                count = 1;
-                            }
-
-                            if (options && options.method) {
-                                options.method = options.method.toUpperCase();
-                            }
-
-                            handler.expectCount = count;
-                            handler.expectOptions = options;
-                            return this;
-                        },
-
-                        callCount: function() {
-                            return handler.callCount;
-                        }
-                    };
-
+                    handler = createHandler(method, url);
                     handlers.push(handler);
                 }
 
@@ -215,7 +225,8 @@ function addMockHttpProviderService(module) {
                 recurve.forEach(requests, function(request, index) {
                     var responded = false;
                     recurve.forEach(handlers, function(handler) {
-                        if (handler.respond(request)) {
+                        if (handler.match(request)) {
+                            handler.respond(request);
                             responded = true;
                             return false;
                         }

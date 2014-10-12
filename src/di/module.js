@@ -29,7 +29,7 @@ function module(dependentModules) {
         // guess it to be a function constructor... why "new" sucks!
         assert(isFunction(Type), "factory services requires a function constructor");
 
-        return this.factory(name, dependencies, function(){
+        return this.factory(name, dependencies, function() {
             var instance = Object.create(Type.prototype);
             instance = Type.apply(instance, argumentsToArray(arguments)) || instance;
 
@@ -43,7 +43,7 @@ function module(dependentModules) {
         // guess it to be a function constructor... why "new" sucks!
         assert(isFunction(Type), "factory services requires a function constructor");
 
-        return this.factory(name, dependencies, function(){
+        return this.factory(name, dependencies, function() {
             var factoryArgs = argumentsToArray(arguments);
             return function() {
                 var instance = Object.create(Type.prototype);
@@ -56,7 +56,7 @@ function module(dependentModules) {
 
     // returns value
     function value(name, value) {
-        return this.factory(name, null, function(){
+        return this.factory(name, null, function() {
             return value;
         });
     }
@@ -119,7 +119,7 @@ function module(dependentModules) {
 
         // Sanity check to ensure all export names map to a service
         // (exports can't include dependent module services)
-        forEach(exportNames, function(exportName){
+        forEach(exportNames, function(exportName) {
             if (-1 === allNames.indexOf(exportName)) {
                 assert(false, "export name {0} doesn't map to a service", exportName);
             }
@@ -145,14 +145,14 @@ function module(dependentModules) {
             exportedDecorators[newName] = decorator;
         }
 
-        forEach(exportedServices, function(service, key){
+        forEach(exportedServices, function(service, key) {
             var cloned = updateDependencies(service);
             if (cloned) {
                 exportedServices[key] = cloned;
             }
         });
 
-        forEach(exportedDecorators, function(decorator, key){
+        forEach(exportedDecorators, function(decorator, key) {
             var cloned = updateDependencies(decorator);
             if (cloned) {
                 exportedDecorators[key] = cloned;
@@ -165,7 +165,7 @@ function module(dependentModules) {
             // Clone the service/decorator in this case since the new private name
             // is tied to the export. We don't want the dependencies altered for
             // further exports
-            forEach(item.dependencies, function(dependency, index){
+            forEach(item.dependencies, function(dependency, index) {
                 if (dependency == oldName) {
                     cloned = {};
                     cloned.dependencies = clone(item.dependencies);

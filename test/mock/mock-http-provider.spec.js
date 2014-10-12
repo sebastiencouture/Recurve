@@ -381,7 +381,7 @@ describe("recurveMock-$httpProvider", function() {
 
             expect(function() {
                 $httpProvider.verifyExpectations();
-            }).toThrow(new Error('outstanding expectations:\nmethod: GET, url: www.a.com, expected calls: 1, actual: 0, expected options: {"data":"a"}, actual: {"method":"GET","url":"www.a.com","data":"b"},\n'));
+            }).toThrow(new Error('outstanding expectations:\nmethod: GET, url: www.a.com, expected calls: 1, actual: 0, expected: {"data":"a"}, actual: {"method":"GET","url":"www.a.com","data":"b"},\n'));
         });
     });
 
