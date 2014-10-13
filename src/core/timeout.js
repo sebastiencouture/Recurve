@@ -9,7 +9,7 @@ function addTimeoutService(module) {
 
             var id = $async(function() {
                 delete deferreds[id];
-                deferred.resolve(id);
+                deferred.resolve();
             }, timeMs);
 
             deferred.promise._$timeoutId = id;
