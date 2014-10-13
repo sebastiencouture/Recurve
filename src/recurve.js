@@ -69,6 +69,13 @@ function createApi(recurve) {
     addHttpProviderService(recurveModule);
     addHttpService(recurveModule);
 
+    recurveModule.exports([
+        "$document", "$window", "$timeout", "$signal",
+        "$eventEmitter", "$cache", "$log", "$logConsole",
+        "$errorHandler", "$uncaughtErrorHandler", "$performance",
+        "$cookies", "$promise", "$http"
+    ]);
+
     recurve.module = function(dependentModules) {
         // TODO TBD core module is always include, but does not need to be explicitly specified
         // maybe require to be specified

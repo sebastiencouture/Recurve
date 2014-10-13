@@ -10,6 +10,8 @@
 (function() {
     "use strict";
 
+    recurve.$module.exports();
+
     recurve.mock = {};
 
     addMockModules();
