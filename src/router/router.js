@@ -5,13 +5,15 @@
     recurve.router = {};
     var module = recurve.router.$module = recurve.module();
 
-    // window "hashchange"
-    // window "popstate"
+    module.factory("$router", ["$history", "$config"], function($history, $config) {
+        // Support for history polyfill
+        // https://github.com/devote/HTML5-History-API
+        var location = window.history.location || window.location;
 
-    // if want to support IE8/9... require polyfill?
-    // https://github.com/devote/HTML5-History-API
+        function checkUrl() {
 
-    module.factory("$router", null, function() {
+        }
+
         return {
             match: function(path) {
                 return {
@@ -42,13 +44,13 @@
             },
 
             start: function() {
-
+                $history.changed.on(checkUrl);
+                $history.start();
             }
         };
     });
 
     module.config("$router", {
-        mode: "history",
         root: ""
     });
 })();

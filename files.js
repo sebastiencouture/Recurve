@@ -41,6 +41,7 @@ var recurveFiles = {
         ],
 
         "router" : [
+            "src/router/router-history.js",
             "src/router/router.js"
         ]
     },
