@@ -38,6 +38,10 @@ var recurveFiles = {
             "src/mock/mock-http-provider.js",
             "src/mock/mock-error-handler-decorator.js",
             "src/mock/mock.js"
+        ],
+
+        "router" : [
+            "src/router/router.js"
         ]
     },
 
