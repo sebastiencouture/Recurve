@@ -2,10 +2,10 @@
 
 var recurveFiles = {
     "recurveSrc": [
-        "src/common.js",
-        "src/recurve.js",
-        "src/di/container.js",
-        "src/di/module.js",
+        "src/core/common.js",
+        "src/core/recurve.js",
+        "src/core/di/container.js",
+        "src/core/di/module.js",
         "src/core/window.js",
         "src/core/document.js",
         "src/core/async.js",
