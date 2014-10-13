@@ -31,7 +31,7 @@ describe("$timeout", function() {
         window.setTimeout(function() {
             expect(fn).toHaveBeenCalled();
             done();
-        }, 30);
+        }, 50);
     });
 
     it("should reject promise on cancel", function(done) {
@@ -41,6 +41,6 @@ describe("$timeout", function() {
         window.setTimeout(function() {
             expect(fn).toHaveBeenCalledWith("canceled");
             done();
-        }, 30);
+        }, 50);
     });
 });
