@@ -479,38 +479,50 @@ function createElement(name, attributes) {
     return element;
 }
 
-function addEventListener(element, event, callback) {
+function addEventListener(obj, event, callback) {
     // http://pieisgood.org/test/script-link-events/
     // TODO TBD link tags don't support any type of load callback on old WebKit (Safari 5)
     function readyStateHandler() {
-        if (isEqualIgnoreCase("loaded", element.readyState) ||
-            isEqualIgnoreCase("complete", element.readyState)) {
+        if (isEqualIgnoreCase("loaded", obj.readyState) ||
+            isEqualIgnoreCase("complete", obj.readyState)) {
             callback({type: "load"});
         }
     }
 
     // IE8 :T
     if ("load" === event &&
-        elementSupportsEvent(element, "onreadystatechange")) {
-        element.onreadystatechange = readyStateHandler;
+        supportsEvent(obj, "onreadystatechange")) {
+        obj.onreadystatechange = readyStateHandler;
     }
     else {
-        element.addEventListener(event, callback);
+        // IE8 :T
+        if (obj.addEventListener) {
+            obj.addEventListener(event, callback);
+        }
+        else {
+            obj.attachEvent("on" + event, callback);
+        }
     }
 }
 
-function removeEventListener(element, event, callback) {
+function removeEventListener(obj, event, callback) {
     if ("load" === event &&
-        elementSupportsEvent(element, "onreadystatechange")) {
-        element.onreadystatechange = null;
+        supportsEvent(obj, "onreadystatechange")) {
+        obj.onreadystatechange = null;
     }
     else {
-        element.removeEventListener(event, callback);
+        // IE8 :T
+        if (obj.removeEventListener) {
+            obj.removeEventListener(event, callback);
+        }
+        else {
+            obj.detachEvent("on" + event, callback);
+        }
     }
 }
 
-function elementSupportsEvent(element, name) {
-    return name in element;
+function supportsEvent(obj, name) {
+    return name in obj;
 }
 
 ////
