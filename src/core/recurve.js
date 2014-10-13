@@ -28,6 +28,8 @@ function createApi(recurve) {
         clone: clone,
         format: format,
         contains: contains,
+        addEventListener: addEventListener,
+        removeEventListener: removeEventListener,
         areEqual: areEqual,
         isNaN: isNaN,
         isSameType: isSameType,

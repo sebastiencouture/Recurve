@@ -38,7 +38,7 @@
  createElement: true,
  addEventListener: true,
  removeEventListener: true,
- elementSupportsEvent: true,
+ supportsEvent: true,
  addParametersToUrl: true,
  removeParameterFromUrl: true,
  getParametersOfUrl: true,

@@ -46,7 +46,7 @@
         "createElement": false,
         "addEventListener": false,
         "removeEventListener": false,
-        "elementSupportsEvent": false,
+        "supportsEvent": false,
         "addParametersToUrl": false,
         "removeParameterFromUrl": false,
         "getParametersOfUrl": false,
