@@ -194,7 +194,9 @@
 
             reload: function() {
                 currentPath = null;
-                checkCurrentPath();
+                if (started) {
+                    checkCurrentPath();
+                }
             },
 
             start: function() {
