@@ -136,25 +136,25 @@ describe("common", function(){
 
         it("should detect strict equality", function(){
             equal = areEqual(1,1);
-            expect(equal).toBe(true);
+            expect(equal).toEqual(true);
 
             equal = areEqual("1", "1");
-            expect(equal).toBe(true);
+            expect(equal).toEqual(true);
         });
 
         it("should not detect ==", function(){
             equal = areEqual(1, "1");
-            expect(equal).toBe(false);
+            expect(equal).toEqual(false);
         });
 
         it("should detect arrays with all values passing strict equality", function(){
             equal = areEqual(["a", "b", "c"], ["a", "b", "c"]);
-            expect(equal).toBe(true);
+            expect(equal).toEqual(true);
         });
 
         it("should not detect arrays with different lengths", function(){
             equal = areEqual(["a"], ["a", "b"]);
-            expect(equal).toBe(false);
+            expect(equal).toEqual(false);
         });
 
         it("should detect objects with all keys passing strict equality", function(){
@@ -162,7 +162,7 @@ describe("common", function(){
             var b = {a:1,b:2,c:3};
 
             equal = areEqual(a, b);
-            expect(equal).toBe(true);
+            expect(equal).toEqual(true);
         });
 
         it("should not detect objects with same keys but different values", function(){
@@ -170,7 +170,7 @@ describe("common", function(){
             var b = {a:1,b:2,c:3};
 
             equal = areEqual(a, b);
-            expect(equal).toBe(false);
+            expect(equal).toEqual(false);
         });
 
         it("should detect equal dates", function(){
@@ -178,7 +178,7 @@ describe("common", function(){
             var b = new Date(2014, 9, 10);
 
             equal = areEqual(a, b);
-            expect(equal).toBe(true);
+            expect(equal).toEqual(true);
         });
 
         it("should not detect different dates", function(){
@@ -186,12 +186,22 @@ describe("common", function(){
             var b = new Date(2014, 9, 10);
 
             equal = areEqual(a, b);
-            expect(equal).toBe(false);
+            expect(equal).toEqual(false);
+        });
+
+        it("should detect reg expressions", function() {
+            equal = areEqual(/a/, /a/);
+            expect(equal).toEqual(true);
+        });
+
+        it("should detect reg expressions with constructor", function() {
+            equal = areEqual(new RegExp("/a/"), new RegExp("/a/"));
+            expect(equal).toEqual(true);
         });
 
         it("should detect both are NaN", function(){
             equal = areEqual(NaN, NaN);
-            expect(equal).toBe(true);
+            expect(equal).toEqual(true);
         });
     });
 

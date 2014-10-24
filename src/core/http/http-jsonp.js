@@ -2,6 +2,37 @@
 
 function addHttpJsonpService(module) {
     module.factory("$httpJsonp", ["$window", "$document", "$promise"], function($window, $document, $promise) {
+
+        function addEventForElement(element, event, callback) {
+            // http://pieisgood.org/test/script-link-events/
+            // TODO TBD link tags don't support any type of load callback on old WebKit (Safari 5)
+            function readyStateHandler() {
+                if (isEqualIgnoreCase("loaded", element.readyState) ||
+                    isEqualIgnoreCase("complete", element.readyState)) {
+                    callback({type: "load"});
+                }
+            }
+
+            // IE8 :T
+            if ("load" === event &&
+                supportsEvent(element, "onreadystatechange")) {
+                element.onreadystatechange = readyStateHandler;
+            }
+            else {
+                addEvent(element, event, callback);
+            }
+        }
+
+        function removeEventForElement(element, event, callback) {
+            if ("load" === event &&
+                supportsEvent(element, "onreadystatechange")) {
+                element.onreadystatechange = null;
+            }
+            else {
+                removeEvent(element, event, callback);
+            }
+        }
+
         return function (options) {
             var canceled = false;
             var deferred;
@@ -52,8 +83,8 @@ function addHttpJsonpService(module) {
                     }
 
                     function loadErrorHandler (event) {
-                        removeEventListener(script, "load", loadErrorHandler);
-                        removeEventListener(script, "error", loadErrorHandler);
+                        removeEventForElement(script, "load", loadErrorHandler);
+                        removeEventForElement(script, "error", loadErrorHandler);
 
                         $document.head.removeChild(script);
                         script = null;
@@ -65,8 +96,8 @@ function addHttpJsonpService(module) {
                         }
                     }
 
-                    addEventListener(script, "load", loadErrorHandler);
-                    addEventListener(script, "error", loadErrorHandler);
+                    addEventForElement(script, "load", loadErrorHandler);
+                    addEventForElement(script, "error", loadErrorHandler);
 
                     $window[callbackId] = callbackHandler;
 

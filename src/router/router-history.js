@@ -2,7 +2,7 @@
 
 function addRouterHistoryService(module) {
     module.factory("$history", ["$window", "$document", "$timeout", "$signal"], function($window, $document, $timeout, $signal) {
-        var changed = $signal();
+        var popped = $signal();
         var history = $window.history;
 
         return {
@@ -14,24 +14,22 @@ function addRouterHistoryService(module) {
                 history.forward();
             },
 
-            go: function(count) {
-                history.go(count);
-            },
-
-            count: function() {
-                return history.length;
-            },
-
-            currentState: function() {
-                return history.state;
+            go: function(delta) {
+                history.go(delta);
             },
 
             pushState: function() {
-                history.pushState();
+                history.pushState.apply(history, arguments);
             },
 
             replaceState: function() {
-                history.replaceState();
+                history.replaceState.apply(history, arguments);
+            },
+
+            // TODO TBD implement
+            // http://stackoverflow.com/questions/8439145/reading-window-history-state-object-in-webkit
+            getState: function() {
+                return history.state;
             },
 
             start: function() {
@@ -47,22 +45,22 @@ function addRouterHistoryService(module) {
                         return;
                     }
 
-                    changed.trigger(event);
+                    popped.trigger(event);
                 }
 
                 function loadCompleteHandler() {
-                    recurve.removeEventListener("load", loadCompleteHandler);
+                    recurve.removeEvent($window, "load", loadCompleteHandler);
 
                     $timeout(0).then(function() {
                         blockPopstate = false;
                     });
                 }
 
-                recurve.addEventListener("load", loadCompleteHandler);
-                recurve.addEventListener("popstate", popstateHandler);
+                recurve.addEvent($window, "load", loadCompleteHandler);
+                recurve.addEvent($window, "popstate", popstateHandler);
             },
 
-            changed: changed
+            popped: popped
         };
     });
 }

@@ -1,0 +1,6 @@
+{
+    "extends": "../../.jshintrc-common",
+    "globals": {
+        "recurve": true
+    }
+}

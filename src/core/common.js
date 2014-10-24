@@ -36,8 +36,8 @@
  removeAt: true,
  argumentsToArray: true,
  createElement: true,
- addEventListener: true,
- removeEventListener: true,
+ addEvent: true,
+ removeEvent: true,
  supportsEvent: true,
  addParametersToUrl: true,
  removeParameterFromUrl: true,
@@ -143,8 +143,11 @@ function areEqual(value, other) {
             return true;
         }
     }
-    else if(isDate(value)) {
+    else if (isDate(value)) {
         return value.getTime() == other.getTime();
+    }
+    else if (isRegExp(value)) {
+        return value.toString() == other.toString();
     }
     else {
         var keysOfValue = {};
@@ -479,45 +482,23 @@ function createElement(name, attributes) {
     return element;
 }
 
-function addEventListener(obj, event, callback) {
-    // http://pieisgood.org/test/script-link-events/
-    // TODO TBD link tags don't support any type of load callback on old WebKit (Safari 5)
-    function readyStateHandler() {
-        if (isEqualIgnoreCase("loaded", obj.readyState) ||
-            isEqualIgnoreCase("complete", obj.readyState)) {
-            callback({type: "load"});
-        }
-    }
-
+function addEvent(obj, event, callback) {
     // IE8 :T
-    if ("load" === event &&
-        supportsEvent(obj, "onreadystatechange")) {
-        obj.onreadystatechange = readyStateHandler;
+    if (isFunction(obj.addEventListener)) {
+        obj.addEventListener(event, callback);
     }
     else {
-        // IE8 :T
-        if (obj.addEventListener) {
-            obj.addEventListener(event, callback);
-        }
-        else {
-            obj.attachEvent("on" + event, callback);
-        }
+        obj.attachEvent("on" + event, callback);
     }
 }
 
-function removeEventListener(obj, event, callback) {
-    if ("load" === event &&
-        supportsEvent(obj, "onreadystatechange")) {
-        obj.onreadystatechange = null;
+function removeEvent(obj, event, callback) {
+    // IE8 :T
+    if (isFunction(obj.removeEventListener)) {
+        obj.removeEventListener(event, callback);
     }
     else {
-        // IE8 :T
-        if (obj.removeEventListener) {
-            obj.removeEventListener(event, callback);
-        }
-        else {
-            obj.detachEvent("on" + event, callback);
-        }
+        obj.detachEvent("on" + event, callback);
     }
 }
 
