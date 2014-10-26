@@ -16,6 +16,9 @@ ddescribe("$router", function() {
         });
 
         callback = jasmine.createSpy("callback");
+
+        // Make sure we start at some other path for each test
+        pushState("startElsewhere");
     });
 
     it("should be invokable", function() {
@@ -129,6 +132,33 @@ ddescribe("$router", function() {
 
             expect(callback).toHaveBeenCalledWith({splat: ["this/should/work"], query: "2"});
         });
+
+        it("should ignore leading '/' in location", function() {
+            $router.match("a").to(callback);
+            pushState("/a");
+
+            $router.start();
+
+            expect(callback).toHaveBeenCalled();
+        });
+
+        it("should ignore trailing space location", function() {
+            $router.match("a").to(callback);
+            pushState("a   ");
+
+            $router.start();
+
+            expect(callback).toHaveBeenCalled();
+        });
+
+        it("should decode location for special characters", function() {
+            $router.match("å").to(callback);
+            pushState("%C3%A5");
+
+            $router.start();
+
+            expect(callback).toHaveBeenCalled();
+        });
     });
 
     it("should call noMatch handler if no match", function() {
@@ -155,79 +185,265 @@ ddescribe("$router", function() {
             expect(callback).toHaveBeenCalled();
         });
 
-        iit("should return state object", function() {
+        it("should return state object", function() {
             $router.start();
             $router.navigate("a", {b: 2});
-            expect(callback).toHaveBeenCalledWith([{}, {b: 2}]);
+
+            expect(callback.calls.mostRecent().args[1]).toEqual({b: 2});
         });
 
         it("should not call route callback if trigger is false", function() {
+            $router.start();
+            $router.navigate("a", null, false);
 
+            expect(callback).not.toHaveBeenCalled();
         });
 
         it("should not call route callback before start", function() {
+            $router.navigate("a");
+            expect(callback).not.toHaveBeenCalled();
+        });
 
+        it("should ignore leading '/'", function() {
+            $router.start();
+            $router.navigate("/a");
+
+            expect(callback).toHaveBeenCalled();
+        });
+
+        it("should ignore trailing space", function() {
+            $router.start();
+            $router.navigate("a    ");
+
+            expect(callback).toHaveBeenCalled();
         });
     });
 
     describe("replace", function() {
-        it("should call route callback for matching path", function() {
+        beforeEach(function() {
+            $router.match("a").to(callback);
+        });
 
+        it("should call route callback for matching path", function() {
+            $router.start();
+            $router.replace("a");
+
+            expect(callback).toHaveBeenCalled();
         });
 
         it("should return state object", function() {
+            $router.start();
+            $router.replace("a", {b: 2});
 
+            expect(callback.calls.first().args[1]).toEqual({b: 2});
         });
 
         it("should not call route callback if trigger is false", function() {
+            $router.start();
+            $router.replace("a", null, false);
 
+            expect(callback).not.toHaveBeenCalled();
         });
 
         it("should not call route callback before start", function() {
+            $router.replace("a");
+            expect(callback).not.toHaveBeenCalled();
+        });
 
+        it("should ignore leading hash", function() {
+            $router.start();
+            $router.replace("/a");
+
+            expect(callback).toHaveBeenCalled();
+        });
+
+        it("should ignore trailing space", function() {
+            $router.start();
+            $router.replace("a      ");
+
+            expect(callback).toHaveBeenCalled();
         });
     });
 
     describe("back", function() {
-        it("should call route callback for popped path", function() {
-
+        beforeEach(function() {
+            $router.match("a").to(callback);
         });
 
-        it("should not call route callback before start", function() {
+        it("should call route callback for popped path", function(done) {
+            $router.navigate("a", null, false);
+            $router.navigate("b", null, false);
+            $router.start();
+            $router.back();
 
+            setTimeout(function() {
+                expect(callback).toHaveBeenCalled();
+                done();
+            }, 0);
+        });
+
+        it("should call route callback with state for popped path", function(done) {
+            $router.navigate("a", {b: 1}, false);
+            $router.navigate("b", null, false);
+            $router.start();
+            $router.back();
+
+            setTimeout(function() {
+                expect(callback.calls.first().args[1]).toEqual({b: 1});
+                done();
+            }, 0);
+        });
+
+        it("should not call route callback before start", function(done) {
+            $router.navigate("a", null, false);
+            $router.navigate("b", null, false);
+            $router.back();
+
+            setTimeout(function() {
+                expect(callback).not.toHaveBeenCalled();
+                done();
+            }, 0);
         });
     });
 
     describe("forward", function() {
-        it("should call route callback for forward path", function() {
-
+        beforeEach(function() {
+            $router.match("b").to(callback);
         });
 
-        it("should not call route callback before start", function() {
+        it("should call route callback for forward path", function(done) {
+            $router.navigate("a", null, false);
+            $router.navigate("b", null, false);
+            $router.start();
+            callback.calls.reset();
+            $router.back();
 
+            setTimeout(function() {
+                $router.forward();
+
+                setTimeout(function() {
+                    expect(callback).toHaveBeenCalled();
+                    done();
+                }, 0);
+            }, 0);
+        });
+
+        it("should call route callback with state for popped path", function(done) {
+            $router.navigate("a", null, false);
+            $router.navigate("b", {b: 1}, false);
+            $router.start();
+            callback.calls.reset();
+            $router.back();
+
+            setTimeout(function() {
+                $router.forward();
+
+                setTimeout(function() {
+                    expect(callback.calls.first().args[1]).toEqual({b: 1});
+                    done();
+                }, 0);
+            }, 0);
+        });
+
+        it("should not call route callback before start", function(done) {
+            $router.navigate("a", null, false);
+            $router.navigate("b", null, false);
+            callback.calls.reset();
+            $router.back();
+
+            setTimeout(function() {
+                $router.forward();
+
+                setTimeout(function() {
+                    expect(callback).not.toHaveBeenCalled();
+                    done();
+                }, 0);
+            }, 0);
         });
     });
 
     describe("reload", function() {
-        it("should call current route callback", function() {
+        beforeEach(function() {
+            $router.match("a").to(callback);
+        });
 
+        it("should call current route callback", function() {
+            $router.navigate("a");
+            $router.start();
+            $router.reload();
+
+            expect(callback.calls.count()).toEqual(2);
+        });
+
+        it("should call current route callback with state", function() {
+            $router.navigate("a", {b: 1});
+            $router.start();
+            $router.reload();
+
+            expect(callback.calls.mostRecent().args[1]).toEqual({b: 1});
+        });
+
+        it("should call even if navigate/replace was silent", function() {
+            $router.start();
+            $router.navigate("a", null, false);
+            $router.reload();
+
+            expect(callback.calls.count()).toEqual(1);
         });
 
         it("should not call route callback before start", function() {
+            $router.navigate("a", {a: 1});
+            $router.reload();
 
+            expect(callback).not.toHaveBeenCalled();
+
+            $router.start();
+
+            expect(callback.calls.count()).toEqual(1);
         });
     });
 
     describe("root", function() {
-        it("should add root from navigate path", function() {
+        function setup(root, matcher) {
+            $include(recurve.router.$module, function($mockable) {
+                $mockable.config("$route", {root: root})
+            });
+
+            $invoke(["$router"], function(router) {
+                $router = router;
+            });
+
+            $router.match(matcher).to(callback);
+            $router.start();
+        }
+
+        it("should add root to navigate path", function() {
+            setup("root", "root/a");
+            $router.navigate("a");
+
+            expect(callback).toHaveBeenCalled();
+        });
+
+        it("should add root to replace path", function() {
+            setup("root", "root/a");
+            $router.replace("a");
+
+            expect(callback).toHaveBeenCalled();
+        });
+
+        it("should remove root from current location", function() {
 
         });
 
-        it("should add root from replace path", function() {
+        it("should not require match to include root", function() {
 
         });
 
-        it("should remove root from current path", function() {
+        it("should ignore leading '/'", function() {
+
+        });
+
+        it("should ignore trailing space", function() {
 
         });
     });

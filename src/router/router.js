@@ -1,5 +1,3 @@
-/* global addRouterHistoryService */
-
 (function() {
     "use strict";
 
@@ -14,16 +12,20 @@
 
         var routes = [];
         var noMatchRoute;
-        var currentPath = removeRoot(location.href);
+        var currentPath = getPath();
         var currentStateObj;
         var started;
+        var root = sanitizePath($config.root || "");
 
-        function decode(str) {
-            if (!str) {
-                return "";
-            }
+        function getPath() {
+            var path = decodeURI(location.pathname + location.search);
+            path = sanitizePath(path);
 
-            return decodeURIComponent(str).replace(/\+/g, " ");
+            return removeRoot(path);
+        }
+
+        function sanitizePath(path) {
+            return path.replace(/^[#\/]|\s+$/g, "");
         }
 
         var PATH_NAME_MATCHER = /:([\w\d]+)/g;
@@ -76,7 +78,7 @@
                 var keyValue = path.slice(startIndex, endIndex);
 
                 var split = keyValue.split("=");
-                var key = decode(split[0]);
+                var key = decodeParam(split[0]);
                 // No support for decoding value, too difficult. No need yet for this either
                 var value = 1 < split.length ? split[1] : null;
 
@@ -116,44 +118,8 @@
                 route = {};
                 route.pathRegExp = pathRegExp;
                 route.callbacks = [];
-
-                var paramKeys = pathParamKeys(path);
-
-                route.handle = function(path) {
-                    var queryParams = pathQueryParams(path);
-                    path = removePathQueryParams(path);
-
-                    var params = this.pathRegExp.exec(path);
-                    if (!params) {
-                        return false;
-                    }
-
-                    // full path
-                    params.shift();
-
-                    var decodedParams = queryParams;
-                    recurve.forEach(params, function(param, index) {
-                        var decodedParam = decode(param);
-                        if (paramKeys && paramKeys[index]) {
-                            decodedParams[paramKeys[index]] = decodedParam;
-                        }
-                        else {
-                            decodedParams.splat = decodedParams.splat || [];
-                            decodedParams.splat.push(decodedParam);
-                        }
-                    });
-
-                    var args = [decodedParams];
-                    if (currentStateObj) {
-                        args.push(currentStateObj);
-                    }
-
-                    recurve.forEach(this.callbacks, function(callback) {
-                        callback.apply(null, args);
-                    });
-
-                    return true;
-                }
+                route.paramKeys = pathParamKeys(path);
+                route.handle = routeHandler;
 
                 routes.push(route);
             }
@@ -161,20 +127,64 @@
             return route;
         }
 
+        function routeHandler(path) {
+            var queryParams = pathQueryParams(path);
+            path = removePathQueryParams(path);
+
+            var params = this.pathRegExp.exec(path);
+            if (!params) {
+                return false;
+            }
+
+            // full path
+            params.shift();
+
+            var decodedParams = queryParams;
+            recurve.forEach(params, function(param, index) {
+                var decodedParam = decodeParam(param);
+                if (this.paramKeys && this.paramKeys[index]) {
+                    decodedParams[this.paramKeys[index]] = decodedParam;
+                }
+                else {
+                    decodedParams.splat = decodedParams.splat || [];
+                    decodedParams.splat.push(decodedParam);
+                }
+            }, this);
+
+            var args = [decodedParams];
+            if (currentStateObj) {
+                args.push(currentStateObj);
+            }
+
+            recurve.forEach(this.callbacks, function(callback) {
+                callback.apply(null, args);
+            });
+
+            return true;
+        }
+
+        function decodeParam(str) {
+            if (!str) {
+                return "";
+            }
+
+            return decodeURIComponent(str).replace(/\+/g, " ");
+        }
+
         function addRoot(path) {
-            if (!$config.root) {
+            if (!root) {
                 return path;
             }
 
-            return path;
+            return root + "/" + path;
         }
 
         function removeRoot(path) {
-            if (!$config.root) {
+            if (!root) {
                 return path;
             }
 
-            return path;
+            return path.replace(root + "/", "");
         }
 
         function checkCurrentPath() {
@@ -182,7 +192,7 @@
                 return;
             }
 
-            var path = removeRoot(location.href);
+            var path = getPath();
             if(currentPath === path) {
                 return;
             }
@@ -216,6 +226,7 @@
             },
 
             navigate: function(path, stateObj, trigger) {
+                path = sanitizePath(path);
                 path = addRoot(path);
                 currentStateObj = stateObj;
                 trigger = recurve.isUndefined(trigger) ? true : trigger;
@@ -227,6 +238,7 @@
             },
 
             replace: function(path, stateObj, trigger) {
+                path = sanitizePath(path);
                 path = addRoot(path);
                 currentStateObj = stateObj;
                 trigger = recurve.isUndefined(trigger) ? true : trigger;
@@ -261,7 +273,7 @@
                     checkCurrentPath();
                 });
 
-                currentStateObj = history.state;
+                currentStateObj = currentStateObj || history.state;
                 this.reload();
             }
         };
