@@ -11,11 +11,12 @@
         var location = history.location || $window.location;
 
         var routes = [];
-        var noMatchRoute;
+        var noMatchHandler;
         var currentPath = getPath();
         var currentStateObj;
         var started;
-        var root = sanitizePath($config.root || "");
+        var root = $config.root ? sanitizePath($config.root) : "/";
+        root = ("/" + root + "/").replace(/^\/+|\/+$/g, "/");
 
         function getPath() {
             var path = decodeURI(location.pathname + location.search);
@@ -25,7 +26,7 @@
         }
 
         function sanitizePath(path) {
-            return path.replace(/^[#\/]|\s+$/g, "");
+            return recurve.isString(path) ? path.replace(/^[#\/]|\s+$/g, "") : path;
         }
 
         var PATH_NAME_MATCHER = /:([\w\d]+)/g;
@@ -119,48 +120,46 @@
                 route.pathRegExp = pathRegExp;
                 route.callbacks = [];
                 route.paramKeys = pathParamKeys(path);
-                route.handle = routeHandler;
+                route.handle = function(path) {
+                    var queryParams = pathQueryParams(path);
+                    path = removePathQueryParams(path);
+
+                    var params = this.pathRegExp.exec(path);
+                    if (!params) {
+                        return false;
+                    }
+
+                    // full path
+                    params.shift();
+
+                    var decodedParams = queryParams;
+                    recurve.forEach(params, function(param, index) {
+                        var decodedParam = decodeParam(param);
+                        if (this.paramKeys && this.paramKeys[index]) {
+                            decodedParams[this.paramKeys[index]] = decodedParam;
+                        }
+                        else {
+                            decodedParams.splat = decodedParams.splat || [];
+                            decodedParams.splat.push(decodedParam);
+                        }
+                    }, this);
+
+                    var args = [decodedParams];
+                    if (currentStateObj) {
+                        args.push(currentStateObj);
+                    }
+
+                    recurve.forEach(this.callbacks, function(callback) {
+                        callback.apply(null, args);
+                    });
+
+                    return true;
+                };
 
                 routes.push(route);
             }
 
             return route;
-        }
-
-        function routeHandler(path) {
-            var queryParams = pathQueryParams(path);
-            path = removePathQueryParams(path);
-
-            var params = this.pathRegExp.exec(path);
-            if (!params) {
-                return false;
-            }
-
-            // full path
-            params.shift();
-
-            var decodedParams = queryParams;
-            recurve.forEach(params, function(param, index) {
-                var decodedParam = decodeParam(param);
-                if (this.paramKeys && this.paramKeys[index]) {
-                    decodedParams[this.paramKeys[index]] = decodedParam;
-                }
-                else {
-                    decodedParams.splat = decodedParams.splat || [];
-                    decodedParams.splat.push(decodedParam);
-                }
-            }, this);
-
-            var args = [decodedParams];
-            if (currentStateObj) {
-                args.push(currentStateObj);
-            }
-
-            recurve.forEach(this.callbacks, function(callback) {
-                callback.apply(null, args);
-            });
-
-            return true;
         }
 
         function decodeParam(str) {
@@ -176,15 +175,19 @@
                 return path;
             }
 
-            return root + "/" + path;
+            return root + path;
         }
 
         function removeRoot(path) {
-            if (!root) {
+            if (!root || recurve.isRegExp(path)) {
                 return path;
             }
 
-            return path.replace(root + "/", "");
+            if (0 === path.indexOf(root)) {
+                path = path.slice(root.length);
+            }
+
+            return path;
         }
 
         function checkCurrentPath() {
@@ -205,13 +208,28 @@
                 return !handled;
             });
 
-            if (!handled && noMatchRoute) {
-                noMatchRoute();
+            if (!handled && noMatchHandler) {
+                noMatchHandler();
             }
+        }
+
+        function historyPath(path) {
+            if (path) {
+                path = sanitizePath(path);
+                path = addRoot(path);
+            }
+            else {
+                path = root.slice(0, -1);
+            }
+
+            return path;
         }
 
         return {
             match: function(path) {
+                path = sanitizePath(path);
+                path = removeRoot(path);
+
                 var route = addRoute(path);
 
                 return {
@@ -222,12 +240,11 @@
             },
 
             noMatch: function(callback) {
-                noMatchRoute = callback;
+                noMatchHandler = callback;
             },
 
             navigate: function(path, stateObj, trigger) {
-                path = sanitizePath(path);
-                path = addRoot(path);
+                path = historyPath(path);
                 currentStateObj = stateObj;
                 trigger = recurve.isUndefined(trigger) ? true : trigger;
 
@@ -238,8 +255,7 @@
             },
 
             replace: function(path, stateObj, trigger) {
-                path = sanitizePath(path);
-                path = addRoot(path);
+                path = historyPath(path);
                 currentStateObj = stateObj;
                 trigger = recurve.isUndefined(trigger) ? true : trigger;
 

@@ -1,6 +1,6 @@
 "use strict";
 
-ddescribe("$router", function() {
+describe("$router", function() {
     var $router;
     var callback;
 
@@ -17,8 +17,8 @@ ddescribe("$router", function() {
 
         callback = jasmine.createSpy("callback");
 
-        // Make sure we start at some other path for each test
-        pushState("startElsewhere");
+        // Make sure we start at some other path before each
+        pushState("/start-at-some-other-path");
     });
 
     it("should be invokable", function() {
@@ -27,54 +27,63 @@ ddescribe("$router", function() {
     });
 
     describe("match", function() {
-        it("should call callback for string path with no params", function() {
+        it("should call route callback for string matcher with no params", function() {
+            $router.match("/a").to(callback);
+            pushState("/a");
+
+            $router.start();
+
+            expect(callback).toHaveBeenCalled();
+        });
+
+        it("should not require leading slash in string matcher", function() {
             $router.match("a").to(callback);
-            pushState("a");
+            pushState("/a");
 
             $router.start();
 
             expect(callback).toHaveBeenCalled();
         });
 
-        it("should call callback for string path with one param", function() {
+        it("should call route callback for string matcher with one param", function() {
             $router.match("a/:id").to(callback);
-            pushState("a/1");
+            pushState("/a/1");
 
             $router.start();
 
             expect(callback).toHaveBeenCalled();
         });
 
-        it("should call callback for string path with multiple params", function() {
+        it("should call route callback for string matcher with multiple params", function() {
             $router.match("a/:id/b/:time").to(callback);
-            pushState("a/1/b/21");
+            pushState("/a/1/b/21");
 
             $router.start();
 
             expect(callback).toHaveBeenCalled();
         });
 
-        it("should not call callback if doesn't match string path", function() {
+        it("should not call route callback if doesn't match string matcher", function() {
             $router.match("a/:id").to(callback);
-            pushState("a/1/b");
+            pushState("/a/1/b");
 
             $router.start();
 
             expect(callback).not.toHaveBeenCalled();
         });
 
-        it("should call callback for regexp path", function() {
+        it("should call route callback for regexp matcher", function() {
             $router.match(/recurve/i).to(callback);
-            pushState("this-is-recurve");
+            pushState("/this-is-recurve");
 
             $router.start();
 
-            expect(callback).toHaveBeenCalled(  );
+            expect(callback).toHaveBeenCalled();
         });
 
-        it("should not call callback if doesn't match regexp path", function() {
+        it("should not call route callback if doesn't match regexp matcher", function() {
             $router.match(/recurve/i).to(callback);
-            pushState("this-is");
+            pushState("/this-is");
 
             $router.start();
 
@@ -88,7 +97,7 @@ ddescribe("$router", function() {
             var callback3 = jasmine.createSpy("callback3");
             $router.match("a").to(callback3);
 
-            pushState("a");
+            pushState("/a");
 
             $router.start();
 
@@ -99,7 +108,7 @@ ddescribe("$router", function() {
 
         it("should return params with keys for string path", function() {
             $router.match("a/:id/b/:time").to(callback);
-            pushState("a/1/b/21");
+            pushState("/a/1/b/21");
 
             $router.start();
 
@@ -117,7 +126,7 @@ ddescribe("$router", function() {
 
         it("should return query string params for string path", function() {
             $router.match("a/:id").to(callback);
-            pushState("a/1?query=2");
+            pushState("/a/1?query=2");
 
             $router.start();
 
@@ -133,18 +142,9 @@ ddescribe("$router", function() {
             expect(callback).toHaveBeenCalledWith({splat: ["this/should/work"], query: "2"});
         });
 
-        it("should ignore leading '/' in location", function() {
-            $router.match("a").to(callback);
-            pushState("/a");
-
-            $router.start();
-
-            expect(callback).toHaveBeenCalled();
-        });
-
         it("should ignore trailing space location", function() {
             $router.match("a").to(callback);
-            pushState("a   ");
+            pushState("/a   ");
 
             $router.start();
 
@@ -178,7 +178,7 @@ ddescribe("$router", function() {
             $router.match("a").to(callback);
         });
 
-        it("should call route callback for matching path", function() {
+        it("should call route callback for match", function() {
             $router.start();
             $router.navigate("a");
 
@@ -204,7 +204,7 @@ ddescribe("$router", function() {
             expect(callback).not.toHaveBeenCalled();
         });
 
-        it("should ignore leading '/'", function() {
+        it("should not require leading slash", function() {
             $router.start();
             $router.navigate("/a");
 
@@ -224,7 +224,7 @@ ddescribe("$router", function() {
             $router.match("a").to(callback);
         });
 
-        it("should call route callback for matching path", function() {
+        it("should call route callback for match", function() {
             $router.start();
             $router.replace("a");
 
@@ -250,7 +250,7 @@ ddescribe("$router", function() {
             expect(callback).not.toHaveBeenCalled();
         });
 
-        it("should ignore leading hash", function() {
+        it("should not require leading slash", function() {
             $router.start();
             $router.replace("/a");
 
@@ -406,45 +406,148 @@ ddescribe("$router", function() {
     describe("root", function() {
         function setup(root, matcher) {
             $include(recurve.router.$module, function($mockable) {
-                $mockable.config("$route", {root: root})
+                $mockable.config("$router", {root: root});
             });
 
             $invoke(["$router"], function(router) {
                 $router = router;
             });
 
-            $router.match(matcher).to(callback);
+            if (matcher) {
+                $router.match(matcher).to(callback);
+            }
+
             $router.start();
         }
 
-        it("should add root to navigate path", function() {
-            setup("root", "root/a");
-            $router.navigate("a");
+        it("should add root to navigate path", function(done) {
+            setup("a");
+            $router.navigate("b");
+
+            setTimeout(function() {
+                expect(location.pathname).toEqual("/a/b");
+                done();
+            }, 0);
+        });
+
+        it("should add root to replace path", function(done) {
+            setup("a");
+            $router.replace("b");
+
+            setTimeout(function() {
+                expect(location.pathname).toEqual("/a/b");
+                done();
+            }, 0);
+        });
+
+        it("should navigate to root for empty path", function(done) {
+            setup("a");
+            $router.navigate("");
+
+            setTimeout(function() {
+                expect(location.pathname).toEqual("/a");
+                done();
+            }, 0);
+        });
+
+        it("should replace to root for empty path", function(done) {
+            setup("a");
+            $router.replace("");
+
+            setTimeout(function() {
+                expect(location.pathname).toEqual("/a");
+                done();
+            }, 0);
+        });
+
+        it("should not append root multiple times with multiple calls to navigate", function(done) {
+            setup("a");
+            $router.navigate("b");
+            $router.navigate("b");
+            $router.navigate("b");
+
+            setTimeout(function() {
+                expect(location.pathname).toEqual("/a/b");
+                done();
+            }, 0);
+        });
+
+        it("should not append empty root multiple times with multiple calls to navigate", function(done) {
+            setup("");
+            $router.navigate("a/b");
+            $router.navigate("a/b");
+            $router.navigate("a/b");
+
+            setTimeout(function() {
+                expect(location.pathname).toEqual("/a/b");
+                done();
+            }, 0);
+        });
+
+        it("should not append empty root multiple times with multiple calls to replace", function(done) {
+            setup("a");
+            $router.replace("b");
+            $router.replace("b");
+            $router.replace("b");
+
+            setTimeout(function() {
+                expect(location.pathname).toEqual("/a/b");
+                done();
+            }, 0);
+        });
+
+        it("should not append empty root multiple times with multiple calls to replace", function(done) {
+            setup("");
+            $router.replace("a/b");
+            $router.replace("a/b");
+            $router.replace("a/b");
+
+            setTimeout(function() {
+                expect(location.pathname).toEqual("/a/b");
+                done();
+            }, 0);
+        });
+
+        it("should match if root is in matcher", function() {
+            setup("a", "a/b");
+            $router.navigate("b");
 
             expect(callback).toHaveBeenCalled();
         });
 
-        it("should add root to replace path", function() {
-            setup("root", "root/a");
-            $router.replace("a");
+        it("should match if root is not in matcher", function() {
+            setup("a", "b");
+            $router.navigate("b");
 
             expect(callback).toHaveBeenCalled();
         });
 
-        it("should remove root from current location", function() {
+        it("should match regexp with root", function() {
+            setup("a", /b/);
+            $router.navigate("b");
 
+            expect(callback).toHaveBeenCalled();
         });
 
-        it("should not require match to include root", function() {
+        it("should allow root to include leading '/'", function() {
+            setup("/a", "a/b");
+            $router.navigate("b");
 
+            expect(callback).toHaveBeenCalled();
         });
 
-        it("should ignore leading '/'", function() {
+        it("should ignore trailing space in root", function() {
+            setup("a    ", "a/b");
+            $router.navigate("b");
 
+            expect(callback).toHaveBeenCalled();
         });
 
-        it("should ignore trailing space", function() {
+        it("should allow root to include '/' after first character", function() {
+            setup("a/b", "a/b/c");
+            $router.navigate("c");
 
+            expect(callback).toHaveBeenCalled();
         });
     });
 });
