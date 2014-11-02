@@ -1,3 +1,10 @@
+/* global addActionCreatorService,
+ addDispatcherService,
+ addDataStoreService,
+ addRestActionCreatorService,
+ addStateActionCreatorService
+*/
+
 (function() {
     "use strict";
 
@@ -7,4 +14,6 @@
     addActionCreatorService(module);
     addDispatcherService(module);
     addDataStoreService(module);
+    addRestActionCreatorService(module);
+    addStateActionCreatorService(module);
 })();
