@@ -164,6 +164,18 @@ describe("$eventEmitter", function(){
                 eventEmitter.on("a", undefined);
             }).toThrow(new Error("callback must exist"));
         });
+
+        it("should throw error for number callback", function() {
+            expect(function(){
+                eventEmitter.on(1);
+            }).toThrow(new Error("callback must exist"));
+        });
+
+        it("should throw error for string callback", function() {
+            expect(function(){
+                eventEmitter.on("a");
+            }).toThrow(new Error("callback must exist"));
+        });
     });
 
     // TODO TBD repeated "on" tests
@@ -297,25 +309,25 @@ describe("$eventEmitter", function(){
 
         it("should throw error for null event", function(){
             expect(function(){
-                eventEmitter.on(null, function(){});
+                eventEmitter.once(null, function(){});
             }).toThrow(new Error("event must exist"));
         });
 
         it("should throw error for undefined event", function(){
             expect(function(){
-                eventEmitter.on(null, function(){});
+                eventEmitter.once(null, function(){});
             }).toThrow(new Error("event must exist"));
         });
 
-        it("should throw error for null callback", function(){
+        it("should throw error for number callback", function() {
             expect(function(){
-                eventEmitter.on("a", null);
+                eventEmitter.once(1);
             }).toThrow(new Error("callback must exist"));
         });
 
-        it("should throw error for undefined callback", function(){
+        it("should throw error for string callback", function() {
             expect(function(){
-                eventEmitter.on("a", undefined);
+                eventEmitter.once("a");
             }).toThrow(new Error("callback must exist"));
         });
     });

@@ -102,6 +102,18 @@ describe("$signal", function(){
                 signal.on(undefined);
             }).toThrow(new Error("callback must exist"));
         });
+
+        it("should throw error for number callback", function() {
+            expect(function(){
+                signal.on(1);
+            }).toThrow(new Error("callback must exist"));
+        });
+
+        it("should throw error for string callback", function() {
+            expect(function(){
+                signal.on("a");
+            }).toThrow(new Error("callback must exist"));
+        });
     });
 
     describe("once", function(){
@@ -189,6 +201,18 @@ describe("$signal", function(){
                 signal.once(undefined);
             }).toThrow(new Error("callback must exist"));
         });
+
+        it("should throw error for number callback", function() {
+            expect(function(){
+                signal.once(1);
+            }).toThrow(new Error("callback must exist"));
+        });
+
+        it("should throw error for string callback", function() {
+            expect(function(){
+                signal.once("a");
+            }).toThrow(new Error("callback must exist"));
+        });
     });
 
     describe("off", function(){
@@ -254,7 +278,7 @@ describe("$signal", function(){
     });
 
     it("should disable", function(){
-        signal.on("a", triggerHandler, this);
+        signal.on(triggerHandler, this);
         signal.disable();
         signal.trigger();
 

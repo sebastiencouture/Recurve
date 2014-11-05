@@ -25,7 +25,7 @@ function addEventEmitterService(module) {
             return {
                 on: function(event, callback, context) {
                     assert(event, "event must exist");
-                    assert(callback, "callback must exist");
+                    assert(isFunction(callback), "callback must exist");
 
                     forEach(event.split(" "), function(name) {
                         var signal = createSignal(name);
@@ -35,7 +35,7 @@ function addEventEmitterService(module) {
 
                 once: function(event, callback, context) {
                     assert(event, "event must exist");
-                    assert(callback, "callback must exist");
+                    assert(isFunction(callback), "callback must exist");
 
                     forEach(event.split(" "), function(name) {
                         var signal = createSignal(name);

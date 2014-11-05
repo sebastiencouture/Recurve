@@ -23,7 +23,7 @@ function addSignalService(module) {
 
             return {
                 on: function(callback, context) {
-                    assert(callback, "callback must exist");
+                    assert(isFunction(callback), "callback must exist");
 
                     if (listenerExists(callback, context)) {
                         return;
@@ -33,7 +33,7 @@ function addSignalService(module) {
                 },
 
                 once: function(callback, context) {
-                    assert(callback, "callback must exist");
+                    assert(isFunction(callback), "callback must exist");
 
                     if (listenerExists(callback, context)) {
                         return;
