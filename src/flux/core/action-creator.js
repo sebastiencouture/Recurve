@@ -5,8 +5,8 @@ function addActionCreatorService(module) {
         return {
             extend: function(obj) {
                 return recurve.extend({
-                    trigger: function(action) {
-                        $dispatcher.trigger(action);
+                    dispatch: function(payload) {
+                        $dispatcher.dispatch(payload);
                     }
                 }, obj);
             }

@@ -7,8 +7,8 @@ function addDataStoreService(module) {
                 return recurve.extend({
                     changed: $signal(),
 
-                    on: function(actionId, callback) {
-                        $dispatcher.on(actionId, callback, this);
+                    register: function(callback, match) {
+                        this.dispatchToken = $dispatcher.register(callback, match);
                     },
 
                     trigger: function() {

@@ -2,110 +2,83 @@
 
 function addDispatcherService(module) {
     module.factory("$dispatcher", null, function() {
-        var actionDispatchers = [];
+        var handlers = {};
+        var nextToken = 1;
+        var currentDispatchingToken;
+        var currentPayload;
 
-        function getActionDispatcher(id) {
-            var found;
-            recurve.forEach(actionDispatchers, function(actionDispatcher) {
-                if(actionDispatcher.id === id) {
-                    found = actionDispatcher;
-                    return false;
-                }
-            });
-
-            return found;
-        }
-
-        function getCurrentDispatching() {
-            var found;
-            recurve.forEach(actionDispatchers, function(actionDispatcher) {
-                if(actionDispatcher.dispatchingAction) {
-                    found = actionDispatcher;
-                    return false;
-                }
-            });
-
-            return found;
-        }
-
-        var actionDispatcherPrototype = {
-            init: function(id, context) {
-                this.id = id;
-                this.context = context;
-            },
-
-            add: function(callback) {
-                this.handlers.push(Object.create(actionHandlerPrototype).init(callback));
-            },
-
-            trigger: function(action) {
-                this.dispatchingAction = action;
-
-                recurve.forEach(this.handlers, function(handler) {
-                    if (!handler.triggered) {
-                        handler.trigger(action);
-                    }
-                });
-
-                recurve.forEach(this.handlers, function(handler) {
-                    handler.triggered = false;
-                });
-
-                this.dispatchingAction = undefined;
-            },
-
-            waitOn: function(contexts) {
-                // TODO TBD improve message: context1 -> context2 -> context1
-                recurve.assert(!this.waiting, "wait on circular reference detected for {0}", this.id);
-
-                this.waiting = true;
-
-                recurve.forEach(contexts, function(context) {
-                    recurve.assert(this.context !== context, "cannot wait on same context for {0}", this.id);
-                    recurve.forEach(this.handlers, function(handler) {
-                        if (context === handler.context && !handler.triggered) {
-                            handler.trigger(this.dispatchingAction);
-                        }
-                    }, this);
-                }, this);
-
-                this.waiting = false;
-            }
-        };
-
-        var actionHandlerPrototype = {
+        var handlerPrototype = {
             init: function(callback) {
                 this.callback = callback;
+                this.token = nextToken++;
+
+                return this;
             },
 
-            trigger: function(action) {
-                this.triggered = true;
-                this.callback.call(null, action);
+            dispatch: function() {
+                if (this.dispatched) {
+                    return;
+                }
+
+                currentDispatchingToken = this;
+                this.callback.call(null, currentPayload);
+                this.dispatched = true;
+            },
+
+            reset: function() {
+                this.dispatched = false;
             }
         };
 
         return {
-            trigger: function(action) {
-                var actionDispatcher = getActionDispatcher(action.id);
-                if (actionDispatcher) {
-                    actionDispatcher.trigger(action);
+            register: function(callback) {
+                recurve.assert(recurve.isFunction(callback), "callback must exist");
+
+                var handler = Object.create(handlerPrototype).init(callback);
+                handlers[handler.token] = handler;
+
+                return handler.token;
+            },
+
+            unregister: function(token) {
+                recurve.assert(token, "token must exist");
+                recurve.assert(handlers[token], "no registered callback exists for '{0}' token", token);
+
+                delete handlers[token];
+            },
+
+            dispatch: function(payload) {
+                recurve.assert(!currentDispatchingToken, "cannot dispatch while in the middle of a dispatch");
+
+                currentPayload = payload;
+
+                try {
+                    recurve.forEach(handlers, function(handler) {
+                        handler.dispatch(payload);
+                    });
+                }
+                finally {
+                    recurve.forEach(handlers, function(handler) {
+                        handler.reset();
+                    });
+
+                    currentDispatchingToken = undefined;
+                    currentPayload = undefined;
                 }
             },
 
-            on: function(actionId, callback, context) {
-                var actionDispatcher = getActionDispatcher(actionId);
-                if (!actionDispatcher) {
-                    actionDispatcher = Object.create(actionDispatcherPrototype).init(actionId, context);
-                }
+            waitFor: function(tokens) {
+                recurve.assert(currentDispatchingToken, "can only wait while in the middle of a dispatch");
 
-                actionDispatcher.add(callback);
-            },
+                recurve.forEach(tokens, function(token) {
+                    recurve.assert(token !== currentDispatchingToken,
+                        "circular dependency detected while waiting for '{0}'", token);
 
-            waitOn: function(contexts) {
-                var actionDispatcher = getCurrentDispatching();
-                recurve.assert(actionDispatcher, "no action is currently being dispatched to wait on");
+                    var handler = handlers[token];
+                    recurve.assert(handler, "no registered callback exists for '{0}' token", token);
 
-                actionDispatcher.waitOn(contexts);
+                    handler.dispatch();
+                });
             }
         };
     });
