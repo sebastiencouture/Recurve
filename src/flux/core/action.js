@@ -36,7 +36,8 @@ function addActionService(module) {
             }
         };
 
-        return function() {
+        // TODO TBD optional name for error handling
+        return function(name) {
             var listeners = [];
             var triggering;
 
