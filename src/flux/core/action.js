@@ -2,9 +2,8 @@
 
 function addActionService(module) {
     module.factory("$action", null, function() {
-
-        var currentPayload;
-        var currentListener;
+        var triggerPayload;
+        var triggerListener;
 
         function actionListener(callback, context, dataStore) {
             return Object.create(actionListenerPrototype).init(callback, context, dataStore);
@@ -23,13 +22,13 @@ function addActionService(module) {
                 return this.callback === callback;
             },
 
-            trigger: function() {
+            trigger: function(payload) {
                 if (this.triggered) {
                     return;
                 }
 
                 this.triggered = true;
-                this.callback.call(this.context, currentPayload);
+                this.callback.call(this.context, payload);
             },
 
             reset: function() {
@@ -43,19 +42,19 @@ function addActionService(module) {
 
             return {
                 trigger: function(payload) {
-                    recurve.assert(!currentListener, "cannot trigger an action while another action is being triggered");
+                    recurve.assert(!triggerListener, "cannot trigger an action while another action is being triggered");
 
-                    currentPayload = payload;
+                    triggerPayload = payload;
 
                     try {
                         recurve.forEach(listeners, function(listener) {
-                            currentListener = listener;
-                            listener.trigger();
+                            triggerListener = listener;
+                            listener.trigger(triggerPayload);
                         });
                     }
                     finally {
-                        currentListener = undefined;
-                        currentPayload = undefined;
+                        triggerListener = undefined;
+                        triggerPayload = undefined;
 
                         recurve.forEach(listeners, function(listener) {
                             listener.reset();
@@ -96,19 +95,19 @@ function addActionService(module) {
                 },
 
                 waitFor: function(dataStores) {
-                    recurve.assert(currentListener, "can only wait for while in the middle of triggering an action");
-                    recurve.assert(currentListener.dataStore,
+                    recurve.assert(triggerListener, "can only wait for while in the middle of triggering an action");
+                    recurve.assert(triggerListener.dataStore,
                         "data store must be set for current action listener to detect circular dependencies");
 
                     recurve.forEach(dataStores, function(dataStore, index) {
-                        recurve.assert(dataStore !== currentListener.dataStore,
+                        recurve.assert(dataStore !== triggerListener.dataStore,
                             "circular dependency detected while waiting for current action listener at index {0}", index);
 
                         var found = false;
                         recurve.forEach(listeners, function(listener) {
                             if (listener.dataStore === dataStore) {
                                 found = true;
-                                listener.trigger();
+                                listener.trigger(triggerPayload);
                             }
                         });
 
