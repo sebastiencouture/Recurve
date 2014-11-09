@@ -1,8 +1,8 @@
 "use strict";
 
-function addStateActionCreatorService(module) {
+function addStateActionEmitterService(module) {
     // TODO TBD move $router to core recurve?
-    module.factory("$stateActionCreator", ["$router", "$actionCreator"], function($router, $actionCreator) {
+    module.factory("$stateActionEmitter", ["$router", "$action"], function($router, $action) {
         // functionality:
         // - define states to a route
         // - define modals to a route with default state (if one doesn't exist)

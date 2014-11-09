@@ -1,8 +1,7 @@
-/* global addActionCreatorService,
- addDispatcherService,
+/* global addActionService,
  addDataStoreService,
- addRestActionCreatorService,
- addStateActionCreatorService
+ addRestActionEmitterService,
+ addStateActionEmitterService
 */
 
 (function() {
@@ -11,9 +10,8 @@
     recurve.flux = {};
     var module = recurve.flux.$module = recurve.module();
 
-    addActionCreatorService(module);
-    addDispatcherService(module);
+    addActionService(module);
     addDataStoreService(module);
-    addRestActionCreatorService(module);
-    addStateActionCreatorService(module);
+    addRestActionEmitterService(module);
+    addStateActionEmitterService(module);
 })();

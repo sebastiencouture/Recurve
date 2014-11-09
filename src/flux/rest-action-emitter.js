@@ -1,7 +1,7 @@
 "use strict";
 
-function addRestActionCreatorService(module) {
-    module.factory("$restActionCreator", ["$http", "$actionCreator"], function($http, $actionCreator) {
+function addRestActionEmitterService(module) {
+    module.factory("$restActionEmitter", ["$http", "$action"], function($http, $action) {
         // functionality:
         // - define resources for REST api
         // - trigger success, error, and cancelled actions

@@ -1,20 +1,16 @@
 "use strict";
 
 function addDataStoreService(module) {
-    module.factory("$dataStore", ["$signal", "$dispatcher"], function($signal, $dispatcher) {
+    module.factory("$dataStore", ["$signal"], function($signal) {
         return {
-            extend: function(obj) {
-                return recurve.extend({
-                    changed: $signal(),
+            changed: $signal(),
 
-                    register: function(callback, match) {
-                        this.dispatchToken = $dispatcher.register(callback, match);
-                    },
+            onAction: function(action, callback, context) {
+                action.on(callback, context, this);
+            },
 
-                    trigger: function() {
-                        this.changed.trigger.apply(this.changed, arguments);
-                    }
-                }, obj);
+            offAction: function(action, callback, context) {
+                action.off(callback, context, this);
             }
         };
     });

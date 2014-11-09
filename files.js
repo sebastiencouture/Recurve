@@ -45,11 +45,10 @@ var recurveFiles = {
         ],
 
         "flux": [
-            "src/flux/core/action-creator.js",
+            "src/flux/core/action.js",
             "src/flux/core/data-store.js",
-            "src/flux/core/dispatcher.js",
-            "src/flux/rest-action-creator.js",
-            "src/flux/state-action-creator.js",
+            "src/flux/rest-action-emitter.js",
+            "src/flux/state-action-emitter.js",
             "src/flux/flux.js"
         ]
     },
