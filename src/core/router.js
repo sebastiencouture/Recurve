@@ -1,9 +1,6 @@
-(function() {
-    "use strict";
+"use strict";
 
-    recurve.router = {};
-    var module = recurve.router.$module = recurve.module();
-
+function addRouterService(module) {
     module.factory("$router", ["$window", "$config"], function($window, $config) {
         // Support for history polyfill
         // https://github.com/devote/HTML5-History-API
@@ -26,14 +23,14 @@
         }
 
         function sanitizePath(path) {
-            return recurve.isString(path) ? path.replace(/^[#\/]|\s+$/g, "") : path;
+            return isString(path) ? path.replace(/^[#\/]|\s+$/g, "") : path;
         }
 
         var PATH_NAME_MATCHER = /:([\w\d]+)/g;
         var PATH_REPLACER = "([^\/]+)";
 
         function pathToRegExp(path) {
-            if (recurve.isRegExp(path)) {
+            if (isRegExp(path)) {
                 return path;
             }
 
@@ -42,7 +39,7 @@
 
         function pathParamKeys(path) {
             var paramKeys = [];
-            if (recurve.isRegExp(path)) {
+            if (isRegExp(path)) {
                 return paramKeys;
             }
 
@@ -57,38 +54,6 @@
             }
 
             return paramKeys;
-        }
-
-        function pathQueryParams(path) {
-            var params = {};
-            if (!path) {
-                return params;
-            }
-
-            var startIndex = path.indexOf("?") + 1;
-            if (startIndex === path.length) {
-                return params;
-            }
-
-            while (0 < startIndex) {
-                var endIndex = path.indexOf("&", startIndex);
-                if (-1 === endIndex) {
-                    endIndex = undefined;
-                }
-
-                var keyValue = path.slice(startIndex, endIndex);
-
-                var split = keyValue.split("=");
-                var key = decodeParam(split[0]);
-                // No support for decoding value, too difficult. No need yet for this either
-                var value = 1 < split.length ? split[1] : null;
-
-                params[key] = value;
-
-                startIndex = endIndex + 1;
-            }
-
-            return params;
         }
 
         function removePathQueryParams(path) {
@@ -121,7 +86,7 @@
                 route.callbacks = [];
                 route.paramKeys = pathParamKeys(path);
                 route.handle = function(path) {
-                    var queryParams = pathQueryParams(path);
+                    var queryParams = getParametersOfUrl(path);
                     path = removePathQueryParams(path);
 
                     var params = this.pathRegExp.exec(path);
@@ -133,7 +98,7 @@
                     params.shift();
 
                     var decodedParams = queryParams;
-                    recurve.forEach(params, function(param, index) {
+                    forEach(params, function(param, index) {
                         var decodedParam = decodeParam(param);
                         if (this.paramKeys && this.paramKeys[index]) {
                             decodedParams[this.paramKeys[index]] = decodedParam;
@@ -149,7 +114,7 @@
                         args.push(currentStateObj);
                     }
 
-                    recurve.forEach(this.callbacks, function(callback) {
+                    forEach(this.callbacks, function(callback) {
                         callback.apply(null, args);
                     });
 
@@ -179,7 +144,7 @@
         }
 
         function removeRoot(path) {
-            if (!root || recurve.isRegExp(path)) {
+            if (!root || isRegExp(path)) {
                 return path;
             }
 
@@ -203,7 +168,7 @@
             currentPath = path;
 
             var handled = false;
-            recurve.forEach(routes, function(route) {
+            forEach(routes, function(route) {
                 handled = route.handle(path);
                 return !handled;
             });
@@ -246,7 +211,7 @@
             navigate: function(path, stateObj, trigger) {
                 path = historyPath(path);
                 currentStateObj = stateObj;
-                trigger = recurve.isUndefined(trigger) ? true : trigger;
+                trigger = isUndefined(trigger) ? true : trigger;
 
                 history.pushState(stateObj, null, path);
                 if (trigger) {
@@ -257,7 +222,7 @@
             replace: function(path, stateObj, trigger) {
                 path = historyPath(path);
                 currentStateObj = stateObj;
-                trigger = recurve.isUndefined(trigger) ? true : trigger;
+                trigger = isUndefined(trigger) ? true : trigger;
 
                 history.replaceState(stateObj, null, path);
                 if (trigger) {
@@ -284,7 +249,7 @@
 
             start: function() {
                 started = true;
-                recurve.addEvent($window, "popstate", function(event) {
+                addEvent($window, "popstate", function(event) {
                     currentStateObj = event.state;
                     checkCurrentPath();
                 });
@@ -298,5 +263,5 @@
     module.config("$router", {
         root: ""
     });
-})();
+}
 

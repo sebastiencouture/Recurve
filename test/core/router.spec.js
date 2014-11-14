@@ -9,8 +9,6 @@ describe("$router", function() {
     }
 
     beforeEach(function() {
-        $include(recurve.router.$module);
-
         $invoke(["$router"], function(router) {
             $router = router;
         });
@@ -405,7 +403,7 @@ describe("$router", function() {
 
     describe("root", function() {
         function setup(root, matcher) {
-            $include(recurve.router.$module, function($mockable) {
+            $include(null, function($mockable) {
                 $mockable.config("$router", {root: root});
             });
 

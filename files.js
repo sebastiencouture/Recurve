@@ -25,7 +25,8 @@ var recurveFiles = {
         "src/core/http/http-provider.js",
         "src/core/http/http-xhr.js",
         "src/core/http/http-jsonp.js",
-        "src/core/http/http-deferred.js"
+        "src/core/http/http-deferred.js",
+        "src/core/router.js"
     ],
 
     "recurveModules" : {
@@ -38,10 +39,6 @@ var recurveFiles = {
             "src/mock/mock-http-provider.js",
             "src/mock/mock-error-handler-decorator.js",
             "src/mock/mock.js"
-        ],
-
-        "router" : [
-            "src/router/router.js"
         ],
 
         "flux": [

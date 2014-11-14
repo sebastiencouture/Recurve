@@ -17,7 +17,8 @@
  addHttpJsonpService,
  addHttpDeferredService,
  addHttpProviderService,
- addHttpService
+ addHttpService,
+ addRouterService
  */
 "use strict";
 
@@ -70,6 +71,7 @@ function createApi(recurve) {
     addHttpDeferredService(recurveModule);
     addHttpProviderService(recurveModule);
     addHttpService(recurveModule);
+    addRouterService(recurveModule);
 
     recurveModule.exports([
         "$document", "$window", "$timeout", "$signal",

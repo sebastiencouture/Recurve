@@ -48,7 +48,6 @@ module.exports = function(grunt) {
             },
             recurve: files.recurveSrc,
             recurveMock: files.recurveModules.mock,
-            recurveRouter: files.recurveModules.router,
             recurveFlux: files.recurveModules.flux,
             test: files.test
         },
