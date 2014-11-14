@@ -14,7 +14,7 @@ function addActionGroupService(module) {
                 remove: function(action) {
                     var index = actions.indexOf(action);
                     recurve.assert(-1 !== index, "action is not in the group");
-                    actions.split(1, index);
+                    actions.splice(index, 1);
                 },
 
                 on: function(callback, context, dataStore) {
