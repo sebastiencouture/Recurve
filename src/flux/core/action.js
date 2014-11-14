@@ -42,7 +42,7 @@ function addActionService(module) {
 
             return {
                 trigger: function(payload) {
-                    recurve.assert(!triggerListener, "cannot trigger an action while another action is being triggered");
+                    recurve.assert(!this.isTriggering(), "cannot trigger an action while another action is being triggered");
 
                     triggerPayload = payload;
 
@@ -95,7 +95,7 @@ function addActionService(module) {
                 },
 
                 waitFor: function(dataStores) {
-                    recurve.assert(triggerListener, "can only wait for while in the middle of triggering an action");
+                    recurve.assert(this.isTriggering(), "can only wait for while in the middle of triggering an action");
                     recurve.assert(triggerListener.dataStore,
                         "data store must be set for current action listener to detect circular dependencies");
 
@@ -113,6 +113,10 @@ function addActionService(module) {
 
                         recurve.assert(found, "no action listener found for the wait for data store at index {0}", index);
                     });
+                },
+
+                isTriggering: function() {
+                    return triggerListener ? true : false;
                 }
             };
         };
