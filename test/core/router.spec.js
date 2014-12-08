@@ -24,9 +24,9 @@ describe("$router", function() {
         expect(isFunction($router)).toEqual(false);
     });
 
-    describe("match", function() {
+    describe("on", function() {
         it("should call route callback for string matcher with no params", function() {
-            $router.match("/a").to(callback);
+            $router.on("/a", callback);
             pushState("/a");
 
             $router.start();
@@ -35,7 +35,7 @@ describe("$router", function() {
         });
 
         it("should not require leading slash in string matcher", function() {
-            $router.match("a").to(callback);
+            $router.on("a", callback);
             pushState("/a");
 
             $router.start();
@@ -44,7 +44,7 @@ describe("$router", function() {
         });
 
         it("should call route callback for string matcher with one param", function() {
-            $router.match("a/:id").to(callback);
+            $router.on("a/:id", callback);
             pushState("/a/1");
 
             $router.start();
@@ -53,7 +53,7 @@ describe("$router", function() {
         });
 
         it("should call route callback for string matcher with multiple params", function() {
-            $router.match("a/:id/b/:time").to(callback);
+            $router.on("a/:id/b/:time", callback);
             pushState("/a/1/b/21");
 
             $router.start();
@@ -62,7 +62,7 @@ describe("$router", function() {
         });
 
         it("should not call route callback if doesn't match string matcher", function() {
-            $router.match("a/:id").to(callback);
+            $router.on("a/:id", callback);
             pushState("/a/1/b");
 
             $router.start();
@@ -71,7 +71,7 @@ describe("$router", function() {
         });
 
         it("should call route callback for regexp matcher", function() {
-            $router.match(/recurve/i).to(callback);
+            $router.on(/recurve/i, callback);
             pushState("/this-is-recurve");
 
             $router.start();
@@ -80,7 +80,7 @@ describe("$router", function() {
         });
 
         it("should not call route callback if doesn't match regexp matcher", function() {
-            $router.match(/recurve/i).to(callback);
+            $router.on(/recurve/i, callback);
             pushState("/this-is");
 
             $router.start();
@@ -88,24 +88,24 @@ describe("$router", function() {
             expect(callback).not.toHaveBeenCalled();
         });
 
-        it("should call multiple callbacks for route", function() {
-            $router.match("a").to(callback);
+        it("should only register last callback for a path", function() {
+            $router.on("a", callback);
             var callback2 = jasmine.createSpy("callback2");
-            $router.match("a").to(callback2);
+            $router.on("a", callback2);
             var callback3 = jasmine.createSpy("callback3");
-            $router.match("a").to(callback3);
+            $router.on("a", callback3);
 
             pushState("/a");
 
             $router.start();
 
-            expect(callback).toHaveBeenCalled();
-            expect(callback2).toHaveBeenCalled();
+            expect(callback).not.toHaveBeenCalled();
+            expect(callback2).not.toHaveBeenCalled();
             expect(callback3).toHaveBeenCalled();
         });
 
         it("should return params with keys for string path", function() {
-            $router.match("a/:id/b/:time").to(callback);
+            $router.on("a/:id/b/:time", callback);
             pushState("/a/1/b/21");
 
             $router.start();
@@ -114,7 +114,7 @@ describe("$router", function() {
         });
 
         it("should return params splat array for regexp path", function() {
-            $router.match(/\/test\/(.+)/).to(callback);
+            $router.on(/\/test\/(.+)/, callback);
             pushState("/wow/test/this/should/work");
 
             $router.start();
@@ -123,7 +123,7 @@ describe("$router", function() {
         });
 
         it("should return query string params for string path", function() {
-            $router.match("a/:id").to(callback);
+            $router.on("a/:id", callback);
             pushState("/a/1?query=2");
 
             $router.start();
@@ -132,7 +132,7 @@ describe("$router", function() {
         });
 
         it("should return query string params for regexp path", function() {
-            $router.match(/\/test\/(.+)/).to(callback);
+            $router.on(/\/test\/(.+)/, callback);
             pushState("/wow/test/this/should/work?query=2");
 
             $router.start();
@@ -141,7 +141,7 @@ describe("$router", function() {
         });
 
         it("should ignore trailing space location", function() {
-            $router.match("a").to(callback);
+            $router.on("a", callback);
             pushState("/a   ");
 
             $router.start();
@@ -150,19 +150,43 @@ describe("$router", function() {
         });
 
         it("should decode location for special characters", function() {
-            $router.match("å").to(callback);
+            $router.on("å", callback);
             pushState("%C3%A5");
 
             $router.start();
 
             expect(callback).toHaveBeenCalled();
         });
+
+        it("should throw error for null callback", function() {
+            expect(function() {
+                $router.on("a", null);
+            }).toThrowError("callback must exist");
+        });
+
+        it("should throw error for undefined callback", function() {
+            expect(function() {
+                $router.on("a");
+            }).toThrowError("callback must exist");
+        });
+
+        it("should throw error for number callback", function() {
+            expect(function() {
+                $router.on("a", 0);
+            }).toThrowError("callback must exist");
+        });
+
+        it("should throw error for string callback", function() {
+            expect(function() {
+                $router.on("a", "a");
+            }).toThrowError("callback must exist");
+        });
     });
 
-    it("should call noMatch handler if no match", function() {
-        $router.match("a").to(callback);
+    it("should call otherwise callback if no match", function() {
+        $router.on("a", callback);
         var noMatch = jasmine.createSpy("noMatch");
-        $router.noMatch(noMatch);
+        $router.otherwise(noMatch);
         pushState("b");
 
         $router.start();
@@ -171,9 +195,35 @@ describe("$router", function() {
         expect(noMatch).toHaveBeenCalled();
     });
 
+    describe("off", function() {
+        it("should remove path callback", function() {
+            $router.on("a", callback);
+            $router.off("a");
+
+            pushState("a");
+
+            $router.start();
+
+            expect(callback).not.toHaveBeenCalled();
+        });
+
+        it("should call otherwise after path callback has been removed", function() {
+            $router.on("a", callback);
+            $router.off("a", callback);
+            var noMatch = jasmine.createSpy("noMatch");
+            $router.otherwise(noMatch);
+            pushState("a");
+
+            $router.start();
+
+            expect(callback).not.toHaveBeenCalled();
+            expect(noMatch).toHaveBeenCalled();
+        });
+    });
+
     describe("navigate", function() {
         beforeEach(function() {
-            $router.match("a").to(callback);
+            $router.on("a", callback);
         });
 
         it("should call route callback for match", function() {
@@ -219,7 +269,7 @@ describe("$router", function() {
 
     describe("replace", function() {
         beforeEach(function() {
-            $router.match("a").to(callback);
+            $router.on("a", callback);
         });
 
         it("should call route callback for match", function() {
@@ -265,7 +315,7 @@ describe("$router", function() {
 
     describe("back", function() {
         beforeEach(function() {
-            $router.match("a").to(callback);
+            $router.on("a", callback);
         });
 
         it("should call route callback for popped path", function(done) {
@@ -306,7 +356,7 @@ describe("$router", function() {
 
     describe("forward", function() {
         beforeEach(function() {
-            $router.match("b").to(callback);
+            $router.on("b", callback);
         });
 
         it("should call route callback for forward path", function(done) {
@@ -362,7 +412,7 @@ describe("$router", function() {
 
     describe("reload", function() {
         beforeEach(function() {
-            $router.match("a").to(callback);
+            $router.on("a", callback);
         });
 
         it("should call current route callback", function() {
@@ -412,7 +462,7 @@ describe("$router", function() {
             });
 
             if (matcher) {
-                $router.match(matcher).to(callback);
+                $router.on(matcher, callback);
             }
 
             $router.start();

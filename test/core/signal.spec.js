@@ -105,7 +105,7 @@ describe("$signal", function(){
 
         it("should throw error for number callback", function() {
             expect(function(){
-                signal.on(1);
+                signal.on(0);
             }).toThrow(new Error("callback must exist"));
         });
 

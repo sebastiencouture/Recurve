@@ -1,8 +1,10 @@
-"use strict";
+(function() {
+    "use strict";
 
-function addStateActionEmitterService(module) {
-    // TODO TBD move $router to core recurve?
-    module.factory("$stateActionEmitter", ["$router", "$action"], function($router, $action) {
+    recurve.flux.state = {};
+    var module = recurve.flux.state.$module = recurve.module();
+
+    module.factory("$state", ["$router", "$action"], function($router, $action) {
         // functionality:
         // - define states to a route
         // - define modals to a route with default state (if one doesn't exist)
@@ -15,4 +17,4 @@ function addStateActionEmitterService(module) {
 
         };
     });
-}
+})();

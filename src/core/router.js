@@ -78,52 +78,46 @@ function addRouterService(module) {
 
         function addRoute(path) {
             var pathRegExp = pathToRegExp(path);
-            var route = getRoute(pathRegExp);
 
-            if(!route) {
-                route = {};
-                route.pathRegExp = pathRegExp;
-                route.callbacks = [];
-                route.paramKeys = pathParamKeys(path);
-                route.handle = function(path) {
-                    var queryParams = getParametersOfUrl(path);
-                    path = removePathQueryParams(path);
+            var route = {};
+            route.pathRegExp = pathRegExp;
+            route.paramKeys = pathParamKeys(path);
 
-                    var params = this.pathRegExp.exec(path);
-                    if (!params) {
-                        return false;
+            route.handle = function(path) {
+                var queryParams = getParametersOfUrl(path);
+                path = removePathQueryParams(path);
+
+                var params = this.pathRegExp.exec(path);
+                if (!params) {
+                    return false;
+                }
+
+                // full path
+                params.shift();
+
+                var decodedParams = queryParams;
+                forEach(params, function(param, index) {
+                    var decodedParam = decodeParam(param);
+                    if (this.paramKeys && this.paramKeys[index]) {
+                        decodedParams[this.paramKeys[index]] = decodedParam;
                     }
-
-                    // full path
-                    params.shift();
-
-                    var decodedParams = queryParams;
-                    forEach(params, function(param, index) {
-                        var decodedParam = decodeParam(param);
-                        if (this.paramKeys && this.paramKeys[index]) {
-                            decodedParams[this.paramKeys[index]] = decodedParam;
-                        }
-                        else {
-                            decodedParams.splat = decodedParams.splat || [];
-                            decodedParams.splat.push(decodedParam);
-                        }
-                    }, this);
-
-                    var args = [decodedParams];
-                    if (currentStateObj) {
-                        args.push(currentStateObj);
+                    else {
+                        decodedParams.splat = decodedParams.splat || [];
+                        decodedParams.splat.push(decodedParam);
                     }
+                }, this);
 
-                    forEach(this.callbacks, function(callback) {
-                        callback.apply(null, args);
-                    });
+                var args = [decodedParams];
+                if (currentStateObj) {
+                    args.push(currentStateObj);
+                }
 
-                    return true;
-                };
+                this.callback.apply(null, args);
 
-                routes.push(route);
-            }
+                return true;
+            };
 
+            routes.push(route);
             return route;
         }
 
@@ -191,20 +185,35 @@ function addRouterService(module) {
         }
 
         return {
-            match: function(path) {
+            on: function(path, callback) {
+                assert(isFunction(callback), "callback must exist");
+
                 path = sanitizePath(path);
                 path = removeRoot(path);
+                var pathRegExp = pathToRegExp(path);
 
-                var route = addRoute(path);
+                var route = getRoute(pathRegExp);
+                if (!route) {
+                    route = addRoute(path);
+                }
 
-                return {
-                    to: function(callback) {
-                        route.callbacks.push(callback);
-                    }
-                };
+                route.callback = callback;
             },
 
-            noMatch: function(callback) {
+            off: function(path) {
+                path = sanitizePath(path);
+                path = removeRoot(path);
+                var pathRegExp = pathToRegExp(path);
+
+                recurve.forEach(routes, function(route, index) {
+                    if(recurve.areEqual(pathRegExp, route.pathRegExp)) {
+                        routes.splice(index, 1);
+                        return false;
+                    }
+                });
+            },
+
+            otherwise: function(callback) {
                 noMatchHandler = callback;
             },
 
