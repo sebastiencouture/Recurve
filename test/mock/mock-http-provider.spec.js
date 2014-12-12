@@ -241,9 +241,7 @@ describe("recurveMock-$httpProvider", function() {
             $httpProvider.send({method: "GET", url: "www.a.com"}, $httpDeferred());
             $httpProvider.flush();
 
-            expect(function() {
-                $httpProvider.verifyPending();
-            }).not.toThrow();
+            $httpProvider.verifyPending();
         });
 
         it("should include description of each pending request", function() {
@@ -343,9 +341,7 @@ describe("recurveMock-$httpProvider", function() {
 
             $httpProvider.flush();
 
-            expect(function() {
-                $httpProvider.verifyExpectations();
-            }).not.toThrow();
+            $httpProvider.verifyExpectations();
         });
 
         it("should do nothing if no handlers", function() {
@@ -357,9 +353,7 @@ describe("recurveMock-$httpProvider", function() {
             $httpProvider.send({method: "GET", url: "www.a.com"}, $httpDeferred());
             $httpProvider.flush();
 
-            expect(function() {
-                $httpProvider.verifyExpectations();
-            }).not.toThrow();
+            $httpProvider.verifyExpectations();
         });
 
         it("should include description of each handler that did not meet expectation", function() {
@@ -421,9 +415,7 @@ describe("recurveMock-$httpProvider", function() {
             $httpProvider.send({method: "GET", url: "www.a.com"}, $httpDeferred());
             $httpProvider.flush();
 
-            expect(function() {
-                $httpProvider.verifyExpectations();
-            }).not.toThrow();
+            $httpProvider.verifyExpectations();
         });
 
         it("should meet expectations for empty expected options object", function() {
@@ -432,9 +424,7 @@ describe("recurveMock-$httpProvider", function() {
             $httpProvider.send({method: "GET", url: "www.a.com", data: {a: 1}}, $httpDeferred());
             $httpProvider.flush();
 
-            expect(function() {
-                $httpProvider.verifyExpectations();
-            }).not.toThrow();
+            $httpProvider.verifyExpectations();
         });
 
         it("should treat expected options method parameter as case insensitive", function() {
@@ -443,9 +433,7 @@ describe("recurveMock-$httpProvider", function() {
             $httpProvider.send({method: "get", url: "www.a.com"}, $httpDeferred());
             $httpProvider.flush();
 
-            expect(function() {
-                $httpProvider.verifyExpectations();
-            }).not.toThrow();
+            $httpProvider.verifyExpectations();
         });
 
         it("should meet expectations for null expected options object", function() {
@@ -454,9 +442,7 @@ describe("recurveMock-$httpProvider", function() {
             $httpProvider.send({method: "GET", url: "www.a.com", data: {a: 1}}, $httpDeferred());
             $httpProvider.flush();
 
-            expect(function() {
-                $httpProvider.verifyExpectations();
-            }).not.toThrow();
+            $httpProvider.verifyExpectations();
         });
 
         it("should allow to be set multiple times", function() {
@@ -468,9 +454,7 @@ describe("recurveMock-$httpProvider", function() {
 
             $httpProvider.flush();
 
-            expect(function() {
-                $httpProvider.verifyExpectations();
-            }).not.toThrow();
+            $httpProvider.verifyExpectations();
         });
 
         it("should meet expectations if expected options match request options", function() {
@@ -479,9 +463,7 @@ describe("recurveMock-$httpProvider", function() {
             $httpProvider.send({method: "GET", url: "www.a.com", data: "a"}, $httpDeferred());
             $httpProvider.flush();
 
-            expect(function() {
-                $httpProvider.verifyExpectations();
-            }).not.toThrow();
+            $httpProvider.verifyExpectations();
         });
 
         it("should meet expectations for options object parameters", function() {
@@ -490,9 +472,7 @@ describe("recurveMock-$httpProvider", function() {
             $httpProvider.send({method: "GET", url: "www.a.com", data: {a: 1}}, $httpDeferred());
             $httpProvider.flush();
 
-            expect(function() {
-                $httpProvider.verifyExpectations();
-            }).not.toThrow();
+            $httpProvider.verifyExpectations();
         });
 
         it("should meet expectations for partial options object parameters", function() {
@@ -501,9 +481,7 @@ describe("recurveMock-$httpProvider", function() {
             $httpProvider.send({method: "GET", url: "www.a.com", data: {a: 1, b: 2}}, $httpDeferred());
             $httpProvider.flush();
 
-            expect(function() {
-                $httpProvider.verifyExpectations();
-            }).not.toThrow();
+            $httpProvider.verifyExpectations();
         });
 
         it("should meet expectations for serialized json data", function() {
@@ -512,9 +490,7 @@ describe("recurveMock-$httpProvider", function() {
             $httpProvider.send({method: "GET", url: "www.a.com", data: toJson({a: 1})}, $httpDeferred());
             $httpProvider.flush();
 
-            expect(function() {
-                $httpProvider.verifyExpectations();
-            }).not.toThrow();
+            $httpProvider.verifyExpectations();
         });
 
         it("should meet expectations for serialized form data", function() {
@@ -523,9 +499,7 @@ describe("recurveMock-$httpProvider", function() {
             $httpProvider.send({method: "GET", url: "www.a.com", data: toFormData({a: 1})}, $httpDeferred());
             $httpProvider.flush();
 
-            expect(function() {
-                $httpProvider.verifyExpectations();
-            }).not.toThrow();
+            $httpProvider.verifyExpectations();
         });
 
         it("should meet expectations for values that match regexp", function() {
@@ -534,9 +508,7 @@ describe("recurveMock-$httpProvider", function() {
             $httpProvider.send({method: "GET", url: "www.a.com", data: {a: "123"}}, $httpDeferred());
             $httpProvider.flush();
 
-            expect(function() {
-                $httpProvider.verifyExpectations();
-            }).not.toThrow();
+            $httpProvider.verifyExpectations();
         });
 
         it("should meet expectations for number values that match regexp", function() {
@@ -545,9 +517,7 @@ describe("recurveMock-$httpProvider", function() {
             $httpProvider.send({method: "GET", url: "www.a.com", data: {a: 123}}, $httpDeferred());
             $httpProvider.flush();
 
-            expect(function() {
-                $httpProvider.verifyExpectations();
-            }).not.toThrow();
+            $httpProvider.verifyExpectations();
         });
 
         it("should not meet expectations for values that do not match regexp", function() {
@@ -578,9 +548,7 @@ describe("recurveMock-$httpProvider", function() {
             $httpProvider.send({method: "GET", url: "www.a.com", data: "a", other: "a"}, $httpDeferred());
             $httpProvider.flush();
 
-            expect(function() {
-                $httpProvider.verifyExpectations();
-            }).not.toThrow();
+            $httpProvider.verifyExpectations();
         });
 
         it("should not meet expectations if expected options match but count does not", function() {
@@ -600,9 +568,7 @@ describe("recurveMock-$httpProvider", function() {
             $httpProvider.send({method: "get", url: "www.a.com", params: {a: 1}}, $httpDeferred());
             $httpProvider.flush();
 
-            expect(function() {
-                $httpProvider.verifyExpectations();
-            }).not.toThrow();
+            $httpProvider.verifyExpectations();
         });
 
         it("should meet expectations for url with query parameters included in handler url", function() {
@@ -612,9 +578,7 @@ describe("recurveMock-$httpProvider", function() {
             $httpProvider.send({method: "get", url: "www.a.com?a=2"}, $httpDeferred());
             $httpProvider.flush();
 
-            expect(function() {
-                $httpProvider.verifyExpectations();
-            }).not.toThrow();
+            $httpProvider.verifyExpectations();
         });
     });
 
@@ -646,19 +610,14 @@ describe("recurveMock-$httpProvider", function() {
         $httpProvider.send({method: "GET", url: "www.a.com"}, $httpDeferred());
         $httpProvider.flush();
 
-        expect(function() {
-            $httpProvider.verifyExpectations();
-        }).not.toThrow();
-
+        $httpProvider.verifyExpectations();
         $httpProvider.clearExpectations();
 
         $httpProvider.send({method: "GET", url: "www.a.com"}, $httpDeferred());
         $httpProvider.send({method: "GET", url: "www.a.com"}, $httpDeferred());
         $httpProvider.flush();
 
-        expect(function() {
-            $httpProvider.verifyExpectations();
-        }).not.toThrow();
+        $httpProvider.verifyExpectations();
     });
 
     it("should clear handlers", function() {
@@ -701,9 +660,7 @@ describe("recurveMock-$httpProvider", function() {
         $httpProvider.send({method: "DELETE", url: "www.a.com"}, $httpDeferred());
         $httpProvider.flush();
 
-        expect(function() {
-            $httpProvider.verifyExpectations();
-        }).not.toThrow();
+        $httpProvider.verifyExpectations();
     });
 
     it("should invoke different handler for different url and method", function() {
@@ -716,8 +673,6 @@ describe("recurveMock-$httpProvider", function() {
         $httpProvider.send({method: "DELETE", url: "www.c.com"}, $httpDeferred());
         $httpProvider.flush();
 
-        expect(function() {
-            $httpProvider.verifyExpectations();
-        }).not.toThrow();
+        $httpProvider.verifyExpectations();
     });
 });
