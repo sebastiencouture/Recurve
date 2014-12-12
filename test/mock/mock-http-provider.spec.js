@@ -176,6 +176,23 @@ describe("recurveMock-$httpProvider", function() {
             $httpProvider.flush();
             expect(callback).toHaveBeenCalledWith({status: 0, canceled: true});
         });
+
+        it("should overwrite respond for canceled request", function() {
+            handler.respond({status: 400});
+            promise.then(null, callback);
+            promise.cancel();
+
+            $httpProvider.flush();
+            expect(callback).toHaveBeenCalledWith({status: 0, canceled: true});
+        });
+
+        it("should default status to 200 if not specified", function() {
+            handler.respond({data: "a"});
+            promise.then(callback);
+
+            $httpProvider.flush();
+            expect(callback).toHaveBeenCalledWith({status: 200, data: "a"});
+        });
     });
 
     describe("callCount", function() {
