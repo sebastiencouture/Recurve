@@ -168,6 +168,14 @@ describe("recurveMock-$httpProvider", function() {
             $httpProvider.flush();
             expect(callback).toHaveBeenCalledWith({status: 400, data: "a"});
         });
+
+        it("should return canceled and status 0 for canceled request", function() {
+            promise.then(null, callback);
+            promise.cancel();
+
+            $httpProvider.flush();
+            expect(callback).toHaveBeenCalledWith({status: 0, canceled: true});
+        });
     });
 
     describe("callCount", function() {
@@ -514,7 +522,7 @@ describe("recurveMock-$httpProvider", function() {
             }).not.toThrow();
         });
 
-        it("should meet expections for number values that match regexp", function() {
+        it("should meet expectations for number values that match regexp", function() {
             handler.expect({data: {a: /[0-9]{3}/}});
 
             $httpProvider.send({method: "GET", url: "www.a.com", data: {a: 123}}, $httpDeferred());
