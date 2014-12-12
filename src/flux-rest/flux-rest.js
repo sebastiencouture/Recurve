@@ -61,7 +61,7 @@
                             recurve.extend(endPointOptions, {data: data});
                         }
 
-                        var paramsWithDefaults = recurve.extend({}, paramDefaults)
+                        var paramsWithDefaults = recurve.extend({}, paramDefaults);
                         recurve.extend(paramsWithDefaults, params);
 
                         updateUrl(endPointOptions, url, paramsWithDefaults);

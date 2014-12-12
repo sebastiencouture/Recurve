@@ -23,7 +23,7 @@
                     add: function(name, path, onValidate, onGetData) {
 
                     }
-                }
+                };
             }
         };
     });
