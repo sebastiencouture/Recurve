@@ -481,6 +481,28 @@ describe("recurveMock-$httpProvider", function() {
             }).not.toThrow();
         });
 
+        it("should meet expectations for serialized json data", function() {
+            handler.expect({data: {a: 1}});
+
+            $httpProvider.send({method: "GET", url: "www.a.com", data: toJson({a: 1})}, $httpDeferred());
+            $httpProvider.flush();
+
+            expect(function() {
+                $httpProvider.verifyExpectations();
+            }).not.toThrow();
+        });
+
+        it("should meet expectations for serialized form data", function() {
+            handler.expect({data: {a: 1}});
+
+            $httpProvider.send({method: "GET", url: "www.a.com", data: toFormData({a: 1})}, $httpDeferred());
+            $httpProvider.flush();
+
+            expect(function() {
+                $httpProvider.verifyExpectations();
+            }).not.toThrow();
+        });
+
         it("should meet expectations for values that match regexp", function() {
             handler.expect({data: {a: /[0-9]{3}/}});
 

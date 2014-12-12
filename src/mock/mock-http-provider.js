@@ -33,6 +33,20 @@ function addMockHttpProviderService(module) {
             return url;
         }
 
+        // TODO TBD pulled from core common.js
+        function toFormData(obj) {
+            if (!isObject(obj) || isArray(obj)) {
+                return null;
+            }
+
+            var values = [];
+            forEach(obj, function(value, key) {
+                values.push(encodeURIComponent(key) + "=" + encodeURIComponent(value));
+            });
+
+            return values.join("&");
+        }
+
         function expectationsMatch(expect, actual) {
             if (!actual) {
                 return false;
@@ -44,6 +58,24 @@ function addMockHttpProviderService(module) {
                     match = recurve.toJson(actual[key]).match(value);
                 }
                 else if (recurve.isObject(value)) {
+                    // check for serialized data to json and form data by $http
+                    if (recurve.isString(actual[key])) {
+                        try {
+                            var json = recurve.toJson(value);
+                            if (json === actual[key]) {
+                                return;
+                            }
+                        }
+                        catch (e) {}
+                        try {
+                            var formData = toFormData(value);
+                            if (formData === actual[key]) {
+                                return;
+                            }
+                        }
+                        catch (e) {}
+                    }
+
                     match = expectationsMatch(value, actual[key]);
                     return false;
                 }
@@ -148,14 +180,15 @@ function addMockHttpProviderService(module) {
             // doing this to simplify unit testing...
             handler.interface = {
                 respond: function(response) {
-                    if (response) {
-                        response.status = response.status || 200;
+                    if (response && recurve.isUndefined(response.status)) {
+                        response.status = 200;
                     }
 
                     handler.response = response;
                     return this;
                 },
 
+                // NOTE, don't need to expect any options, or count (even method)
                 expect: function(options, count) {
                     if (recurve.isUndefined(count)) {
                         count = 1;
@@ -189,24 +222,24 @@ function addMockHttpProviderService(module) {
             send: function(options, httpDeferred) {
                 // don't require handlers to match params on the url, instead should check against
                 // the params object
-                if (options) {
-                    recurve.forEach(options.params, function(value, param) {
-                        options.url = removeParameterFromUrl(options.url, param);
-                    });
+                recurve.forEach(options.params, function(value, param) {
+                    options.url = removeParameterFromUrl(options.url, param);
+                });
 
-                    if (options.method) {
-                        options.method = options.method.toUpperCase();
-                    }
-                }
+                options.method = options.method.toUpperCase();
+
+                var that = this;
+                httpDeferred.promise.cancel = function() {
+                    var handler = that.on(options.method, options.url);
+                    handler.respond({status: 0, canceled: true});
+                };
 
                 requests.push({options: options, httpDeferred: httpDeferred});
                 return httpDeferred.promise;
             },
 
             on: function(method, url) {
-                if (method) {
-                    method = method.toUpperCase();
-                }
+                method = method.toUpperCase();
 
                 var handler;
                 recurve.forEach(handlers, function(existing) {

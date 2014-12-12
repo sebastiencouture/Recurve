@@ -45,7 +45,6 @@ function addActionService(module) {
                     recurve.assert(!this.isTriggering(), "cannot trigger an action while another action is being triggered");
 
                     triggerPayload = payload;
-
                     try {
                         recurve.forEach(listeners, function(listener) {
                             triggerListener = listener;

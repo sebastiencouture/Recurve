@@ -14,37 +14,41 @@
         return function(config) {
             config = config || {};
 
-            var baseUrl = removeLeadingSlashes(config.url) || "";
+            var baseUrl = removeLeadingTrailingSlashes(config.url) || "";
             var defaults = config.defaults;
 
-            function removeLeadingSlashes(url) {
+            function removeLeadingTrailingSlashes(url) {
                 if (!url) {
                     return url;
                 }
 
-                return url.replace(/^\/+$/, "");
+                return url.replace(/^\/+|\/+$/g, "");
             }
 
-            function removeTrailingSlashes(url) {
-                if (!url) {
-                    return url;
-                }
+            function updateUrl(options, url, parameters) {
+                // replace in url if exists
+                var urlSplit = url.split("/");
+                recurve.forEach(urlSplit, function(value, index) {
+                    if (0 === value.indexOf(":")) {
+                        value = value.slice(1);
+                        if (!recurve.isUndefined(parameters[value])) {
+                            urlSplit[index] = encodeURIComponent(parameters[value]);
+                            delete parameters[value];
+                        }
+                    }
+                });
 
-                return url.replace(/\/+$/, "");
-            }
+                options.url = urlSplit.join("/");
 
-            function updateUrl(options, url, params) {
-                // TODO TBD replace in url
-                options.url = url;
-
-                // TODO TBD add rest as query params
+                // add rest as query params
                 options.params = options.params || {};
-                options.params.todo = "dasdas";
+                recurve.extend(options.params, parameters);
             }
 
             function resource(url, paramDefaults, endPoints) {
+                url = removeLeadingTrailingSlashes(url);
                 if (baseUrl) {
-                    url = baseUrl + "/" + removeTrailingSlashes(url);
+                    url = baseUrl + "/" + url;
                 }
 
                 function endPoint(options) {
@@ -62,19 +66,18 @@
 
                         updateUrl(endPointOptions, url, paramsWithDefaults);
 
-                        var that = this;
                         var httpPromise = $http(endPointOptions);
 
-                        httpPromise.success(function(response) {
-                            that.successAction.trigger(response);
+                        httpPromise.success(function() {
+                            send.successAction.trigger.apply(send.successAction, arguments);
                         });
 
-                        httpPromise.error(function(response) {
-                            if (response.canceled) {
-                                that.cancelAction.trigger(response);
+                        httpPromise.error(function(data, status, statusText, headers, options, canceled) {
+                            if (canceled) {
+                                send.cancelAction.trigger.apply(send.cancelAction, arguments);
                             }
                             else {
-                                that.errorAction.trigger(response);
+                                send.errorAction.trigger.apply(send.errorAction, arguments);
                             }
                         });
 
