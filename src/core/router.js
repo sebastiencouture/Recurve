@@ -8,12 +8,14 @@ function addRouterService(module) {
         var location = history.location || $window.location;
 
         var routes = [];
-        var noMatchHandler;
+        var noMatchHandler = $config.otherwise
         var currentPath = getPath();
         var currentStateObj;
         var started;
-        var root = $config.root ? sanitizePath($config.root) : "/";
-        root = ("/" + root + "/").replace(/^\/+|\/+$/g, "/");
+        var root;
+
+        var PATH_NAME_MATCHER = /:([\w\d]+)/g;
+        var PATH_REPLACER = "([^\/]+)";
 
         function getPath() {
             var path = decodeURI(location.pathname + location.search);
@@ -25,9 +27,6 @@ function addRouterService(module) {
         function sanitizePath(path) {
             return isString(path) ? path.replace(/^[#\/]|\s+$/g, "") : path;
         }
-
-        var PATH_NAME_MATCHER = /:([\w\d]+)/g;
-        var PATH_REPLACER = "([^\/]+)";
 
         function pathToRegExp(path) {
             if (isRegExp(path)) {
@@ -184,39 +183,7 @@ function addRouterService(module) {
             return path;
         }
 
-        return {
-            on: function(path, callback) {
-                assert(isFunction(callback), "callback must exist");
-
-                path = sanitizePath(path);
-                path = removeRoot(path);
-                var pathRegExp = pathToRegExp(path);
-
-                var route = getRoute(pathRegExp);
-                if (!route) {
-                    route = addRoute(path);
-                }
-
-                route.callback = callback;
-            },
-
-            off: function(path) {
-                path = sanitizePath(path);
-                path = removeRoot(path);
-                var pathRegExp = pathToRegExp(path);
-
-                recurve.forEach(routes, function(route, index) {
-                    if(recurve.areEqual(pathRegExp, route.pathRegExp)) {
-                        routes.splice(index, 1);
-                        return false;
-                    }
-                });
-            },
-
-            otherwise: function(callback) {
-                noMatchHandler = callback;
-            },
-
+        var $router = {
             navigate: function(path, stateObj, trigger) {
                 path = historyPath(path);
                 currentStateObj = stateObj;
@@ -256,6 +223,10 @@ function addRouterService(module) {
                 checkCurrentPath();
             },
 
+            currentPath: function() {
+                return currentPath;
+            },
+
             start: function() {
                 started = true;
                 addEvent($window, "popstate", function(event) {
@@ -265,12 +236,46 @@ function addRouterService(module) {
 
                 currentStateObj = currentStateObj || history.state;
                 this.reload();
+            },
+
+            // Convenience method if not possible to use config (building on top of $router => $state)
+            setRoot: function(value) {
+                root = value ? sanitizePath(value) : "/";
+                root = ("/" + root + "/").replace(/^\/+|\/+$/g, "/");
+            },
+
+            on: function(path, callback) {
+                assert(isFunction(callback), "callback must exist for route '{0}'", path);
+
+                path = sanitizePath(path);
+                path = removeRoot(path);
+                var pathRegExp = pathToRegExp(path);
+
+                var route = getRoute(pathRegExp);
+                if (!route) {
+                    route = addRoute(path);
+                }
+
+                route.callback = callback;
+            },
+
+            otherwise: function(callback) {
+                noMatchHandler = callback;
             }
         };
+
+        $router.setRoot($config.root);
+        forEach($config.routes, function(routeConfig) {
+            $router.on(routeConfig.path, routeConfig.callback);
+        });
+
+        return $router;
     });
+
 
     module.config("$router", {
-        root: ""
+        root: "",
+        routes: [],
+        otherwise: null
     });
 }
-

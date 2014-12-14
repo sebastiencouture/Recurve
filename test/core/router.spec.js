@@ -8,6 +8,22 @@ describe("$router", function() {
         window.history.pushState(stateObj, null, path);
     }
 
+    function setupRoute(path, otherwise) {
+        $include(null, function(module) {
+            module.config("$router", {
+                routes: [{
+                    path: path,
+                    callback: callback
+                }],
+                otherwise: otherwise
+            });
+        });
+
+        $invoke(["$router"], function(router) {
+            $router = router;
+        });
+    }
+
     beforeEach(function() {
         $invoke(["$router"], function(router) {
             $router = router;
@@ -24,9 +40,9 @@ describe("$router", function() {
         expect(isFunction($router)).toEqual(false);
     });
 
-    describe("on", function() {
+    describe("config.routes", function() {
         it("should call route callback for string matcher with no params", function() {
-            $router.on("/a", callback);
+            setupRoute("/a");
             pushState("/a");
 
             $router.start();
@@ -35,7 +51,7 @@ describe("$router", function() {
         });
 
         it("should not require leading slash in string matcher", function() {
-            $router.on("a", callback);
+            setupRoute("a");
             pushState("/a");
 
             $router.start();
@@ -44,7 +60,7 @@ describe("$router", function() {
         });
 
         it("should call route callback for string matcher with one param", function() {
-            $router.on("a/:id", callback);
+            setupRoute("a/:id", callback);
             pushState("/a/1");
 
             $router.start();
@@ -53,7 +69,7 @@ describe("$router", function() {
         });
 
         it("should call route callback for string matcher with multiple params", function() {
-            $router.on("a/:id/b/:time", callback);
+            setupRoute("a/:id/b/:time");
             pushState("/a/1/b/21");
 
             $router.start();
@@ -62,7 +78,7 @@ describe("$router", function() {
         });
 
         it("should not call route callback if doesn't match string matcher", function() {
-            $router.on("a/:id", callback);
+            setupRoute("a/:id");
             pushState("/a/1/b");
 
             $router.start();
@@ -71,7 +87,7 @@ describe("$router", function() {
         });
 
         it("should call route callback for regexp matcher", function() {
-            $router.on(/recurve/i, callback);
+            setupRoute(/recurve/i);
             pushState("/this-is-recurve");
 
             $router.start();
@@ -80,7 +96,7 @@ describe("$router", function() {
         });
 
         it("should not call route callback if doesn't match regexp matcher", function() {
-            $router.on(/recurve/i, callback);
+            setupRoute(/recurve/i);
             pushState("/this-is");
 
             $router.start();
@@ -88,6 +104,114 @@ describe("$router", function() {
             expect(callback).not.toHaveBeenCalled();
         });
 
+        it("should return params with keys for string path", function() {
+            setupRoute("a/:id/b/:time");
+            pushState("/a/1/b/21");
+
+            $router.start();
+
+            expect(callback).toHaveBeenCalledWith({id: "1", time: "21"});
+        });
+
+        it("should return params splat array for regexp path", function() {
+            setupRoute(/\/test\/(.+)/, callback);
+            pushState("/wow/test/this/should/work");
+
+            $router.start();
+
+            expect(callback).toHaveBeenCalledWith({splat: ["this/should/work"]});
+        });
+
+        it("should return query string params for string path", function() {
+            setupRoute("a/:id");
+            pushState("/a/1?query=2");
+
+            $router.start();
+
+            expect(callback).toHaveBeenCalledWith({id: "1", query: "2"});
+        });
+
+        it("should return query string params for regexp path", function() {
+            setupRoute(/\/test\/(.+)/);
+            pushState("/wow/test/this/should/work?query=2");
+
+            $router.start();
+
+            expect(callback).toHaveBeenCalledWith({splat: ["this/should/work"], query: "2"});
+        });
+
+        it("should ignore trailing space location", function() {
+            setupRoute("a");
+            pushState("/a   ");
+
+            $router.start();
+
+            expect(callback).toHaveBeenCalled();
+        });
+
+        it("should decode location for special characters", function() {
+            setupRoute("å");
+            pushState("%C3%A5");
+
+            $router.start();
+
+            expect(callback).toHaveBeenCalled();
+        });
+
+        describe("error handling", function() {
+            function setup(value) {
+                $include(null, function(module) {
+                    module.config("$router", {
+                        routes: [{
+                            path: "a",
+                            callback: value
+                        }]
+                    });
+                });
+
+                $invoke(["$router"], function(router) {
+                    $router = router;
+                });
+            }
+
+            it("should throw error for null callback", function() {
+                expect(function() {
+                    setup(null);
+                }).toThrowError("callback must exist for route 'a'");
+            });
+
+            it("should throw error for undefined callback", function() {
+                expect(function() {
+                    setup();
+                }).toThrowError("callback must exist for route 'a'");
+            });
+
+            it("should throw error for number callback", function() {
+                expect(function() {
+                    setup(0);
+                }).toThrowError("callback must exist for route 'a'");
+            });
+
+            it("should throw error for string callback", function() {
+                expect(function() {
+                    setup("a");
+                }).toThrowError("callback must exist for route 'a'");
+            });
+        });
+
+        it("should call otherwise callback if no match", function() {
+            var noMatch = jasmine.createSpy("noMatch");
+            setupRoute("a", noMatch);
+            pushState("b");
+
+            $router.start();
+
+            expect(callback).not.toHaveBeenCalled();
+            expect(noMatch).toHaveBeenCalled();
+        });
+    });
+
+    describe("on", function() {
         it("should only register last callback for a path", function() {
             $router.on("a", callback);
             var callback2 = jasmine.createSpy("callback2");
@@ -104,126 +228,56 @@ describe("$router", function() {
             expect(callback3).toHaveBeenCalled();
         });
 
-        it("should return params with keys for string path", function() {
-            $router.on("a/:id/b/:time", callback);
-            pushState("/a/1/b/21");
+        it("should override config route for same path", function() {
+            setupRoute("a");
+            var callback2 = jasmine.createSpy("callback2");
+            $router.on("a", callback2);
 
-            $router.start();
-
-            expect(callback).toHaveBeenCalledWith({id: "1", time: "21"});
-        });
-
-        it("should return params splat array for regexp path", function() {
-            $router.on(/\/test\/(.+)/, callback);
-            pushState("/wow/test/this/should/work");
-
-            $router.start();
-
-            expect(callback).toHaveBeenCalledWith({splat: ["this/should/work"]});
-        });
-
-        it("should return query string params for string path", function() {
-            $router.on("a/:id", callback);
-            pushState("/a/1?query=2");
-
-            $router.start();
-
-            expect(callback).toHaveBeenCalledWith({id: "1", query: "2"});
-        });
-
-        it("should return query string params for regexp path", function() {
-            $router.on(/\/test\/(.+)/, callback);
-            pushState("/wow/test/this/should/work?query=2");
-
-            $router.start();
-
-            expect(callback).toHaveBeenCalledWith({splat: ["this/should/work"], query: "2"});
-        });
-
-        it("should ignore trailing space location", function() {
-            $router.on("a", callback);
-            pushState("/a   ");
-
-            $router.start();
-
-            expect(callback).toHaveBeenCalled();
-        });
-
-        it("should decode location for special characters", function() {
-            $router.on("å", callback);
-            pushState("%C3%A5");
-
-            $router.start();
-
-            expect(callback).toHaveBeenCalled();
-        });
-
-        it("should throw error for null callback", function() {
-            expect(function() {
-                $router.on("a", null);
-            }).toThrowError("callback must exist");
-        });
-
-        it("should throw error for undefined callback", function() {
-            expect(function() {
-                $router.on("a");
-            }).toThrowError("callback must exist");
-        });
-
-        it("should throw error for number callback", function() {
-            expect(function() {
-                $router.on("a", 0);
-            }).toThrowError("callback must exist");
-        });
-
-        it("should throw error for string callback", function() {
-            expect(function() {
-                $router.on("a", "a");
-            }).toThrowError("callback must exist");
-        });
-    });
-
-    it("should call otherwise callback if no match", function() {
-        $router.on("a", callback);
-        var noMatch = jasmine.createSpy("noMatch");
-        $router.otherwise(noMatch);
-        pushState("b");
-
-        $router.start();
-
-        expect(callback).not.toHaveBeenCalled();
-        expect(noMatch).toHaveBeenCalled();
-    });
-
-    describe("off", function() {
-        it("should remove path callback", function() {
-            $router.on("a", callback);
-            $router.off("a");
-
-            pushState("a");
+            pushState("/a");
 
             $router.start();
 
             expect(callback).not.toHaveBeenCalled();
+            expect(callback2).toHaveBeenCalled();
+        });
+    });
+
+    describe("otherwise", function() {
+        var noMatch;
+
+        beforeEach(function() {
+            noMatch = jasmine.createSpy("noMatch");
         });
 
-        it("should call otherwise after path callback has been removed", function() {
+        it("should call callback if no match", function() {
             $router.on("a", callback);
-            $router.off("a", callback);
-            var noMatch = jasmine.createSpy("noMatch");
             $router.otherwise(noMatch);
-            pushState("a");
+
+            pushState("b");
 
             $router.start();
 
             expect(callback).not.toHaveBeenCalled();
             expect(noMatch).toHaveBeenCalled();
         });
+
+        it("should override config otherwise", function() {
+            setupRoute("a", noMatch);
+            var noMatch2 = jasmine.createSpy("noMatch2");
+            $router.otherwise(noMatch2);
+
+            pushState("b");
+
+            $router.start();
+
+            expect(noMatch).not.toHaveBeenCalled();
+            expect(noMatch2).toHaveBeenCalled();
+        });
     });
 
     describe("navigate", function() {
         beforeEach(function() {
-            $router.on("a", callback);
+            setupRoute("a");
         });
 
         it("should call route callback for match", function() {
@@ -269,7 +323,7 @@ describe("$router", function() {
 
     describe("replace", function() {
         beforeEach(function() {
-            $router.on("a", callback);
+            setupRoute("a");
         });
 
         it("should call route callback for match", function() {
@@ -315,7 +369,7 @@ describe("$router", function() {
 
     describe("back", function() {
         beforeEach(function() {
-            $router.on("a", callback);
+            setupRoute("a");
         });
 
         it("should call route callback for popped path", function(done) {
@@ -356,7 +410,7 @@ describe("$router", function() {
 
     describe("forward", function() {
         beforeEach(function() {
-            $router.on("b", callback);
+            setupRoute("b");
         });
 
         it("should call route callback for forward path", function(done) {
@@ -412,7 +466,7 @@ describe("$router", function() {
 
     describe("reload", function() {
         beforeEach(function() {
-            $router.on("a", callback);
+            setupRoute("a");
         });
 
         it("should call current route callback", function() {
@@ -452,18 +506,22 @@ describe("$router", function() {
     });
 
     describe("root", function() {
-        function setup(root, matcher) {
+        function setup(root, path) {
             $include(null, function($mockable) {
-                $mockable.config("$router", {root: root});
+                var config = {root: root};
+                if (path) {
+                    config.routes = [{
+                        path: path,
+                        callback: callback
+                    }];
+                }
+
+                $mockable.config("$router", config);
             });
 
             $invoke(["$router"], function(router) {
                 $router = router;
             });
-
-            if (matcher) {
-                $router.on(matcher, callback);
-            }
 
             $router.start();
         }
@@ -596,6 +654,29 @@ describe("$router", function() {
             $router.navigate("c");
 
             expect(callback).toHaveBeenCalled();
+        });
+    });
+
+    describe("currentPath", function() {
+        it("should return current path", function() {
+            $router.start();
+            $router.navigate("/c");
+            expect($router.currentPath()).toEqual("c");
+        });
+
+        it("should include root", function() {
+            $include(null, function($mockable) {
+                $mockable.config("$router", {root: "a"});
+            });
+
+            $invoke(["$router"], function(router) {
+                $router = router;
+            });
+
+            $router.start();
+            $router.navigate("c");
+
+            expect($router.currentPath()).toEqual("a/c");
         });
     });
 });
