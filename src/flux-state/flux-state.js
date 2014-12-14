@@ -25,7 +25,6 @@
             changeAction: $action(),
             errorAction: $action(),
 
-            // TODO TBD this or go method?
             navigate: function(name, params, historyState, options) {
                 // options:
                 // reload => force reload
