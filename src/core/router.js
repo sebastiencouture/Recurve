@@ -10,7 +10,7 @@ function addRouterService(module) {
         var routes = [];
         var noMatchHandler = $config.otherwise
         var currentPath = getPath();
-        var currentStateObj;
+        var currentHistoryState;
         var started;
         var root;
 
@@ -107,8 +107,8 @@ function addRouterService(module) {
                 }, this);
 
                 var args = [decodedParams];
-                if (currentStateObj) {
-                    args.push(currentStateObj);
+                if (currentHistoryState) {
+                    args.push(currentHistoryState);
                 }
 
                 this.callback.apply(null, args);
@@ -184,23 +184,20 @@ function addRouterService(module) {
         }
 
         var $router = {
-            navigate: function(path, stateObj, trigger) {
-                path = historyPath(path);
-                currentStateObj = stateObj;
-                trigger = isUndefined(trigger) ? true : trigger;
+            navigate: function(path, historyState, options) {
+                options = options || {};
 
-                history.pushState(stateObj, null, path);
-                if (trigger) {
-                    checkCurrentPath();
+                path = historyPath(path);
+                currentHistoryState = historyState;
+                var trigger = isUndefined(options.trigger) ? true : options.trigger;
+
+                if (options.replace) {
+                    history.replaceState(historyState, null, path);
                 }
-            },
+                else {
+                    history.pushState(historyState, null, path);
+                }
 
-            replace: function(path, stateObj, trigger) {
-                path = historyPath(path);
-                currentStateObj = stateObj;
-                trigger = isUndefined(trigger) ? true : trigger;
-
-                history.replaceState(stateObj, null, path);
                 if (trigger) {
                     checkCurrentPath();
                 }
@@ -212,10 +209,6 @@ function addRouterService(module) {
 
             forward: function() {
                 history.forward();
-            },
-
-            go: function(delta) {
-                history.go(delta);
             },
 
             reload: function() {
@@ -230,11 +223,11 @@ function addRouterService(module) {
             start: function() {
                 started = true;
                 addEvent($window, "popstate", function(event) {
-                    currentStateObj = event.state;
+                    currentHistoryState = event.state;
                     checkCurrentPath();
                 });
 
-                currentStateObj = currentStateObj || history.state;
+                currentHistoryState = currentHistoryState || history.state;
                 this.reload();
             },
 

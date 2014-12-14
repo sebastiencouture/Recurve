@@ -296,7 +296,7 @@ describe("$router", function() {
 
         it("should not call route callback if trigger is false", function() {
             $router.start();
-            $router.navigate("a", null, false);
+            $router.navigate("a", null, {trigger: false});
 
             expect(callback).not.toHaveBeenCalled();
         });
@@ -328,40 +328,40 @@ describe("$router", function() {
 
         it("should call route callback for match", function() {
             $router.start();
-            $router.replace("a");
+            $router.navigate("a", null, {replace: true});
 
             expect(callback).toHaveBeenCalled();
         });
 
         it("should return state object", function() {
             $router.start();
-            $router.replace("a", {b: 2});
+            $router.navigate("a", {b: 2}, {replace: true});
 
             expect(callback.calls.first().args[1]).toEqual({b: 2});
         });
 
         it("should not call route callback if trigger is false", function() {
             $router.start();
-            $router.replace("a", null, false);
+            $router.navigate("a", null, {trigger: false, replace: true});
 
             expect(callback).not.toHaveBeenCalled();
         });
 
         it("should not call route callback before start", function() {
-            $router.replace("a");
+            $router.navigate("a", null, {replace: true});
             expect(callback).not.toHaveBeenCalled();
         });
 
         it("should not require leading slash", function() {
             $router.start();
-            $router.replace("/a");
+            $router.navigate("/a", null, {replace: true});
 
             expect(callback).toHaveBeenCalled();
         });
 
         it("should ignore trailing space", function() {
             $router.start();
-            $router.replace("a      ");
+            $router.navigate("a      ", null, {replace: true});
 
             expect(callback).toHaveBeenCalled();
         });
@@ -373,8 +373,8 @@ describe("$router", function() {
         });
 
         it("should call route callback for popped path", function(done) {
-            $router.navigate("a", null, false);
-            $router.navigate("b", null, false);
+            $router.navigate("a", null, {trigger: false});
+            $router.navigate("b", null, {trigger: false});
             $router.start();
             $router.back();
 
@@ -385,8 +385,8 @@ describe("$router", function() {
         });
 
         it("should call route callback with state for popped path", function(done) {
-            $router.navigate("a", {b: 1}, false);
-            $router.navigate("b", null, false);
+            $router.navigate("a", {b: 1}, {trigger: false});
+            $router.navigate("b", null, {trigger: false});
             $router.start();
             $router.back();
 
@@ -397,8 +397,8 @@ describe("$router", function() {
         });
 
         it("should not call route callback before start", function(done) {
-            $router.navigate("a", null, false);
-            $router.navigate("b", null, false);
+            $router.navigate("a", null, {trigger: false});
+            $router.navigate("b", null, {trigger: false});
             $router.back();
 
             setTimeout(function() {
@@ -414,8 +414,8 @@ describe("$router", function() {
         });
 
         it("should call route callback for forward path", function(done) {
-            $router.navigate("a", null, false);
-            $router.navigate("b", null, false);
+            $router.navigate("a", null, {trigger: false});
+            $router.navigate("b", null, {trigger: false});
             $router.start();
             callback.calls.reset();
             $router.back();
@@ -431,8 +431,8 @@ describe("$router", function() {
         });
 
         it("should call route callback with state for popped path", function(done) {
-            $router.navigate("a", null, false);
-            $router.navigate("b", {b: 1}, false);
+            $router.navigate("a", null, {trigger: false});
+            $router.navigate("b", {b: 1}, {trigger: false});
             $router.start();
             callback.calls.reset();
             $router.back();
@@ -448,8 +448,8 @@ describe("$router", function() {
         });
 
         it("should not call route callback before start", function(done) {
-            $router.navigate("a", null, false);
-            $router.navigate("b", null, false);
+            $router.navigate("a", null, {trigger: false});
+            $router.navigate("b", null, {trigger: false});
             callback.calls.reset();
             $router.back();
 
@@ -487,7 +487,7 @@ describe("$router", function() {
 
         it("should call even if navigate/replace was silent", function() {
             $router.start();
-            $router.navigate("a", null, false);
+            $router.navigate("a", null, {trigger: false});
             $router.reload();
 
             expect(callback.calls.count()).toEqual(1);
@@ -538,7 +538,7 @@ describe("$router", function() {
 
         it("should add root to replace path", function(done) {
             setup("a");
-            $router.replace("b");
+            $router.navigate("b", null, {replace: true});
 
             setTimeout(function() {
                 expect(location.pathname).toEqual("/a/b");
@@ -558,7 +558,7 @@ describe("$router", function() {
 
         it("should replace to root for empty path", function(done) {
             setup("a");
-            $router.replace("");
+            $router.navigate("", null, {replace: true});
 
             setTimeout(function() {
                 expect(location.pathname).toEqual("/a");
@@ -592,9 +592,9 @@ describe("$router", function() {
 
         it("should not append empty root multiple times with multiple calls to replace", function(done) {
             setup("a");
-            $router.replace("b");
-            $router.replace("b");
-            $router.replace("b");
+            $router.navigate("b", null, {replace: true});
+            $router.navigate("b", null, {replace: true});
+            $router.navigate("b", null, {replace: true});
 
             setTimeout(function() {
                 expect(location.pathname).toEqual("/a/b");
@@ -604,9 +604,9 @@ describe("$router", function() {
 
         it("should not append empty root multiple times with multiple calls to replace", function(done) {
             setup("");
-            $router.replace("a/b");
-            $router.replace("a/b");
-            $router.replace("a/b");
+            $router.navigate("a/b", null, {replace: true});
+            $router.navigate("a/b", null, {replace: true});
+            $router.navigate("a/b", null, {replace: true});
 
             setTimeout(function() {
                 expect(location.pathname).toEqual("/a/b");

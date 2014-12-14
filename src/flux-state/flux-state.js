@@ -25,26 +25,12 @@
             changeAction: $action(),
             errorAction: $action(),
 
-            // TODO TBD this or navigate/replace methods?
-            go: function(name, params, options) {
-                // options:
-                // replace
-                // reload => force reload if same url
-                // trigger => only updates url but nothing else is done
-                // historyState
-            },
-
             // TODO TBD this or go method?
-            navigate: function(name, params, options) {
+            navigate: function(name, params, historyState, options) {
                 // options:
                 // reload => force reload
                 // trigger => only updates url but nothing else is done
-                // historyState => state object for browser history
-            },
-
-            // TODO TBD this or go method?
-            replace: function(name, params, options) {
-
+                // replace
             },
 
             back: function() {
