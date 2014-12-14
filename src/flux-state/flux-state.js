@@ -4,7 +4,6 @@
     recurve.flux.state = {};
     var module = recurve.flux.state.$module = recurve.module();
 
-    // TODO TBD rename to $stateRouter??
     module.factory("$state", ["$router", "$action", "$config"], function($router, $action, $config) {
         $router.setRoot($config.rootUrl);
 
