@@ -14,7 +14,7 @@
     // action change => clear startChange + error, update current + previous
     // action error => clear startChange, update error
 
-    module.factory("$state", ["$router", "$action", "$config"], function($router, $action, $config) {
+    module.factory("$state", ["$router", "$action", "$promise", "$config"], function($router, $action, $promise, $config) {
         var states = [];
 
         $router.setRoot($config.rootUrl);
@@ -31,16 +31,11 @@
                 path = parentState.path + stateConfig.path;
             }
 
-            addState(stateConfig.name, path);
+            add(stateConfig.name, path);
 
             $router.on(path, function(params) {
-                $state.startChangeAction.trigger();
-
-                resolve().then(function() {
-                    $state.changeAction.trigger();
-                }, function() {
-                    $state.errorAction.trigger();
-                });
+                $state.startChangeAction.trigger(stateConfig.name, params);
+                resolve(stateConfig, params);
             });
 
             // stateConfig.name
@@ -51,8 +46,44 @@
             // $router.on(stateConfig.path, handler);
         });
 
-        function getParent(childName) {
+        function resolve(stateConfig, routeParams) {
+            var data = recurve.extend({}, stateConfig.data);
+            var name = stateConfig.name;
 
+            if (recurve.isArray(stateConfig.resolve)) {
+                // TODO TBD
+                // stateConfig.resolve = {static: 1, promiseLike: function() {return promise;}, promiseLike2: function() {return promise}};
+                $promise.all(stateConfig.resolve).then(function() {
+                    $state.changeAction.trigger(name, routeParams, data);
+                }, function(error) {
+                    $state.errorAction.trigger(name, error, routeParams, data);
+                });
+            }
+            else {
+                $state.changeAction.trigger(name, routeParams, data);
+            }
+        }
+
+        function get(name) {
+            var foundState = null;
+            recurve.forEach(states, function(state) {
+                if (name === state.name) {
+                    foundState = state;
+                    return false;
+                }
+            });
+
+            return foundState;
+        }
+
+        function getParent(childName) {
+            var lastIndex = childName.indexOf(".");
+            if (-1 === lastIndex) {
+                return null;
+            }
+
+            var parentName = childName.slice(0, lastIndex);
+            return get(parentName);
         }
 
         function hasParent(childName) {
@@ -67,12 +98,21 @@
             recurve.assert(getParent(childName), "no parent exists for state '{0}'", childName);
         }
 
-        function addState(name, path) {
+        function add(name, path) {
+            var newState = {name: name, path: path};
+            var updated = false;
+            recurve.forEach(states, function(state, index) {
+                if (name === state.name) {
+                    states.splice(index, 1);
+                    states[index] = newState;
+                    updated = true;
+                    return false;
+                }
+            });
 
-        }
-
-        function resolve() {
-
+            if (!updated) {
+                states.push(newState);
+            }
         }
 
         var $state = {
@@ -81,10 +121,30 @@
             errorAction: $action(),
 
             navigate: function(name, params, historyState, options) {
+                options = options || {};
+
                 // options:
                 // reload => force reload
                 // trigger => only updates url but nothing else is done
                 // replace
+
+                var state = get(name);
+                recurve.assert(name, "'{0}' state does not exist", name);
+
+                // TODO TBD add params to url
+                var path = state.path;
+
+                var reload;
+                if (options.reload) {
+                    if ($router.currentPath() === path) {
+                        reload = true;
+                    }
+                }
+
+                $router.navigate(path, historyState, options);
+                if (reload) {
+                    $router.reload();
+                }
             },
 
             // convenience methods
