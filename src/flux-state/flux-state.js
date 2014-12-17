@@ -14,7 +14,8 @@
     // action change => clear startChange + error, update current + previous
     // action error => clear startChange, update error
 
-    module.factory("$state", ["$router", "$action", "$promise", "$config"], function($router, $action, $promise, $config) {
+    module.factory("$state", ["$router", "$action", "$promise", "$config"],
+        function($router, $action, $promise, $config) {
         var states = [];
 
         $router.setRoot($config.rootUrl);
@@ -25,10 +26,10 @@
 
             validateParent(stateConfig.name);
 
-            var path = "";
+            var path = sanitizePath(stateConfig.path);
             var parentState = getParent(stateConfig.name);
             if (parentState) {
-                path = parentState.path + stateConfig.path;
+                path = sanitizePath(parentState.path) + "/" + sanitizePath(stateConfig.path);
             }
 
             add(stateConfig.name, path);
@@ -37,23 +38,48 @@
                 $state.startChangeAction.trigger(stateConfig.name, params);
                 resolve(stateConfig, params);
             });
-
-            // stateConfig.name
-            // stateConfig.path
-            // stateConfig.data
-            // stateConfig.resolve => set of objects, if any promises then wait... this is included with stateConfig.data
-
-            // $router.on(stateConfig.path, handler);
         });
+
+        // TODO TBD duplicate of method in $router
+        function sanitizePath(path) {
+            return recurve.isString(path) ? path.replace(/^[#\/]|\s+$/g, "") : path;
+        }
 
         function resolve(stateConfig, routeParams) {
             var data = recurve.extend({}, stateConfig.data);
             var name = stateConfig.name;
 
-            if (recurve.isArray(stateConfig.resolve)) {
-                // TODO TBD
-                // stateConfig.resolve = {static: 1, promiseLike: function() {return promise;}, promiseLike2: function() {return promise}};
-                $promise.all(stateConfig.resolve).then(function() {
+            if (recurve.isObject(stateConfig.resolve)) {
+                var promises = [];
+
+                recurve.forEach(stateConfig.resolve, function(factory, key) {
+                    if (recurve.isFunction(factory)) {
+                        var value;
+                        try {
+                            value = factory();
+                        }
+                        catch (error) {
+                            $state.errorAction.trigger(name, error, routeParams, data);
+                            return false;
+                        }
+
+                        if (value && recurve.isFunction(value.then)) {
+                            value.then(function(result) {
+                                data[key] = result;
+                            });
+
+                            promises.push(value);
+                        }
+                        else {
+                            data[key] = value;
+                        }
+                    }
+                    else {
+                        data[key] = factory;
+                    }
+                });
+
+                $promise.all(promises).then(function() {
                     $state.changeAction.trigger(name, routeParams, data);
                 }, function(error) {
                     $state.errorAction.trigger(name, error, routeParams, data);
@@ -87,7 +113,7 @@
         }
 
         function hasParent(childName) {
-            return -1 < childName.indexOf(".")
+            return -1 < childName.indexOf(".");
         }
 
         function validateParent(childName) {
@@ -101,9 +127,9 @@
         function add(name, path) {
             var newState = {name: name, path: path};
             var updated = false;
+
             recurve.forEach(states, function(state, index) {
                 if (name === state.name) {
-                    states.splice(index, 1);
                     states[index] = newState;
                     updated = true;
                     return false;
@@ -115,24 +141,36 @@
             }
         }
 
+        function updatePathWithParameters(path, parameters) {
+            var urlSplit = path.split("/");
+            recurve.forEach(urlSplit, function(value, index) {
+                if (0 === value.indexOf(":")) {
+                    value = value.slice(1);
+                    if (!recurve.isUndefined(parameters[value])) {
+                        urlSplit[index] = encodeURIComponent(parameters[value]);
+                    }
+                }
+            });
+
+            return urlSplit.join("/");
+        }
+
         var $state = {
             startChangeAction: $action(),
             changeAction: $action(),
             errorAction: $action(),
 
-            navigate: function(name, params, historyState, options) {
+            // options:
+            // reload => force reload
+            // trigger => only updates url but nothing else is done
+            // replace
+            navigate: function(name, parameters, historyState, options) {
                 options = options || {};
-
-                // options:
-                // reload => force reload
-                // trigger => only updates url but nothing else is done
-                // replace
 
                 var state = get(name);
                 recurve.assert(name, "'{0}' state does not exist", name);
 
-                // TODO TBD add params to url
-                var path = state.path;
+                var path = updatePathWithParameters(state.path, parameters);
 
                 var reload;
                 if (options.reload) {

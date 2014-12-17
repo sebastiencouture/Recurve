@@ -8,7 +8,7 @@ function addRouterService(module) {
         var location = history.location || $window.location;
 
         var routes = [];
-        var noMatchHandler = $config.otherwise
+        var noMatchHandler = $config.otherwise;
         var currentPath = getPath();
         var currentHistoryState;
         var started;

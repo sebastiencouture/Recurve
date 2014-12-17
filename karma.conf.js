@@ -18,7 +18,7 @@ module.exports = function(karma) {
 
     // list of files / patterns to load in the browser
     files: [].concat(files.recurveSrc, "build/recurve.js",
-        files.recurveModules.mock, files.recurveModules.flux, files.recurveModules.fluxRest, files.test),
+        files.recurveModules.mock, files.recurveModules.flux, files.recurveModules.fluxRest, files.recurveModules.fluxState, files.test),
 
     // list of files / patterns to exclude
     exclude: [],
