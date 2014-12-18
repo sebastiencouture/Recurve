@@ -18,7 +18,7 @@
         function($router, $action, $promise, $config) {
         var states = [];
 
-        $router.setRoot($config.rootUrl);
+        $router.setRoot($config.rootPath);
 
         recurve.forEach($config.states, function(stateConfig) {
             recurve.assert(stateConfig.name, "state name must be set", stateConfig);
@@ -170,7 +170,7 @@
                 var state = get(name);
                 recurve.assert(name, "'{0}' state does not exist", name);
 
-                var path = updatePathWithParameters(state.path, parameters);
+                var path = $state.nameToPath(name, parameters);
 
                 var reload;
                 if (options.reload) {
@@ -183,6 +183,16 @@
                 if (reload) {
                     $router.reload();
                 }
+            },
+
+            nameToPath: function(name, parameters) {
+                var state = get(name);
+                var path = null;
+                if (state) {
+                    path = updatePathWithParameters(state.path, parameters);
+                }
+
+                return path;
             },
 
             // convenience methods
@@ -207,7 +217,7 @@
     });
 
     module.config("$state", {
-        rootUrl: "",
+        rootPath: "",
         states: []
     });
 })();
