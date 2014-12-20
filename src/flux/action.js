@@ -2,7 +2,7 @@
 
 function addActionService(module) {
     module.factory("$action", null, function() {
-        var triggerPayload;
+        var triggerArguments;
         var triggerListener;
 
         function actionListener(callback, context, dataStore) {
@@ -22,13 +22,13 @@ function addActionService(module) {
                 return this.callback === callback;
             },
 
-            trigger: function(payload) {
+            trigger: function() {
                 if (this.triggered) {
                     return;
                 }
 
                 this.triggered = true;
-                this.callback.call(this.context, payload);
+                this.callback.apply(this.context, arguments);
             },
 
             reset: function() {
@@ -41,19 +41,19 @@ function addActionService(module) {
             var triggering;
 
             return {
-                trigger: function(payload) {
+                trigger: function() {
                     recurve.assert(!this.isTriggering(), "cannot trigger an action while another action is being triggered");
 
-                    triggerPayload = payload;
+                    triggerArguments = arguments;
                     try {
                         recurve.forEach(listeners, function(listener) {
                             triggerListener = listener;
-                            listener.trigger(triggerPayload);
+                            listener.trigger.apply(listener, triggerArguments);
                         });
                     }
                     finally {
                         triggerListener = undefined;
-                        triggerPayload = undefined;
+                        triggerArguments = undefined;
 
                         recurve.forEach(listeners, function(listener) {
                             listener.reset();
@@ -106,7 +106,7 @@ function addActionService(module) {
                         recurve.forEach(listeners, function(listener) {
                             if (listener.dataStore === dataStore) {
                                 found = true;
-                                listener.trigger(triggerPayload);
+                                listener.trigger.apply(listener, triggerArguments);
                             }
                         });
 

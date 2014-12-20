@@ -138,39 +138,46 @@ describe("$action", function() {
             expect(callback).toHaveBeenCalled();
         });
 
-        it("should allow to trigger with null payload", function() {
+        it("should allow to trigger with null argument", function() {
             action.on(callback);
             action.trigger(null);
 
             expect(callback).toHaveBeenCalledWith(null);
         });
 
-        it("should allow to trigger with undefined payload", function() {
+        it("should allow to trigger with undefined argument", function() {
             action.on(callback);
             action.trigger();
 
-            expect(callback).toHaveBeenCalledWith(undefined);
+            expect(callback).toHaveBeenCalledWith();
         });
 
-        it("should allow to trigger with number payload", function() {
+        it("should allow to trigger with number argument", function() {
             action.on(callback);
             action.trigger(1);
 
             expect(callback).toHaveBeenCalledWith(1);
         });
 
-        it("should allow to trigger with string payload", function() {
+        it("should allow to trigger with string argument", function() {
             action.on(callback);
             action.trigger("a");
 
             expect(callback).toHaveBeenCalledWith("a");
         });
 
-        it("should allow to trigger with object payload", function() {
+        it("should allow to trigger with object argument", function() {
             action.on(callback);
             action.trigger({a: 1});
 
             expect(callback).toHaveBeenCalledWith({a: 1});
+        });
+
+        it("should allow to trigger with multiple arguments", function() {
+            action.on(callback);
+            action.trigger({a: 1}, "test");
+
+            expect(callback).toHaveBeenCalledWith({a: 1}, "test");
         });
     });
 
