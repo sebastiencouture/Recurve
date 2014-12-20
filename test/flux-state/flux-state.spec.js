@@ -14,22 +14,31 @@ ddescribe("$state", function() {
         });
     });
 
-    function setup(states) {
+    function setup(states, noSpies) {
         $include(null, function(module) {
             module.config("$state", {
                 states: states
             });
 
-            module.decorator("$router", null, function($router) {
-                spyOn($router, "on");
-                return $router;
-            });
+            if (!noSpies) {
+                module.decorator("$router", null, function($router) {
+                    spyOn($router, "on");
+                    spyOn($router, "navigate");
+                    spyOn($router, "reload");
+
+                    return $router;
+                });
+            }
         });
 
         $invoke(["$router", "$state"], function(routerService, stateService) {
             $router = routerService;
             $state = stateService;
         });
+    }
+
+    function setupNoSpies(states) {
+        setup(states, true);
     }
 
     function testCallRouterMethod(method) {
@@ -184,20 +193,51 @@ ddescribe("$state", function() {
         });
 
         it("should encode named params", function() {
-
-        });
-
-        it("should append additional params to the path as query params", function() {
             setup([{
                 test: {
-                    path: "a/:id/b/:count"
+                    path: "a/:id"
                 }}]);
 
-            expect($state.nameToPath("test", {id: 1, count: 2, other: 3, another: 4})).toEqual("a/1/b/2?other=3&another=4");
+            expect($state.nameToPath("test", {id: "$"})).toEqual("a/%24");
         });
 
-        it("should encode query params", function() {
+        describe("query params", function() {
+            function testQuery(params, expected) {
+                setup([{
+                    test: {
+                        path: "a"
+                    }}]);
 
+                expect($state.nameToPath("test", params)).toEqual("a" + expected);
+            }
+
+            it("should separate the first parameter with ?", function() {
+                testQuery({a: 1}, "?a=1");
+            });
+
+            it("should separate others with &", function() {
+                testQuery({a: 1, b:2, c:3}, "?a=1&b=2&c=3");
+            });
+
+            it("should encode parameter keys", function() {
+                testQuery({"$":1}, "?%24=1");
+            });
+
+            it("should encode parameter values", function() {
+                testQuery({"$":1}, "?%24=1");
+            });
+
+            it("should encode ?/& in key and values", function() {
+                testQuery({"?&": "&?", a: 2}, "?%3F%26=%26%3F&a=2");
+            });
+
+            it("should convert date parameter to ISO", function() {
+                testQuery({a:new Date(2014,1,1)}, "?a=2014-02-01T08%3A00%3A00.000Z");
+            });
+
+            it("should convert object to JSON", function() {
+                testQuery({a: {b:2}}, "?a=%7B%22b%22%3A2%7D");
+            });
         });
 
         it("should return null if state does not exist", function() {
@@ -212,50 +252,133 @@ ddescribe("$state", function() {
 
     describe("navigate", function() {
         it("should replace parameters in the path", function() {
+            setup([{
+                test: {
+                    path: "a/:id"
+            }}]);
 
+            $state.navigate("test", {id: 1});
+            expect($router.navigate.calls.mostRecent().args[0]).toEqual("a/1");
         });
 
         it("should include parent path", function() {
+            setup([{
+                "parent" : {
+                    path: "a"
+                }}, {
+                "parent.child": {
+                    path: "b"
+                }}]);
 
-        });
-
-        it("should include parent data", function() {
-
+            $state.navigate("parent.child");
+            expect($router.navigate.calls.mostRecent().args[0]).toEqual("a/b");
         });
 
         it("should pass through options to $router.navigate", function() {
+            setup([{
+                test: {
+                    path: "a"
+                }}]);
 
+            $state.navigate("test", null, null, {a: 1});
+            expect($router.navigate.calls.mostRecent().args[2]).toEqual({a: 1});
         });
 
         it("should pass through history state to $router.navigate", function() {
+            setup([{
+                test: {
+                    path: "a"
+                }}]);
 
+            $state.navigate("test", null, "state!");
+            expect($router.navigate.calls.mostRecent().args[1]).toEqual("state!");
         });
 
         it("should force reload if same path for options.reload=true", function() {
+            setup([{
+                test: {
+                    path: "a"
+                }}]);
 
+            $router.currentPath = function() {
+                return "a";
+            }
+
+            $state.navigate("test", null, null, {reload: true});
+            expect($router.reload).toHaveBeenCalled();
         });
 
         it("should not force a reload if different path for options.reload=true", function() {
+            setup([{
+                test: {
+                    path: "a"
+                }}]);
 
+            $router.currentPath = function() {
+                return "b";
+            }
+
+            $state.navigate("test", null, null, {reload: true});
+            expect($router.reload).not.toHaveBeenCalled();
         });
 
         it("should throw error for state that does not exist", function() {
-
+            expect(function() {
+                $state.navigate("test");
+            }).toThrowError("state 'test' does not exist");
         });
     });
 
     describe("actions", function() {
+        var startChangeCallback;
+        var changeCallback;
+
+        beforeEach(function() {
+            startChangeCallback = jasmine.createSpy("startChangeCallback");
+            changeCallback = jasmine.createSpy("changeCallback");
+        });
+
         describe("startChangeAction", function() {
             it("should trigger before changeAction/errorAction", function() {
+                setupNoSpies([{
+                    test: {
+                        path: "a"
+                    }}]);
 
+                $state.changeAction.on(changeCallback);
+                $state.startChangeAction.on(function() {
+                    expect(changeCallback).not.toHaveBeenCalled();
+                });
+
+                $router.start();
+                $state.navigate("test");
             });
 
             it("should trigger before resolving data", function() {
+                var compute = jasmine.createSpy("compute");
+                setupNoSpies([{
+                    test: {
+                        path: "a",
+                        resolve: {
+                            compute: compute
+                        }
+                    }}]);
 
+                $state.startChangeAction.on(function() {
+                    expect(compute).not.toHaveBeenCalled();
+                });
+
+                $router.start();
+                $state.navigate("test");
             });
 
             it("should include name and route params as action parameters", function() {
+                setup([{
+                    test: {
+                        path: "a"
+                    }}]);
 
+                $state.startChangeAction.on(startChangeCallback);
             });
         });
 

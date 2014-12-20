@@ -39,7 +39,7 @@
             add(name, path, config.data);
 
             $router.on(path, function(params) {
-                resolve(config, params);
+                resolve(name, params);
             });
         });
 
@@ -52,23 +52,24 @@
             return path.replace(/^\/+|\/+$/g, "");
         }
 
-        function resolve(config, routeParams) {
-            var name = config.name;
+        function resolve(name, routeParams) {
+            var state = get(name);
+            var name = state.name;
             var parent = getParent(name);
 
-            $state.startChangeAction.trigger(name, params);
+            $state.startChangeAction.trigger(name, routeParams);
 
             var data = {};
             if (parent) {
                 recurve.extend(data, parent.data);
             }
-            recurve.extend(data, config.data);
+            recurve.extend(data, state.data);
 
             var resolve = {};
             if (parent) {
                 recurve.extend(resolve, parent.resolve);
             }
-            recurve.extend(resolve, config.resolve);
+            recurve.extend(resolve, state.resolve);
 
             var promises = [];
             recurve.forEach(resolve, function(factory, key) {
@@ -212,7 +213,7 @@
                 options = options || {};
 
                 var state = get(name);
-                recurve.assert(name, "'{0}' state does not exist", name);
+                recurve.assert(state, "state '{0}' does not exist", name);
 
                 var path = $state.nameToPath(name, parameters);
 
