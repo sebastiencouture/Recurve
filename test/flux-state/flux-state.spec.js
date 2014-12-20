@@ -1,6 +1,8 @@
 "use strict";
 
-ddescribe("$state", function() {
+describe("$state", function() {
+    var $async;
+    var $promise;
     var $router;
     var $state;
 
@@ -8,7 +10,10 @@ ddescribe("$state", function() {
         $include(recurve.flux.$module);
         $include(recurve.flux.state.$module);
 
-        $invoke(["$router", "$state"], function(routerService, stateService) {
+        $invoke(["$async", "$promise", "$router", "$state"],
+            function(asyncService, promiseService, routerService, stateService) {
+            $async = asyncService;
+            $promise = promiseService;
             $router = routerService;
             $state = stateService;
         });
@@ -31,7 +36,10 @@ ddescribe("$state", function() {
             }
         });
 
-        $invoke(["$router", "$state"], function(routerService, stateService) {
+        $invoke(["$async", "$promise", "$router", "$state"],
+            function(asyncService, promiseService, routerService, stateService) {
+            $async = asyncService;
+            $promise = promiseService;
             $router = routerService;
             $state = stateService;
         });
@@ -302,7 +310,7 @@ ddescribe("$state", function() {
 
             $router.currentPath = function() {
                 return "a";
-            }
+            };
 
             $state.navigate("test", null, null, {reload: true});
             expect($router.reload).toHaveBeenCalled();
@@ -316,7 +324,7 @@ ddescribe("$state", function() {
 
             $router.currentPath = function() {
                 return "b";
-            }
+            };
 
             $state.navigate("test", null, null, {reload: true});
             expect($router.reload).not.toHaveBeenCalled();
@@ -330,12 +338,10 @@ ddescribe("$state", function() {
     });
 
     describe("actions", function() {
-        var startChangeCallback;
-        var changeCallback;
+        var callback;
 
         beforeEach(function() {
-            startChangeCallback = jasmine.createSpy("startChangeCallback");
-            changeCallback = jasmine.createSpy("changeCallback");
+            callback = jasmine.createSpy("actionCallback");
         });
 
         describe("startChangeAction", function() {
@@ -345,9 +351,9 @@ ddescribe("$state", function() {
                         path: "a"
                     }}]);
 
-                $state.changeAction.on(changeCallback);
+                $state.changeAction.on(callback);
                 $state.startChangeAction.on(function() {
-                    expect(changeCallback).not.toHaveBeenCalled();
+                    expect(callback).not.toHaveBeenCalled();
                 });
 
                 $router.start();
@@ -373,28 +379,101 @@ ddescribe("$state", function() {
             });
 
             it("should include name and route params as action parameters", function() {
-                setup([{
+                setupNoSpies([{
                     test: {
-                        path: "a"
+                        path: "a/:id"
                     }}]);
 
-                $state.startChangeAction.on(startChangeCallback);
+                $state.startChangeAction.on(callback);
+
+                $router.start();
+                $state.navigate("test", {id: "1"});
+
+                expect(callback).toHaveBeenCalledWith("test", {id: "1"});
             });
         });
 
         describe("changeAction", function() {
             it("should include name, route params and data as action parameters", function() {
+                setupNoSpies([{
+                    test: {
+                        path: "a/:id",
+                        data: {
+                            some: "data"
+                        }
+                    }}]);
 
+                $state.changeAction.on(callback);
+
+                $router.start();
+                $state.navigate("test", {id: "1"});
+                $async.flush();
+
+                expect(callback).toHaveBeenCalledWith("test", {id: "1"}, {some: "data"});
             });
 
             it("should trigger after resolving data", function() {
+                setupNoSpies([{
+                    test: {
+                        path: "a/:id",
+                        resolve: {
+                            someDataLater: function() {
+                                var deferred = $promise.defer();
+                                $async(function() {
+                                    deferred.resolve(1);
+                                }, 0);
 
+                                return deferred.promise;
+                            }
+                        }
+                    }}]);
+
+                $state.changeAction.on(callback);
+
+                $router.start();
+                $state.navigate("test", {id: "1"});
+                $async.flush();
+
+                expect(callback).toHaveBeenCalledWith("test", {id: "1"}, {someDataLater: 1});
             });
         });
 
         describe("errorAction", function() {
-            it("should include error, name, route params and data as action parameters", function() {
+            beforeEach(function() {
+                setupNoSpies([{
+                    test: {
+                        path: "a/:id",
+                        resolve: {
+                            someDataLater: function() {
+                                throw new Error("oops!");
+                            }
+                        }
+                    }
+                }]);
 
+                $state.errorAction.on(callback);
+            });
+
+            it("should include error, name, route params and data as action parameters", function() {
+                $state.errorAction.on(callback);
+
+                $router.start();
+                $state.navigate("test", {id: "1"});
+                $async.flush();
+
+                expect(callback).toHaveBeenCalledWith(new Error("oops!"), "test", {id: "1"}, {});
+            });
+
+            it("should not call change action if error action is triggered", function() {
+                var changeCallback = jasmine.createSpy("changeCallback");
+                $state.changeAction.on(changeCallback);
+
+                $router.start();
+                $state.navigate("test", {id: "1"});
+                $async.flush();
+
+                expect(callback).toHaveBeenCalled();
+                expect(changeCallback).not.toHaveBeenCalled();
             });
         });
     });

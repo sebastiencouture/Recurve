@@ -36,10 +36,11 @@
                     removeLeadingTrailingSlashes(config.path);
             }
 
-            add(name, path, config.data);
+            add(name, path, config);
 
-            $router.on(path, function(params) {
-                resolve(name, params);
+            $router.on(path, function(routeParams) {
+                $state.startChangeAction.trigger(name, routeParams);
+                resolve(name, routeParams);
             });
         });
 
@@ -54,56 +55,58 @@
 
         function resolve(name, routeParams) {
             var state = get(name);
-            var name = state.name;
             var parent = getParent(name);
 
-            $state.startChangeAction.trigger(name, routeParams);
-
-            var data = {};
+            var mergedData = {};
             if (parent) {
-                recurve.extend(data, parent.data);
+                recurve.extend(mergedData, parent.data);
             }
-            recurve.extend(data, state.data);
+            recurve.extend(mergedData, state.data);
 
-            var resolve = {};
+            var mergedResolve = {};
             if (parent) {
-                recurve.extend(resolve, parent.resolve);
+                recurve.extend(mergedResolve, parent.resolve);
             }
-            recurve.extend(resolve, state.resolve);
+            recurve.extend(mergedResolve, state.resolve);
 
             var promises = [];
-            recurve.forEach(resolve, function(factory, key) {
+            var errored;
+
+            recurve.forEach(mergedResolve, function(factory, key) {
                 if (recurve.isFunction(factory)) {
                     var value;
                     try {
                         value = factory();
                     }
                     catch (error) {
-                        $state.errorAction.trigger(error, name, routeParams, data);
+                        errored = true;
+                        $state.errorAction.trigger(error, name, routeParams, mergedData);
                         return false;
                     }
 
                     if (value && recurve.isFunction(value.then)) {
                         value.then(function(result) {
-                            data[key] = result;
+                            mergedData[key] = result;
                         });
 
                         promises.push(value);
                     }
                     else {
-                        data[key] = value;
+                        mergedData[key] = value;
                     }
                 }
                 else {
-                    data[key] = factory;
+                    mergedData[key] = factory;
                 }
             });
 
-            $promise.all(promises).then(function() {
-                $state.changeAction.trigger(name, routeParams, data);
-            }, function(error) {
-                $state.errorAction.trigger(error, name, routeParams, data);
-            });
+            if (!errored) {
+                $promise.all(promises).then(function() {
+                    $state.changeAction.trigger(name, routeParams, mergedData);
+                }, function(error) {
+                    $state.errorAction.trigger(error, name, routeParams, mergedData);
+                });
+            }
         }
 
         function get(name) {
@@ -140,8 +143,8 @@
             recurve.assert(getParent(childName), "no parent exists for state '{0}'", childName);
         }
 
-        function add(name, path, data) {
-            var newState = {path: path, name: name, data: data};
+        function add(name, path, config) {
+            var newState = {path: path, name: name, data: config.data, resolve: config.resolve};
             var updated = false;
 
             recurve.forEach(states, function(state, index) {
