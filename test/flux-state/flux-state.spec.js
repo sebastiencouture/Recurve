@@ -5,6 +5,7 @@ describe("$state", function() {
     var $promise;
     var $router;
     var $state;
+    var callback;
 
     beforeEach(function() {
         $include(recurve.flux.$module);
@@ -17,11 +18,14 @@ describe("$state", function() {
             $router = routerService;
             $state = stateService;
         });
+
+        callback = jasmine.createSpy("callback");
     });
 
-    function setup(states, noSpies) {
+    function setup(states, root, noSpies) {
         $include(null, function(module) {
             module.config("$state", {
+                root: root,
                 states: states
             });
 
@@ -30,6 +34,7 @@ describe("$state", function() {
                     spyOn($router, "on");
                     spyOn($router, "navigate");
                     spyOn($router, "reload");
+                    spyOn($router, "setRoot");
 
                     return $router;
                 });
@@ -45,8 +50,8 @@ describe("$state", function() {
         });
     }
 
-    function setupNoSpies(states) {
-        setup(states, true);
+    function setupNoSpies(states, root) {
+        setup(states, root, true);
     }
 
     function testCallRouterMethod(method) {
@@ -338,12 +343,6 @@ describe("$state", function() {
     });
 
     describe("actions", function() {
-        var callback;
-
-        beforeEach(function() {
-            callback = jasmine.createSpy("actionCallback");
-        });
-
         describe("startChangeAction", function() {
             it("should trigger before changeAction/errorAction", function() {
                 setupNoSpies([{
@@ -478,83 +477,403 @@ describe("$state", function() {
         });
     });
 
-    describe("data resolve", function() {
-        it("should trigger change action if no data to resolve", function() {
+    describe("data", function() {
+        function setupChangeAction(state, errorCallback) {
+            $state.changeAction.on(callback);
+            if (errorCallback) {
+                $state.errorAction.on(errorCallback);
+            }
 
+            $router.start();
+            $state.navigate(state);
+            $async.flush();
+        }
+
+        describe("resolve", function() {
+            it("should trigger change action if no data to resolve", function() {
+                setupNoSpies([{
+                    test: {
+                        path: "a"
+                    }}]);
+
+                setupChangeAction("test");
+                expect(callback).toHaveBeenCalled();
+            });
+
+            it("should allow data returned by function call", function() {
+                setupNoSpies([{
+                    test: {
+                        path: "a",
+                        resolve: {
+                            a: function() {
+                                return "1";
+                            }
+                        }
+                    }}]);
+
+                setupChangeAction("test");
+                expect(callback).toHaveBeenCalledWith("test", {}, {a: "1"});
+            });
+
+            it("should allow static data", function() {
+                setupNoSpies([{
+                    test: {
+                        path: "a",
+                        resolve: {
+                            a: "1"
+                        }
+                    }}]);
+
+                setupChangeAction("test");
+                expect(callback).toHaveBeenCalledWith("test", {}, {a: "1"});
+            });
+
+            it("should wait for promise returned by function call", function() {
+                setupNoSpies([{
+                    test: {
+                        path: "a",
+                        resolve: {
+                            a: function() {
+                                var deferred = $promise.defer();
+                                $async(function() {
+                                    deferred.resolve("1");
+                                }, 0);
+
+                                return deferred.promise;
+                            }
+                        }
+                    }}]);
+
+                setupChangeAction("test");
+                expect(callback).toHaveBeenCalledWith("test", {}, {a: "1"});
+            });
+
+            it("should wait for all promises to resolve before triggering change action", function() {
+                setupNoSpies([{
+                    test: {
+                        path: "a",
+                        resolve: {
+                            a: function() {
+                                var deferred = $promise.defer();
+                                $async(function() {
+                                    deferred.resolve("1");
+                                }, 0);
+
+                                return deferred.promise;
+                            },
+                            b: function() {
+                                var deferred = $promise.defer();
+                                $async(function() {
+                                    deferred.resolve("2");
+                                }, 10);
+
+                                return deferred.promise;
+                            }
+                        }
+                    }}]);
+
+                setupChangeAction("test");
+                expect(callback).toHaveBeenCalledWith("test", {}, {a: "1", b: "2"});
+            });
+
+            it("should allow mixture of promises and static data", function() {
+                setupNoSpies([{
+                    test: {
+                        path: "a",
+                        resolve: {
+                            a: function() {
+                                var deferred = $promise.defer();
+                                $async(function() {
+                                    deferred.resolve("1");
+                                }, 0);
+
+                                return deferred.promise;
+                            },
+                            b: "2"
+                        }
+                    }}]);
+
+                setupChangeAction("test");
+                expect(callback).toHaveBeenCalledWith("test", {}, {a: "1", b: "2"});
+            });
+
+            it("should trigger error action if resolve factory method throws error", function() {
+                var error = new Error("oops!");
+                setupNoSpies([{
+                    test: {
+                        path: "a",
+                        resolve: {
+                            a: function() {
+                                throw error;
+                            }
+                        }
+                    }}]);
+
+                var errorCallback = jasmine.createSpy("errorCallback");
+                setupChangeAction("test", errorCallback);
+                expect(errorCallback).toHaveBeenCalledWith(error, "test", {}, {});
+            });
+
+            it("should merge resolved data over custom data", function() {
+                setupNoSpies([{
+                    test: {
+                        path: "a",
+                        resolve: {
+                            a: "2"
+                        },
+                        data: {
+                            a: "1"
+                        }
+                    }}]);
+
+                setupChangeAction("test");
+                expect(callback).toHaveBeenCalledWith("test", {}, {a: "2"});
+            });
+
+            it("should trigger error action if resolve promise rejects", function() {
+                setupNoSpies([{
+                    test: {
+                        path: "a",
+                        resolve: {
+                            a: function() {
+                                var deferred = $promise.defer();
+                                $async(function() {
+                                    deferred.reject("1");
+                                }, 0);
+
+                                return deferred.promise;
+                            }
+                        }
+                    }}]);
+
+                var errorCallback = jasmine.createSpy("errorCallback");
+                setupChangeAction("test", errorCallback);
+                expect(errorCallback).toHaveBeenCalledWith("1", "test", {}, {});
+            });
+
+            it("should pass in resolved parent data to child resolve methods", function() {
+                setupNoSpies([{
+                    parent: {
+                        path: "a",
+                        resolve: {
+                            a: function() {
+                                var deferred = $promise.defer();
+                                $async(function() {
+                                    deferred.resolve("1");
+                                }, 0);
+
+                                return deferred.promise;
+                            }
+                        }
+                    }}, {
+                    "parent.child": {
+                        path: "b",
+                        resolve: {
+                            b: function(parentResolved) {
+                                expect(parentResolved).toEqual({a: "1"});
+                                return "2";
+                            }
+                        }
+                    }
+                }]);
+
+                setupChangeAction("parent.child");
+                expect(callback).toHaveBeenCalledWith("parent.child", {}, {a: "1", b: "2"});
+            });
+
+            it("should inherit parent resolved data", function() {
+                setupNoSpies([{
+                    parent: {
+                        path: "a",
+                        resolve: {
+                            a: function() {
+                                return "1";
+                            }
+                        }
+                    }}, {
+                    "parent.child": {
+                        path: "b",
+                        resolve: {
+                            b: function() {
+                                return "2";
+                            }
+                        }
+                    }
+                }]);
+
+                setupChangeAction("parent.child");
+                expect(callback).toHaveBeenCalledWith("parent.child", {}, {a: "1", b: "2"});
+            });
+
+            it("should overwrite parent resolved data", function() {
+                setupNoSpies([{
+                    parent: {
+                        path: "a",
+                        resolve: {
+                            a: function() {
+                                return "1";
+                            }
+                        }
+                    }}, {
+                    "parent.child": {
+                        path: "b",
+                        resolve: {
+                            a: function() {
+                                return "2";
+                            }
+                        }
+                    }
+                }]);
+
+                setupChangeAction("parent.child");
+                expect(callback).toHaveBeenCalledWith("parent.child", {}, {a: "2"});
+            });
+
+            it("should not attempt to resolve parent data that is overwritten with child data", function() {
+                setupNoSpies([{
+                    parent: {
+                        path: "a",
+                        resolve: {
+                            a: function() {
+                                throw new Error("should not be called");
+                            }
+                        }
+                    }}, {
+                    "parent.child": {
+                        path: "b",
+                        resolve: {
+                            a: function() {
+                                return "2";
+                            }
+                        }
+                    }
+                }]);
+
+                setupChangeAction("parent.child");
+                expect(callback).toHaveBeenCalledWith("parent.child", {}, {a: "2"});
+            });
         });
 
-        it("should trigger change action if no resolve key on the state config object", function() {
+        describe("custom", function() {
+            it("should not invoke methods", function() {
+                setupNoSpies([{
+                    test: {
+                        path: "a",
+                        data: {
+                            some: callback
+                        }
+                    }}]);
 
-        });
+                $router.start();
+                $state.navigate("test");
 
-        it("should set the resolved data to the corresponding key on the returned object", function() {
+                expect(callback).not.toHaveBeenCalled();
+            });
 
-        });
+            it("should inherit parent data", function() {
+                setupNoSpies([{
+                    parent: {
+                        path: "a",
+                        data: {
+                            a: "1"
+                        }
+                    }}, {
+                    "parent.child": {
+                        path: "b",
+                        data: {
+                            b: "2"
+                        }
+                    }}]);
 
-        it("should allow static data", function() {
+                setupChangeAction("parent.child");
+                expect(callback).toHaveBeenCalledWith("parent.child", {}, {a: "1", b: "2"});
+            });
 
-        });
+            it("should not inherit child data", function() {
+                setupNoSpies([{
+                    parent: {
+                        path: "a",
+                        data: {
+                            a: "1"
+                        }
+                    }}, {
+                    "parent.child": {
+                        path: "b",
+                        data: {
+                            b: "2"
+                        }
+                    }}]);
 
-        it("should allow data returned by function call", function() {
+                setupChangeAction("parent");
+                expect(callback).toHaveBeenCalledWith("parent", {}, {a: "1"});
+            });
 
-        });
+            it("should overwrite parent data", function() {
+                setupNoSpies([{
+                    parent: {
+                        path: "a",
+                        data: {
+                            a: "1"
+                        }
+                    }}, {
+                    "parent.child": {
+                        path: "b",
+                        data: {
+                            a: "2"
+                        }
+                    }}]);
 
-        it("should wait for promise returned by function call", function() {
+                setupChangeAction("parent.child");
+                expect(callback).toHaveBeenCalledWith("parent.child", {}, {a: "2"});
+            });
 
-        });
+            it("should overwrite with resolved data from parent", function() {
+                setupNoSpies([{
+                    parent: {
+                        path: "a",
+                        data: {
+                            a: "1"
+                        },
+                        resolve: {
+                            a: function() {
+                                return "3";
+                            }
+                        }
+                    }}, {
+                    "parent.child": {
+                        path: "b",
+                        data: {
+                            a: "2"
+                        }
+                    }}]);
 
-        it("should wait for all promises to resolve before triggering change action", function() {
+                setupChangeAction("parent.child");
+                expect(callback).toHaveBeenCalledWith("parent.child", {}, {a: "3"});
+            });
 
-        });
+            it("should overwrite with resolved data from child", function() {
+                setupNoSpies([{
+                    parent: {
+                        path: "a",
+                        data: {
+                            a: "1"
+                        }
+                    }}, {
+                    "parent.child": {
+                        path: "b",
+                        data: {
+                            a: "2"
+                        },
+                        resolve: {
+                            a: function() {
+                                return "3";
+                            }
+                        }
+                    }}]);
 
-        it("should allow mixture of promises and static data", function() {
-
-        });
-
-        it("should trigger error action if resolve factory method throws error", function() {
-
-        });
-
-        it("should merge resolved data over config data", function() {
-
-        });
-
-        it("should trigger error action if resolve promise errors", function() {
-
-        });
-
-        it("should resolve parent data first", function() {
-
-        });
-
-        it("should pass in resolved parent data to child resolve methods", function() {
-
-        });
-
-        it("should inherit parent resolved data", function() {
-
-        });
-
-        it("should overwrite parent resolved data", function() {
-
-        });
-    });
-
-    describe("data custom", function() {
-        it("should not invoke methods", function() {
-
-        });
-
-        it("should inherit parent data", function() {
-
-        });
-
-        it("should overwrite parent data", function() {
-
-        });
-
-        it("should overwrite with resolved data", function() {
-
+                setupChangeAction("parent.child");
+                expect(callback).toHaveBeenCalledWith("parent.child", {}, {a: "3"});
+            });
         });
     });
 
@@ -570,9 +889,25 @@ describe("$state", function() {
         testCallRouterMethod("reload");
     });
 
-    describe("rootPath", function() {
+    describe("root", function() {
         it("should set the root on $router", function() {
+            setup({}, "a");
+            expect($router.setRoot).toHaveBeenCalledWith("a");
+        });
 
+        it("should set the root on $router with null", function() {
+            setup({}, null);
+            expect($router.setRoot).toHaveBeenCalledWith(null);
+        });
+
+        it("should set the root on $router with undefined", function() {
+            setup({}, undefined);
+            expect($router.setRoot).toHaveBeenCalledWith(undefined);
+        });
+
+        it("should set the root on $router with empty string", function() {
+            setup({}, "");
+            expect($router.setRoot).toHaveBeenCalledWith("");
         });
     });
 });

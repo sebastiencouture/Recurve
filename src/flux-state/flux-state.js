@@ -10,15 +10,15 @@
     // error
     // startChange
     //
-    // action startChange => update startChange, clear error
-    // action change => clear startChange + error, update current + previous
-    // action error => clear startChange, update error
+    // trigger action startChange => update startChange, clear error
+    // trigger action change => clear startChange + error, update current + previous
+    // trigger action error => clear startChange, update error
 
     module.factory("$state", ["$router", "$action", "$promise", "$config"],
         function($router, $action, $promise, $config) {
         var states = [];
 
-        $router.setRoot($config.rootPath);
+            $router.setRoot($config.root);
 
         recurve.forEach($config.states, function(state) {
             var name = Object.keys(state)[0];
@@ -265,7 +265,7 @@
     });
 
     module.config("$state", {
-        rootPath: "",
+        root: "",
         states: []
     });
 })();
