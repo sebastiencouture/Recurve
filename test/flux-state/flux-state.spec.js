@@ -911,5 +911,21 @@ describe("$state", function() {
         });
     });
 
-    // TODO TBD need tests for regexp for state paths
+    describe("path regexp", function() {
+        it("should allow regexp as path", function() {
+
+        });
+
+        it("should not use parent regexp path if child path is regexp", function() {
+
+        });
+
+        it("should not use parent string path if child path is regexp", function() {
+
+        });
+
+        it("should not use parent regexp path if child path is string", function() {
+
+        });
+    });
 });
