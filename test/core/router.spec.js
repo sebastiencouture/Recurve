@@ -8,13 +8,13 @@ describe("$router", function() {
         window.history.pushState(stateObj, null, path);
     }
 
-    function setupRoute(path, otherwise) {
+    function setupRoute(path, notFound) {
         $include(null, function(module) {
             var routes = {};
             routes[path] = callback;
             module.config("$router", {
                 routes: routes,
-                otherwise: otherwise
+                notFound: notFound
             });
         });
 
@@ -195,7 +195,7 @@ describe("$router", function() {
             });
         });
 
-        it("should call otherwise callback if no match", function() {
+        it("should call notFound callback if no match", function() {
             var noMatch = jasmine.createSpy("noMatch");
             setupRoute("a", noMatch);
             pushState("b");
@@ -254,36 +254,36 @@ describe("$router", function() {
         });
     });
 
-    describe("otherwise", function() {
-        var noMatch;
+    describe("notFound", function() {
+        var notFound;
 
         beforeEach(function() {
-            noMatch = jasmine.createSpy("noMatch");
+            notFound = jasmine.createSpy("noMatch");
         });
 
         it("should call callback if no match", function() {
             $router.on("a", callback);
-            $router.otherwise(noMatch);
+            $router.notFound(notFound);
 
             pushState("b");
 
             $router.start();
 
             expect(callback).not.toHaveBeenCalled();
-            expect(noMatch).toHaveBeenCalled();
+            expect(notFound).toHaveBeenCalled();
         });
 
-        it("should override config otherwise", function() {
-            setupRoute("a", noMatch);
-            var noMatch2 = jasmine.createSpy("noMatch2");
-            $router.otherwise(noMatch2);
+        it("should override config notFound", function() {
+            setupRoute("a", notFound);
+            var notFound2 = jasmine.createSpy("notFound2");
+            $router.notFound(notFound2);
 
             pushState("b");
 
             $router.start();
 
-            expect(noMatch).not.toHaveBeenCalled();
-            expect(noMatch2).toHaveBeenCalled();
+            expect(notFound).not.toHaveBeenCalled();
+            expect(notFound2).toHaveBeenCalled();
         });
     });
 

@@ -8,7 +8,7 @@ function addRouterService(module) {
         var location = history.location || $window.location;
 
         var routes = [];
-        var noMatchHandler = $config.otherwise;
+        var notFoundCallback = $config.notFound;
         var currentPath = getPath();
         var currentHistoryState;
         var started;
@@ -166,8 +166,8 @@ function addRouterService(module) {
                 return !handled;
             });
 
-            if (!handled && noMatchHandler) {
-                noMatchHandler();
+            if (!handled && notFoundCallback) {
+                notFoundCallback();
             }
         }
 
@@ -252,8 +252,8 @@ function addRouterService(module) {
                 route.callback = callback;
             },
 
-            otherwise: function(callback) {
-                noMatchHandler = callback;
+            notFound: function(callback) {
+                notFoundCallback = callback;
             }
         };
 
@@ -270,6 +270,6 @@ function addRouterService(module) {
     module.config("$router", {
         root: "",
         routes: {},
-        otherwise: null
+        notFound: null
     });
 }
