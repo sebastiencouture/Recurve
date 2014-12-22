@@ -655,6 +655,33 @@ describe("$router", function() {
 
             expect(callback).toHaveBeenCalled();
         });
+
+        it("should set root to '/' for undefined config root", function(done) {
+            setup();
+            $router.navigate("b");
+            setTimeout(function() {
+                expect(location.pathname).toEqual("/b");
+                done();
+            }, 0);
+        });
+
+        it("should set root to '/' for null config root", function(done) {
+            setup(null);
+            $router.navigate("b");
+            setTimeout(function() {
+                expect(location.pathname).toEqual("/b");
+                done();
+            }, 0);
+        });
+
+        it("should set root to '/' for empty string config root", function(done) {
+            setup("");
+            $router.navigate("b");
+            setTimeout(function() {
+                expect(location.pathname).toEqual("/b");
+                done();
+            }, 0);
+        });
     });
 
     describe("currentPath", function() {

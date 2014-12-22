@@ -265,7 +265,12 @@ function addRouterService(module) {
         return $router;
     });
 
-
+    // TODO TBD update routes structure to be:
+    // routes: {
+    //  a: callback,
+    //  b: callback,
+    //  c: callback
+    //}
     module.config("$router", {
         root: "",
         routes: [],
