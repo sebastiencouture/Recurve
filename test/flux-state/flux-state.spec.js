@@ -78,149 +78,121 @@ describe("$state", function() {
         }
 
         it("should call $router.on with path", function() {
-            setup([{
-                test: {
-                    path: "a"
-            }}]);
-
+            setup({test: {path: "a"}});
             expect($router.on).toHaveBeenCalled();
         });
 
         it("should include parent path", function() {
-            setup([{
+            setup({
                 "parent" : {
                     path: "a"
-                }}, {
+                },
                 "parent.child": {
                     path: "b"
-            }}]);
+            }});
 
             testMostRecent("a/b");
         });
 
         it("should allow deeply nested parents", function() {
-            setup([{
+            setup({
                 "parent" : {
                     path: "a"
-                }}, {
+                },
                 "parent.childA" : {
                     path: "b"
-                }}, {
+                },
                 "parent.childA.childB": {
                     path: "c"
-                }}]);
+                }});
 
             testMostRecent("a/b/c");
         });
 
         it("should strip additional slashes joining parent and child path", function() {
-            setup([{
+            setup({
                 "parent" : {
                     path: "a"
-                }}, {
+                },
                 "parent.child": {
                     path: "b"
-                }}]);
+                }});
 
             testMostRecent("a/b");
         });
 
         it("should throw error for parent that does not exist", function() {
             expect(function() {
-                setup([{
+                setup({
                     "parent.child": {
                         path: "b"
-                    }}]);
+                    }});
             }).toThrowError("no parent exists for state 'parent.child'");
         });
 
         it("should throw error for parent that is defined after child", function() {
             expect(function() {
-                setup([{
+                setup({
                     "parent.child": {
                         path: "b"
-                    }}, {
+                    },
                     "parent" : {
                         path: "a"
                     }
-                }]);
+                });
             }).toThrowError("no parent exists for state 'parent.child'");
         });
 
         it("should throw error for empty name", function() {
             expect(function() {
-                setup([{
-                    "": {
-                        path: "b"
-                    }}]);
+                setup({"": {path: "b"}});
             }).toThrowError("state name must be set for path 'b'");
         });
 
         it("should throw error for null path", function() {
             expect(function() {
-                setup([{
-                    test: {
-                    }}]);
+                setup({test: {}});
             }).toThrowError("state path must be set for name 'test'");
         });
 
         it("should throw error for empty path", function() {
             expect(function() {
-                setup([{
-                    test: {
-                        path: ""
-                    }}]);
+                setup({test: {path: ""}});
             }).toThrowError("state path must be set for name 'test'");
         });
     });
 
     describe("nameToPath", function() {
         it("should return path specified in config", function() {
-            setup([{
-                test: {
-                    path: "a"
-            }}]);
-
+            setup({test: {path: "a"}});
             expect($state.nameToPath("test")).toEqual("a");
         });
 
         it("should include parent path", function() {
-            setup([{
+            setup({
                 "parent" : {
                     path: "a"
-                }}, {
+                },
                 "parent.child": {
                     path: "b"
-            }}]);
+            }});
 
             expect($state.nameToPath("parent.child")).toEqual("a/b");
         });
 
         it("should replace named params", function() {
-            setup([{
-                test: {
-                    path: "a/:id/b/:count"
-                }}]);
-
+            setup({test: {path: "a/:id/b/:count"}});
             expect($state.nameToPath("test", {id: 1, count: 2})).toEqual("a/1/b/2");
         });
 
         it("should encode named params", function() {
-            setup([{
-                test: {
-                    path: "a/:id"
-                }}]);
-
+            setup({test: {path: "a/:id"}});
             expect($state.nameToPath("test", {id: "$"})).toEqual("a/%24");
         });
 
         describe("query params", function() {
             function testQuery(params, expected) {
-                setup([{
-                    test: {
-                        path: "a"
-                    }}]);
-
+                setup({test: {path: "a"}});
                 expect($state.nameToPath("test", params)).toEqual("a" + expected);
             }
 
@@ -254,10 +226,10 @@ describe("$state", function() {
         });
 
         it("should return null if state does not exist", function() {
-            setup([{
+            setup({
                 test: {
                     path: "a"
-                }}]);
+                }});
 
             expect($state.nameToPath("other")).toEqual(null);
         });
@@ -265,53 +237,53 @@ describe("$state", function() {
 
     describe("navigate", function() {
         it("should replace parameters in the path", function() {
-            setup([{
+            setup({
                 test: {
                     path: "a/:id"
-            }}]);
+            }});
 
             $state.navigate("test", {id: 1});
             expect($router.navigate.calls.mostRecent().args[0]).toEqual("a/1");
         });
 
         it("should include parent path", function() {
-            setup([{
+            setup({
                 "parent" : {
                     path: "a"
-                }}, {
+                },
                 "parent.child": {
                     path: "b"
-                }}]);
+                }});
 
             $state.navigate("parent.child");
             expect($router.navigate.calls.mostRecent().args[0]).toEqual("a/b");
         });
 
         it("should pass through options to $router.navigate", function() {
-            setup([{
+            setup({
                 test: {
                     path: "a"
-                }}]);
+                }});
 
             $state.navigate("test", null, null, {a: 1});
             expect($router.navigate.calls.mostRecent().args[2]).toEqual({a: 1});
         });
 
         it("should pass through history state to $router.navigate", function() {
-            setup([{
+            setup({
                 test: {
                     path: "a"
-                }}]);
+                }});
 
             $state.navigate("test", null, "state!");
             expect($router.navigate.calls.mostRecent().args[1]).toEqual("state!");
         });
 
         it("should force reload if same path for options.reload=true", function() {
-            setup([{
+            setup({
                 test: {
                     path: "a"
-                }}]);
+                }});
 
             $router.currentPath = function() {
                 return "a";
@@ -322,10 +294,10 @@ describe("$state", function() {
         });
 
         it("should not force a reload if different path for options.reload=true", function() {
-            setup([{
+            setup({
                 test: {
                     path: "a"
-                }}]);
+                }});
 
             $router.currentPath = function() {
                 return "b";
@@ -345,10 +317,10 @@ describe("$state", function() {
     describe("actions", function() {
         describe("startChangeAction", function() {
             it("should trigger before changeAction/errorAction", function() {
-                setupNoSpies([{
+                setupNoSpies({
                     test: {
                         path: "a"
-                    }}]);
+                    }});
 
                 $state.changeAction.on(callback);
                 $state.startChangeAction.on(function() {
@@ -361,13 +333,13 @@ describe("$state", function() {
 
             it("should trigger before resolving data", function() {
                 var compute = jasmine.createSpy("compute");
-                setupNoSpies([{
+                setupNoSpies({
                     test: {
                         path: "a",
                         resolve: {
                             compute: compute
                         }
-                    }}]);
+                    }});
 
                 $state.startChangeAction.on(function() {
                     expect(compute).not.toHaveBeenCalled();
@@ -378,10 +350,10 @@ describe("$state", function() {
             });
 
             it("should include name and route params as action parameters", function() {
-                setupNoSpies([{
+                setupNoSpies({
                     test: {
                         path: "a/:id"
-                    }}]);
+                    }});
 
                 $state.startChangeAction.on(callback);
 
@@ -394,13 +366,13 @@ describe("$state", function() {
 
         describe("changeAction", function() {
             it("should include name, route params and data as action parameters", function() {
-                setupNoSpies([{
+                setupNoSpies({
                     test: {
                         path: "a/:id",
                         data: {
                             some: "data"
                         }
-                    }}]);
+                    }});
 
                 $state.changeAction.on(callback);
 
@@ -412,7 +384,7 @@ describe("$state", function() {
             });
 
             it("should trigger after resolving data", function() {
-                setupNoSpies([{
+                setupNoSpies({
                     test: {
                         path: "a/:id",
                         resolve: {
@@ -425,7 +397,7 @@ describe("$state", function() {
                                 return deferred.promise;
                             }
                         }
-                    }}]);
+                    }});
 
                 $state.changeAction.on(callback);
 
@@ -439,7 +411,7 @@ describe("$state", function() {
 
         describe("errorAction", function() {
             beforeEach(function() {
-                setupNoSpies([{
+                setupNoSpies({
                     test: {
                         path: "a/:id",
                         resolve: {
@@ -448,7 +420,7 @@ describe("$state", function() {
                             }
                         }
                     }
-                }]);
+                });
 
                 $state.errorAction.on(callback);
             });
@@ -491,17 +463,17 @@ describe("$state", function() {
 
         describe("resolve", function() {
             it("should trigger change action if no data to resolve", function() {
-                setupNoSpies([{
+                setupNoSpies({
                     test: {
                         path: "a"
-                    }}]);
+                    }});
 
                 setupChangeAction("test");
                 expect(callback).toHaveBeenCalled();
             });
 
             it("should allow data returned by function call", function() {
-                setupNoSpies([{
+                setupNoSpies({
                     test: {
                         path: "a",
                         resolve: {
@@ -509,27 +481,27 @@ describe("$state", function() {
                                 return "1";
                             }
                         }
-                    }}]);
+                    }});
 
                 setupChangeAction("test");
                 expect(callback).toHaveBeenCalledWith("test", {}, {a: "1"});
             });
 
             it("should allow static data", function() {
-                setupNoSpies([{
+                setupNoSpies({
                     test: {
                         path: "a",
                         resolve: {
                             a: "1"
                         }
-                    }}]);
+                    }});
 
                 setupChangeAction("test");
                 expect(callback).toHaveBeenCalledWith("test", {}, {a: "1"});
             });
 
             it("should wait for promise returned by function call", function() {
-                setupNoSpies([{
+                setupNoSpies({
                     test: {
                         path: "a",
                         resolve: {
@@ -542,14 +514,14 @@ describe("$state", function() {
                                 return deferred.promise;
                             }
                         }
-                    }}]);
+                    }});
 
                 setupChangeAction("test");
                 expect(callback).toHaveBeenCalledWith("test", {}, {a: "1"});
             });
 
             it("should wait for all promises to resolve before triggering change action", function() {
-                setupNoSpies([{
+                setupNoSpies({
                     test: {
                         path: "a",
                         resolve: {
@@ -570,14 +542,14 @@ describe("$state", function() {
                                 return deferred.promise;
                             }
                         }
-                    }}]);
+                    }});
 
                 setupChangeAction("test");
                 expect(callback).toHaveBeenCalledWith("test", {}, {a: "1", b: "2"});
             });
 
             it("should allow mixture of promises and static data", function() {
-                setupNoSpies([{
+                setupNoSpies({
                     test: {
                         path: "a",
                         resolve: {
@@ -591,7 +563,7 @@ describe("$state", function() {
                             },
                             b: "2"
                         }
-                    }}]);
+                    }});
 
                 setupChangeAction("test");
                 expect(callback).toHaveBeenCalledWith("test", {}, {a: "1", b: "2"});
@@ -599,7 +571,7 @@ describe("$state", function() {
 
             it("should trigger error action if resolve factory method throws error", function() {
                 var error = new Error("oops!");
-                setupNoSpies([{
+                setupNoSpies({
                     test: {
                         path: "a",
                         resolve: {
@@ -607,7 +579,7 @@ describe("$state", function() {
                                 throw error;
                             }
                         }
-                    }}]);
+                    }});
 
                 var errorCallback = jasmine.createSpy("errorCallback");
                 setupChangeAction("test", errorCallback);
@@ -615,7 +587,7 @@ describe("$state", function() {
             });
 
             it("should merge resolved data over custom data", function() {
-                setupNoSpies([{
+                setupNoSpies({
                     test: {
                         path: "a",
                         resolve: {
@@ -624,14 +596,14 @@ describe("$state", function() {
                         data: {
                             a: "1"
                         }
-                    }}]);
+                    }});
 
                 setupChangeAction("test");
                 expect(callback).toHaveBeenCalledWith("test", {}, {a: "2"});
             });
 
             it("should trigger error action if resolve promise rejects", function() {
-                setupNoSpies([{
+                setupNoSpies({
                     test: {
                         path: "a",
                         resolve: {
@@ -644,7 +616,7 @@ describe("$state", function() {
                                 return deferred.promise;
                             }
                         }
-                    }}]);
+                    }});
 
                 var errorCallback = jasmine.createSpy("errorCallback");
                 setupChangeAction("test", errorCallback);
@@ -652,7 +624,7 @@ describe("$state", function() {
             });
 
             it("should pass in resolved parent data to child resolve methods", function() {
-                setupNoSpies([{
+                setupNoSpies({
                     parent: {
                         path: "a",
                         resolve: {
@@ -665,7 +637,7 @@ describe("$state", function() {
                                 return deferred.promise;
                             }
                         }
-                    }}, {
+                    },
                     "parent.child": {
                         path: "b",
                         resolve: {
@@ -675,14 +647,14 @@ describe("$state", function() {
                             }
                         }
                     }
-                }]);
+                });
 
                 setupChangeAction("parent.child");
                 expect(callback).toHaveBeenCalledWith("parent.child", {}, {a: "1", b: "2"});
             });
 
             it("should inherit parent resolved data", function() {
-                setupNoSpies([{
+                setupNoSpies({
                     parent: {
                         path: "a",
                         resolve: {
@@ -690,7 +662,7 @@ describe("$state", function() {
                                 return "1";
                             }
                         }
-                    }}, {
+                    },
                     "parent.child": {
                         path: "b",
                         resolve: {
@@ -699,14 +671,14 @@ describe("$state", function() {
                             }
                         }
                     }
-                }]);
+                });
 
                 setupChangeAction("parent.child");
                 expect(callback).toHaveBeenCalledWith("parent.child", {}, {a: "1", b: "2"});
             });
 
             it("should overwrite parent resolved data", function() {
-                setupNoSpies([{
+                setupNoSpies({
                     parent: {
                         path: "a",
                         resolve: {
@@ -714,7 +686,7 @@ describe("$state", function() {
                                 return "1";
                             }
                         }
-                    }}, {
+                    },
                     "parent.child": {
                         path: "b",
                         resolve: {
@@ -723,14 +695,14 @@ describe("$state", function() {
                             }
                         }
                     }
-                }]);
+                });
 
                 setupChangeAction("parent.child");
                 expect(callback).toHaveBeenCalledWith("parent.child", {}, {a: "2"});
             });
 
             it("should not attempt to resolve parent data that is overwritten with child data", function() {
-                setupNoSpies([{
+                setupNoSpies({
                     parent: {
                         path: "a",
                         resolve: {
@@ -738,7 +710,7 @@ describe("$state", function() {
                                 throw new Error("should not be called");
                             }
                         }
-                    }}, {
+                    },
                     "parent.child": {
                         path: "b",
                         resolve: {
@@ -747,7 +719,7 @@ describe("$state", function() {
                             }
                         }
                     }
-                }]);
+                });
 
                 setupChangeAction("parent.child");
                 expect(callback).toHaveBeenCalledWith("parent.child", {}, {a: "2"});
@@ -756,13 +728,13 @@ describe("$state", function() {
 
         describe("custom", function() {
             it("should not invoke methods", function() {
-                setupNoSpies([{
+                setupNoSpies({
                     test: {
                         path: "a",
                         data: {
                             some: callback
                         }
-                    }}]);
+                    }});
 
                 $router.start();
                 $state.navigate("test");
@@ -771,64 +743,64 @@ describe("$state", function() {
             });
 
             it("should inherit parent data", function() {
-                setupNoSpies([{
+                setupNoSpies({
                     parent: {
                         path: "a",
                         data: {
                             a: "1"
                         }
-                    }}, {
+                    },
                     "parent.child": {
                         path: "b",
                         data: {
                             b: "2"
                         }
-                    }}]);
+                    }});
 
                 setupChangeAction("parent.child");
                 expect(callback).toHaveBeenCalledWith("parent.child", {}, {a: "1", b: "2"});
             });
 
             it("should not inherit child data", function() {
-                setupNoSpies([{
+                setupNoSpies({
                     parent: {
                         path: "a",
                         data: {
                             a: "1"
                         }
-                    }}, {
+                    },
                     "parent.child": {
                         path: "b",
                         data: {
                             b: "2"
                         }
-                    }}]);
+                    }});
 
                 setupChangeAction("parent");
                 expect(callback).toHaveBeenCalledWith("parent", {}, {a: "1"});
             });
 
             it("should overwrite parent data", function() {
-                setupNoSpies([{
+                setupNoSpies({
                     parent: {
                         path: "a",
                         data: {
                             a: "1"
                         }
-                    }}, {
+                    },
                     "parent.child": {
                         path: "b",
                         data: {
                             a: "2"
                         }
-                    }}]);
+                    }});
 
                 setupChangeAction("parent.child");
                 expect(callback).toHaveBeenCalledWith("parent.child", {}, {a: "2"});
             });
 
             it("should overwrite with resolved data from parent", function() {
-                setupNoSpies([{
+                setupNoSpies({
                     parent: {
                         path: "a",
                         data: {
@@ -839,26 +811,26 @@ describe("$state", function() {
                                 return "3";
                             }
                         }
-                    }}, {
+                    },
                     "parent.child": {
                         path: "b",
                         data: {
                             a: "2"
                         }
-                    }}]);
+                    }});
 
                 setupChangeAction("parent.child");
                 expect(callback).toHaveBeenCalledWith("parent.child", {}, {a: "3"});
             });
 
             it("should overwrite with resolved data from child", function() {
-                setupNoSpies([{
+                setupNoSpies({
                     parent: {
                         path: "a",
                         data: {
                             a: "1"
                         }
-                    }}, {
+                    },
                     "parent.child": {
                         path: "b",
                         data: {
@@ -869,7 +841,7 @@ describe("$state", function() {
                                 return "3";
                             }
                         }
-                    }}]);
+                    }});
 
                 setupChangeAction("parent.child");
                 expect(callback).toHaveBeenCalledWith("parent.child", {}, {a: "3"});

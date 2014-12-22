@@ -20,10 +20,7 @@
 
             $router.setRoot($config.root);
 
-        recurve.forEach($config.states, function(state) {
-            var name = Object.keys(state)[0];
-            var config = state[name];
-
+        recurve.forEach($config.states, function(config, name) {
             recurve.assert(name, "state name must be set for path '{0}'", config.path);
             recurve.assert(config.path, "state path must be set for name '{0}'", name);
 
@@ -270,6 +267,6 @@
     // - there is no need for array, can just be an object
     module.config("$state", {
         root: "",
-        states: []
+        states: {}
     });
 })();
