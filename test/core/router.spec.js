@@ -10,11 +10,10 @@ describe("$router", function() {
 
     function setupRoute(path, otherwise) {
         $include(null, function(module) {
+            var routes = {};
+            routes[path] = callback;
             module.config("$router", {
-                routes: [{
-                    path: path,
-                    callback: callback
-                }],
+                routes: routes,
                 otherwise: otherwise
             });
         });
@@ -87,8 +86,8 @@ describe("$router", function() {
         });
 
         it("should call route callback for regexp matcher", function() {
-            setupRoute(/recurve/i);
-            pushState("/this-is-recurve");
+            setupRoute("test/[0-9]{3}$");
+            pushState("/test/123");
 
             $router.start();
 
@@ -96,8 +95,8 @@ describe("$router", function() {
         });
 
         it("should not call route callback if doesn't match regexp matcher", function() {
-            setupRoute(/recurve/i);
-            pushState("/this-is");
+            setupRoute("test/[0-9]{3}$");
+            pushState("/test/12");
 
             $router.start();
 
@@ -114,7 +113,7 @@ describe("$router", function() {
         });
 
         it("should return params splat array for regexp path", function() {
-            setupRoute(/\/test\/(.+)/, callback);
+            setupRoute("test/(.+)", callback);
             pushState("/wow/test/this/should/work");
 
             $router.start();
@@ -132,7 +131,7 @@ describe("$router", function() {
         });
 
         it("should return query string params for regexp path", function() {
-            setupRoute(/\/test\/(.+)/);
+            setupRoute("test/(.+)");
             pushState("/wow/test/this/should/work?query=2");
 
             $router.start();
@@ -159,13 +158,10 @@ describe("$router", function() {
         });
 
         describe("error handling", function() {
-            function setup(value) {
+            function setup(routeCallback) {
                 $include(null, function(module) {
                     module.config("$router", {
-                        routes: [{
-                            path: "a",
-                            callback: value
-                        }]
+                        routes: {a: routeCallback}
                     });
                 });
 
@@ -239,6 +235,22 @@ describe("$router", function() {
 
             expect(callback).not.toHaveBeenCalled();
             expect(callback2).toHaveBeenCalled();
+        });
+
+        it("should match path with regexp object", function() {
+            $router.on(/\/test\/(.+)/, callback);
+            pushState("/wow/test/should/work");
+
+            $router.start();
+            expect(callback).toHaveBeenCalled();
+        });
+
+        it("should not match path with non matching regexp object", function() {
+            $router.on(/\/test\/(.+)/, callback);
+            pushState("/wow/tast/should/work");
+
+            $router.start();
+            expect(callback).not.toHaveBeenCalled();
         });
     });
 
@@ -510,10 +522,8 @@ describe("$router", function() {
             $include(null, function($mockable) {
                 var config = {root: root};
                 if (path) {
-                    config.routes = [{
-                        path: path,
-                        callback: callback
-                    }];
+                    config.routes = {};
+                    config.routes[path] = callback;
                 }
 
                 $mockable.config("$router", config);
@@ -629,8 +639,8 @@ describe("$router", function() {
         });
 
         it("should match regexp with root", function() {
-            setup("a", /b/);
-            $router.navigate("b");
+            setup("a", "test/[0-9]{3}$");
+            $router.navigate("test/123");
 
             expect(callback).toHaveBeenCalled();
         });

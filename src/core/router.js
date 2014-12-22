@@ -258,16 +258,18 @@ function addRouterService(module) {
         };
 
         $router.setRoot($config.root);
-        forEach($config.routes, function(routeConfig) {
-            $router.on(routeConfig.path, routeConfig.callback);
+        forEach($config.routes, function(callback, path) {
+            $router.on(path, callback);
         });
 
         return $router;
     });
 
+    // For regexp paths, don't include leading or trailing slashes, nor flags such as "g", "i" at the
+    // end
     module.config("$router", {
         root: "",
-        routes: [],
+        routes: {},
         otherwise: null
     });
 }
