@@ -264,6 +264,10 @@
         return $state;
     });
 
+    // TODO TBD
+    // - should the states be updated so don't use key as state name? instead part of the
+    // state config object?
+    // - there is no need for array, can just be an object
     module.config("$state", {
         root: "",
         states: []

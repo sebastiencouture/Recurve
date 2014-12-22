@@ -910,4 +910,6 @@ describe("$state", function() {
             expect($router.setRoot).toHaveBeenCalledWith("");
         });
     });
+
+    // TODO TBD need tests for regexp for state paths
 });
