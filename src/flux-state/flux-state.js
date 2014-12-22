@@ -18,7 +18,8 @@
         function($router, $action, $promise, $config) {
         var states = [];
 
-            $router.setRoot($config.root);
+        $router.setRoot($config.root);
+        $router.notFound($config.notFound);
 
         recurve.forEach($config.states, function(config, name) {
             recurve.assert(name, "state name must be set for path '{0}'", config.path);
@@ -267,6 +268,7 @@
     // - there is no need for array, can just be an object
     module.config("$state", {
         root: "",
-        states: {}
+        states: {},
+        notFound: null
     });
 })();

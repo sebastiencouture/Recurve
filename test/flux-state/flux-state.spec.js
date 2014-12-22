@@ -22,11 +22,12 @@ describe("$state", function() {
         callback = jasmine.createSpy("callback");
     });
 
-    function setup(states, root, noSpies) {
+    function setup(states, root, notFound, noSpies) {
         $include(null, function(module) {
             module.config("$state", {
                 root: root,
-                states: states
+                states: states,
+                notFound: notFound
             });
 
             if (!noSpies) {
@@ -35,6 +36,7 @@ describe("$state", function() {
                     spyOn($router, "navigate");
                     spyOn($router, "reload");
                     spyOn($router, "setRoot");
+                    spyOn($router, "notFound");
 
                     return $router;
                 });
@@ -50,8 +52,8 @@ describe("$state", function() {
         });
     }
 
-    function setupNoSpies(states, root) {
-        setup(states, root, true);
+    function setupNoSpies(states, root, notFound) {
+        setup(states, root, notFound, true);
     }
 
     function testCallRouterMethod(method) {
@@ -881,6 +883,12 @@ describe("$state", function() {
             setup({}, "");
             expect($router.setRoot).toHaveBeenCalledWith("");
         });
+    });
+
+    it("should set not found callback on $router", function() {
+        var notFoundHandler = function() {};
+        setup({}, "a", notFoundHandler);
+        expect($router.notFound).toHaveBeenCalledWith(notFoundHandler);
     });
 
     describe("path regexp", function() {
