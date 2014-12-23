@@ -480,7 +480,7 @@ describe("$state", function() {
                     }, timeMs || 0);
 
                     return deferred.promise;
-                }
+                };
             }
 
             function rejectLater(reason, timeMs) {
@@ -491,7 +491,7 @@ describe("$state", function() {
                     }, timeMs);
 
                     return deferred.promise;
-                }
+                };
             }
 
             it("should trigger change action if no data to resolve", function() {
