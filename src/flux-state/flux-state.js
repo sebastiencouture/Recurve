@@ -17,6 +17,71 @@
     module.factory("$state", ["$router", "$action", "$promise", "$config"],
         function($router, $action, $promise, $config) {
         var states = [];
+        var statePrototype = {
+            init: function(name, path, config) {
+                this.name = name;
+                this.path = path;
+                this.config = config;
+
+                return this;
+            },
+
+            resolve: function(routeParams, mergedData) {
+                var parent = getParent(this.name);
+                var deferred = $promise.defer();
+                var self = this;
+
+                if (parent) {
+                    return parent.resolve(routeParams, mergedData).then(parentMergedHandler);
+                }
+                else {
+                    parentMergedHandler();
+                }
+
+                function parentMergedHandler() {
+                    recurve.extend(mergedData, self.config.data);
+
+                    var promises = [];
+                    var error;
+
+                    recurve.forEach(self.config.resolve, function(factory, key) {
+                        if (recurve.isFunction(factory)) {
+                            var value;
+                            try {
+                                value = factory(routeParams, mergedData);
+                            }
+                            catch (e) {
+                                error = e;
+                                return false;
+                            }
+
+                            if (value && recurve.isFunction(value.then)) {
+                                value.then(function(result) {
+                                    mergedData[key] = result;
+                                });
+
+                                promises.push(value);
+                            }
+                            else {
+                                mergedData[key] = value;
+                            }
+                        }
+                        else {
+                            mergedData[key] = factory;
+                        }
+                    });
+
+                    if (error) {
+                        deferred.reject(error);
+                    }
+                    else {
+                        $promise.all(promises).then(deferred.resolve, deferred.reject);
+                    }
+                }
+
+                return deferred.promise;
+            }
+        };
 
         $router.setRoot($config.root);
         $router.notFound($config.notFound);
@@ -34,11 +99,17 @@
                     removeLeadingTrailingSlashes(config.path);
             }
 
-            add(name, path, config);
+            var state = add(name, path, config);
 
             $router.on(path, function(routeParams) {
                 $state.startChangeAction.trigger(name, routeParams);
-                resolve(name, routeParams);
+
+                var mergedData = {};
+                state.resolve(routeParams, mergedData).then(function() {
+                    $state.changeAction.trigger(name, routeParams, mergedData);
+                }, function(error) {
+                    $state.errorAction.trigger(error, name, routeParams, mergedData);
+                });
             });
         });
 
@@ -49,62 +120,6 @@
             }
 
             return path.replace(/^\/+|\/+$/g, "");
-        }
-
-        function resolve(name, routeParams) {
-            var state = get(name);
-            var parent = getParent(name);
-
-            var mergedData = {};
-            if (parent) {
-                recurve.extend(mergedData, parent.data);
-            }
-            recurve.extend(mergedData, state.data);
-
-            var mergedResolve = {};
-            if (parent) {
-                recurve.extend(mergedResolve, parent.resolve);
-            }
-            recurve.extend(mergedResolve, state.resolve);
-
-            var promises = [];
-            var errored;
-
-            recurve.forEach(mergedResolve, function(factory, key) {
-                if (recurve.isFunction(factory)) {
-                    var value;
-                    try {
-                        value = factory();
-                    }
-                    catch (error) {
-                        errored = true;
-                        $state.errorAction.trigger(error, name, routeParams, mergedData);
-                        return false;
-                    }
-
-                    if (value && recurve.isFunction(value.then)) {
-                        value.then(function(result) {
-                            mergedData[key] = result;
-                        });
-
-                        promises.push(value);
-                    }
-                    else {
-                        mergedData[key] = value;
-                    }
-                }
-                else {
-                    mergedData[key] = factory;
-                }
-            });
-
-            if (!errored) {
-                $promise.all(promises).then(function() {
-                    $state.changeAction.trigger(name, routeParams, mergedData);
-                }, function(error) {
-                    $state.errorAction.trigger(error, name, routeParams, mergedData);
-                });
-            }
         }
 
         function get(name) {
@@ -142,7 +157,7 @@
         }
 
         function add(name, path, config) {
-            var newState = {path: path, name: name, data: config.data, resolve: config.resolve};
+            var newState = Object.create(statePrototype).init(name, path, config);
             var updated = false;
 
             recurve.forEach(states, function(state, index) {
@@ -156,6 +171,8 @@
             if (!updated) {
                 states.push(newState);
             }
+
+            return newState;
         }
 
         function updatePathWithParameters(path, parameters) {
@@ -262,10 +279,6 @@
         return $state;
     });
 
-    // TODO TBD
-    // - should the states be updated so don't use key as state name? instead part of the
-    // state config object?
-    // - there is no need for array, can just be an object
     module.config("$state", {
         root: "",
         states: {},

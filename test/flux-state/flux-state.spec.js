@@ -452,14 +452,14 @@ describe("$state", function() {
     });
 
     describe("data", function() {
-        function setupChangeAction(state, errorCallback) {
+        function setupChangeAction(state, errorCallback, params) {
             $state.changeAction.on(callback);
             if (errorCallback) {
                 $state.errorAction.on(errorCallback);
             }
 
             $router.start();
-            $state.navigate(state);
+            $state.navigate(state, params);
             $async.flush();
         }
 
@@ -625,6 +625,23 @@ describe("$state", function() {
                 expect(errorCallback).toHaveBeenCalledWith("1", "test", {}, {});
             });
 
+            it("should pass in route params to resolve methods", function() {
+                setupNoSpies({
+                    test: {
+                        path: "a/:id",
+                        resolve: {
+                            a: function(routeParams) {
+                                expect(routeParams).toEqual({id: "1"});
+                                return "2";
+                            }
+                        }
+                    }
+                });
+
+                setupChangeAction("test", null, {id: "1"});
+                expect(callback).toHaveBeenCalledWith("test", {id: "1"}, {a: "2"});
+            });
+
             it("should pass in resolved parent data to child resolve methods", function() {
                 setupNoSpies({
                     parent: {
@@ -643,7 +660,7 @@ describe("$state", function() {
                     "parent.child": {
                         path: "b",
                         resolve: {
-                            b: function(parentResolved) {
+                            b: function(routeParams, parentResolved) {
                                 expect(parentResolved).toEqual({a: "1"});
                                 return "2";
                             }
@@ -703,28 +720,70 @@ describe("$state", function() {
                 expect(callback).toHaveBeenCalledWith("parent.child", {}, {a: "2"});
             });
 
-            it("should not attempt to resolve parent data that is overwritten with child data", function() {
+            it("should resolve deeply nested parents", function() {
+                setupNoSpies({
+                    grandparent: {
+                        path: "a",
+                        resolve: {
+                            a: function() {
+                                return "1";
+                            }
+                        }
+                    },
+                    "grandparent.parent": {
+                        path: "b",
+                        resolve: {
+                            a: function() {
+                                return "2";
+                            },
+                            b: function() {
+                                return "3";
+                            }
+                        }
+                    },
+                    "grandparent.parent.child": {
+                        path: "c",
+                        resolve: {
+                            a: function() {
+                                return "4";
+                            },
+                            c: function() {
+                                return "5";
+                            }
+                        }
+                    }
+                });
+
+                setupChangeAction("grandparent.parent.child");
+                expect(callback).toHaveBeenCalledWith("grandparent.parent.child", {}, {a: "4", b: "3", c: "5"});
+            });
+
+            it("should attempt to resolve child data if parent throws an error", function() {
+                var resolveCallback = jasmine.createSpy("resolveCallback");
+                var error = new Error("oops!");
+
                 setupNoSpies({
                     parent: {
                         path: "a",
                         resolve: {
                             a: function() {
-                                throw new Error("should not be called");
+                                throw error;
                             }
                         }
                     },
                     "parent.child": {
                         path: "b",
                         resolve: {
-                            a: function() {
-                                return "2";
-                            }
+                            b: resolveCallback
                         }
                     }
                 });
 
-                setupChangeAction("parent.child");
-                expect(callback).toHaveBeenCalledWith("parent.child", {}, {a: "2"});
+                var errorCallback = jasmine.createSpy("errorCallback");
+                setupChangeAction("parent.child", errorCallback);
+
+                expect(resolveCallback).not.toHaveBeenCalled();
+                expect(errorCallback).toHaveBeenCalledWith(error, "parent.child", {}, {});
             });
         });
 
@@ -801,7 +860,7 @@ describe("$state", function() {
                 expect(callback).toHaveBeenCalledWith("parent.child", {}, {a: "2"});
             });
 
-            it("should overwrite with resolved data from parent", function() {
+            it("should overwrite parent resolved data with custom child data", function() {
                 setupNoSpies({
                     parent: {
                         path: "a",
@@ -810,14 +869,14 @@ describe("$state", function() {
                         },
                         resolve: {
                             a: function() {
-                                return "3";
+                                return "2";
                             }
                         }
                     },
                     "parent.child": {
                         path: "b",
                         data: {
-                            a: "2"
+                            a: "3"
                         }
                     }});
 
@@ -847,6 +906,34 @@ describe("$state", function() {
 
                 setupChangeAction("parent.child");
                 expect(callback).toHaveBeenCalledWith("parent.child", {}, {a: "3"});
+            });
+
+            it("should merge deeply nested parents", function() {
+                setupNoSpies({
+                    grandparent: {
+                        path: "a",
+                        data: {
+                            a: "1"
+                        }
+                    },
+                    "grandparent.parent": {
+                        path: "b",
+                        data: {
+                            a: "2",
+                            b: "3"
+                        }
+                    },
+                    "grandparent.parent.child": {
+                        path: "c",
+                        resolve: {
+                            a: "4",
+                            c: "5"
+                        }
+                    }
+                });
+
+                setupChangeAction("grandparent.parent.child");
+                expect(callback).toHaveBeenCalledWith("grandparent.parent.child", {}, {a: "4", b: "3", c: "5"});
             });
         });
     });
