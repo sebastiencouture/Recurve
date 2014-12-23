@@ -472,6 +472,28 @@ describe("$state", function() {
         }
 
         describe("resolve", function() {
+            function returnLater(data, timeMs) {
+                return function() {
+                    var deferred = $promise.defer();
+                    $async(function() {
+                        deferred.resolve(data);
+                    }, timeMs || 0);
+
+                    return deferred.promise;
+                }
+            }
+
+            function rejectLater(reason, timeMs) {
+                return function() {
+                    var deferred = $promise.defer();
+                    $async(function() {
+                        deferred.reject(reason);
+                    }, timeMs);
+
+                    return deferred.promise;
+                }
+            }
+
             it("should trigger change action if no data to resolve", function() {
                 setupNoSpies({
                     test: {
@@ -515,14 +537,7 @@ describe("$state", function() {
                     test: {
                         path: "a",
                         resolve: {
-                            a: function() {
-                                var deferred = $promise.defer();
-                                $async(function() {
-                                    deferred.resolve("1");
-                                }, 0);
-
-                                return deferred.promise;
-                            }
+                            a: returnLater("1", 100)
                         }
                     }});
 
@@ -535,22 +550,8 @@ describe("$state", function() {
                     test: {
                         path: "a",
                         resolve: {
-                            a: function() {
-                                var deferred = $promise.defer();
-                                $async(function() {
-                                    deferred.resolve("1");
-                                }, 0);
-
-                                return deferred.promise;
-                            },
-                            b: function() {
-                                var deferred = $promise.defer();
-                                $async(function() {
-                                    deferred.resolve("2");
-                                }, 10);
-
-                                return deferred.promise;
-                            }
+                            a: returnLater("1", 500),
+                            b: returnLater("2", 100)
                         }
                     }});
 
@@ -563,14 +564,7 @@ describe("$state", function() {
                     test: {
                         path: "a",
                         resolve: {
-                            a: function() {
-                                var deferred = $promise.defer();
-                                $async(function() {
-                                    deferred.resolve("1");
-                                }, 0);
-
-                                return deferred.promise;
-                            },
+                            a: returnLater("1", 100),
                             b: "2"
                         }
                     }});
@@ -617,14 +611,7 @@ describe("$state", function() {
                     test: {
                         path: "a",
                         resolve: {
-                            a: function() {
-                                var deferred = $promise.defer();
-                                $async(function() {
-                                    deferred.reject("1");
-                                }, 0);
-
-                                return deferred.promise;
-                            }
+                            a: rejectLater("1", 0)
                         }
                     }});
 
@@ -655,14 +642,7 @@ describe("$state", function() {
                     parent: {
                         path: "a",
                         resolve: {
-                            a: function() {
-                                var deferred = $promise.defer();
-                                $async(function() {
-                                    deferred.resolve("1");
-                                }, 0);
-
-                                return deferred.promise;
-                            }
+                            a: returnLater("1", 100)
                         }
                     },
                     "parent.child": {
@@ -728,7 +708,7 @@ describe("$state", function() {
                 expect(callback).toHaveBeenCalledWith("parent.child", {}, {a: "2"});
             });
 
-            it("should resolve deeply nested parents", function() {
+            it("should resolve deeply nested parents without promises", function() {
                 setupNoSpies({
                     grandparent: {
                         path: "a",
@@ -766,7 +746,65 @@ describe("$state", function() {
                 expect(callback).toHaveBeenCalledWith("grandparent.parent.child", {}, {a: "4", b: "3", c: "5"});
             });
 
-            it("should attempt to resolve child data if parent throws an error", function() {
+            it("should resolve deeply nested parents with promises", function() {
+                setupNoSpies({
+                    grandparent: {
+                        path: "a",
+                        resolve: {
+                            a: returnLater("1", 500)
+                        }
+                    },
+                    "grandparent.parent": {
+                        path: "b",
+                        resolve: {
+                            a: returnLater("2", 200),
+                            b: returnLater("3", 250)
+                        }
+                    },
+                    "grandparent.parent.child": {
+                        path: "c",
+                        resolve: {
+                            a: returnLater("4", 50),
+                            c: returnLater("5", 10)
+                        }
+                    }
+                });
+
+                setupChangeAction("grandparent.parent.child");
+                expect(callback).toHaveBeenCalledWith("grandparent.parent.child", {}, {a: "4", b: "3", c: "5"});
+            });
+
+            it("should throw error from deeply nested parent", function() {
+                var error = new Error("oops!");
+                setupNoSpies({
+                    grandparent: {
+                        path: "a",
+                        resolve: {
+                            a: rejectLater(error, 500)
+                        }
+                    },
+                    "grandparent.parent": {
+                        path: "b",
+                        resolve: {
+                            a: returnLater("2", 200),
+                            b: returnLater("3", 250)
+                        }
+                    },
+                    "grandparent.parent.child": {
+                        path: "c",
+                        resolve: {
+                            a: returnLater("4", 50),
+                            c: returnLater("5", 10)
+                        }
+                    }
+                });
+
+                var errorCallback = jasmine.createSpy("errorCallback");
+                setupChangeAction("grandparent.parent.child", errorCallback);
+                expect(errorCallback).toHaveBeenCalledWith(error, "grandparent.parent.child", {}, {});
+            });
+
+            it("should not attempt to resolve child data if parent throws an error", function() {
                 var resolveCallback = jasmine.createSpy("resolveCallback");
                 var error = new Error("oops!");
 
