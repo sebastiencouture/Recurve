@@ -28,14 +28,13 @@
 
             resolve: function(routeParams, mergedData) {
                 var parent = getParent(this.name);
-                var deferred = $promise.defer();
                 var self = this;
 
                 if (parent) {
                     return parent.resolve(routeParams, mergedData).then(parentMergedHandler);
                 }
                 else {
-                    parentMergedHandler();
+                    return parentMergedHandler();
                 }
 
                 function parentMergedHandler() {
@@ -71,15 +70,16 @@
                         }
                     });
 
+                    var deferred = $promise.defer();
                     if (error) {
                         deferred.reject(error);
                     }
                     else {
                         $promise.all(promises).then(deferred.resolve, deferred.reject);
                     }
-                }
 
-                return deferred.promise;
+                    return deferred.promise;
+                }
             }
         };
 
@@ -114,15 +114,6 @@
                 });
             });
         });
-
-        // TODO TBD duplicate of method in $rest
-        function removeLeadingTrailingSlashes(path) {
-            if (!path) {
-                return path;
-            }
-
-            return path.replace(/^\/+|\/+$/g, "");
-        }
 
         function get(name) {
             var foundState = null;
@@ -175,6 +166,14 @@
             }
 
             return newState;
+        }
+
+        function removeLeadingTrailingSlashes(path) {
+            if (!path) {
+                return path;
+            }
+
+            return path.replace(/^\/+|\/+$/g, "");
         }
 
         function updatePathWithParams(path, params) {
