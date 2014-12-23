@@ -5,12 +5,12 @@ function addMockHttpProviderService(module) {
         var requests = [];
         var handlers = [];
 
-        function removeParameterFromUrl(url, parameter) {
-            if (!url || !parameter) {
+        function removeParamFromUrl(url, param) {
+            if (!url || !param) {
                 return url;
             }
 
-            var search = encodeURIComponent(parameter) + "=";
+            var search = encodeURIComponent(param) + "=";
             var startIndex = url.indexOf(search);
 
             if (-1 === startIndex) {
@@ -223,7 +223,7 @@ function addMockHttpProviderService(module) {
                 // don't require handlers to match params on the url, instead should check against
                 // the params object
                 recurve.forEach(options.params, function(value, param) {
-                    options.url = removeParameterFromUrl(options.url, param);
+                    options.url = removeParamFromUrl(options.url, param);
                 });
 
                 options.method = options.method.toUpperCase();

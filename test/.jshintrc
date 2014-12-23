@@ -50,9 +50,9 @@
         "addEvent": false,
         "removeEvent": false,
         "supportsEvent": false,
-        "addParametersToUrl": false,
-        "removeParameterFromUrl": false,
-        "getParametersOfUrl": false,
+        "addParamsToUrl": false,
+        "removeParamFromUrl": false,
+        "getParamsOfUrl": false,
         "assert": false,
 
         "$invoke": false,

@@ -86,7 +86,7 @@ describe("common", function(){
     });
 
     describe("find", function(){
-        it("should not thrown an error for null/undefined parameters", function(){
+        it("should not thrown an error for null/undefined params", function(){
             find();
             find({});
             find({}, "a");
@@ -1117,122 +1117,122 @@ describe("common", function(){
         });
     });
 
-    describe("addParametersToUrl", function(){
-        it("should separate the first parameter with ?", function(){
-            expect(addParametersToUrl("www.test.com", {a:1})).toEqual("www.test.com?a=1");
+    describe("addParamsToUrl", function(){
+        it("should separate the first param with ?", function(){
+            expect(addParamsToUrl("www.test.com", {a:1})).toEqual("www.test.com?a=1");
         });
 
         it("should separate others with &", function(){
-            expect(addParametersToUrl("www.test.com?a=1", {b:2, c:3})).toEqual("www.test.com?a=1&b=2&c=3");
+            expect(addParamsToUrl("www.test.com?a=1", {b:2, c:3})).toEqual("www.test.com?a=1&b=2&c=3");
         });
 
-        it("should encode parameter keys", function(){
-            expect(addParametersToUrl("www.test.com", {"$":1})).toEqual("www.test.com?%24=1");
+        it("should encode param keys", function(){
+            expect(addParamsToUrl("www.test.com", {"$":1})).toEqual("www.test.com?%24=1");
         });
 
-        it("should encode parameter values", function(){
-            expect(addParametersToUrl("www.test.com", {a: "$"})).toEqual("www.test.com?a=%24");
+        it("should encode param values", function(){
+            expect(addParamsToUrl("www.test.com", {a: "$"})).toEqual("www.test.com?a=%24");
         });
 
         it("should encode ?/& in key and values", function(){
-            expect(addParametersToUrl("www.test.com", {"?&": "&?", a: 2})).toEqual("www.test.com?%3F%26=%26%3F&a=2");
+            expect(addParamsToUrl("www.test.com", {"?&": "&?", a: 2})).toEqual("www.test.com?%3F%26=%26%3F&a=2");
         });
 
-        it("should convert date parameter to ISO", function(){
-            expect(addParametersToUrl("www.test.com", {a:new Date(2014,1,1)})).toEqual("www.test.com?a=2014-02-01T08%3A00%3A00.000Z");
+        it("should convert date param to ISO", function(){
+            expect(addParamsToUrl("www.test.com", {a:new Date(2014,1,1)})).toEqual("www.test.com?a=2014-02-01T08%3A00%3A00.000Z");
         });
 
         it("should convert object to JSON", function(){
-            expect(addParametersToUrl("www.test.com", {a: {b:2}})).toEqual("www.test.com?a=%7B%22b%22%3A2%7D");
+            expect(addParamsToUrl("www.test.com", {a: {b:2}})).toEqual("www.test.com?a=%7B%22b%22%3A2%7D");
         });
 
         it("should add none for non object key/values", function(){
-            expect(addParametersToUrl("www.test.com", 1)).toEqual("www.test.com");
+            expect(addParamsToUrl("www.test.com", 1)).toEqual("www.test.com");
         });
 
         it("should add none for null", function(){
-            expect(addParametersToUrl("www.test.com", null)).toEqual("www.test.com");
+            expect(addParamsToUrl("www.test.com", null)).toEqual("www.test.com");
         });
 
         it("should add none for undefined", function(){
-            expect(addParametersToUrl("www.test.com", undefined)).toEqual("www.test.com");
+            expect(addParamsToUrl("www.test.com", undefined)).toEqual("www.test.com");
         });
     });
 
-    describe("removeParameterFromUrl", function(){
-        it("should remove parameter", function(){
-            expect(removeParameterFromUrl("www.test.com?b=2", "b")).toEqual("www.test.com");
+    describe("removeParamFromUrl", function(){
+        it("should remove param", function(){
+            expect(removeParamFromUrl("www.test.com?b=2", "b")).toEqual("www.test.com");
         });
 
-        it("should only remove that parameter", function(){
-            expect(removeParameterFromUrl("www.test.com?a=1&b=2&c=3", "b")).toEqual("www.test.com?a=1&c=3");
+        it("should only remove that param", function(){
+            expect(removeParamFromUrl("www.test.com?a=1&b=2&c=3", "b")).toEqual("www.test.com?a=1&c=3");
         });
 
-        it("should remove with encoded parameter", function(){
-            expect(removeParameterFromUrl("www.test.com?%24=1", "$")).toEqual("www.test.com");
+        it("should remove with encoded param", function(){
+            expect(removeParamFromUrl("www.test.com?%24=1", "$")).toEqual("www.test.com");
         });
 
-        it("should change & to ? upon removing first parameter", function(){
-            expect(removeParameterFromUrl("www.test.com?a=1&b=2&c=3", "a")).toEqual("www.test.com?b=2&c=3");
+        it("should change & to ? upon removing first param", function(){
+            expect(removeParamFromUrl("www.test.com?a=1&b=2&c=3", "a")).toEqual("www.test.com?b=2&c=3");
 
         });
 
         it("should do nothing if doesn't exist", function(){
-            expect(removeParameterFromUrl("www.test.com?c=1&d=2", "a")).toEqual("www.test.com?c=1&d=2");
+            expect(removeParamFromUrl("www.test.com?c=1&d=2", "a")).toEqual("www.test.com?c=1&d=2");
         });
 
         it("should do nothing for null", function(){
-            expect(removeParameterFromUrl("www.test.com?c=1&d=2", null)).toEqual("www.test.com?c=1&d=2");
+            expect(removeParamFromUrl("www.test.com?c=1&d=2", null)).toEqual("www.test.com?c=1&d=2");
         });
 
         it("should do nothing for undefined", function(){
-            expect(removeParameterFromUrl("www.test.com?c=1&d=2", undefined)).toEqual("www.test.com?c=1&d=2");
+            expect(removeParamFromUrl("www.test.com?c=1&d=2", undefined)).toEqual("www.test.com?c=1&d=2");
         });
     });
 
-    describe("getParametersOfUrl", function() {
-        it("should return parameter as key value pairs", function() {
-            expect(getParametersOfUrl("www.test.com?a=b")).toEqual({a: "b"});
+    describe("getParamsOfUrl", function() {
+        it("should return param as key value pairs", function() {
+            expect(getParamsOfUrl("www.test.com?a=b")).toEqual({a: "b"});
         });
 
         it("should return all values as string", function() {
-            expect(getParametersOfUrl("www.test.com?a=1")).toEqual({a: "1"});
+            expect(getParamsOfUrl("www.test.com?a=1")).toEqual({a: "1"});
         });
 
         it("should decode key", function() {
-            expect(getParametersOfUrl("www.test.com?%24=1")).toEqual({"$": "1"});
+            expect(getParamsOfUrl("www.test.com?%24=1")).toEqual({"$": "1"});
         });
 
         it("should not decode value", function() {
-            expect(getParametersOfUrl("www.test.com?a=%24")).toEqual({a: "%24"});
+            expect(getParamsOfUrl("www.test.com?a=%24")).toEqual({a: "%24"});
         });
 
-        it("should return multiple parameters", function() {
-            expect(getParametersOfUrl("www.test.com?a=1&b=2&c=3")).toEqual({a: "1", b: "2", c: "3"});
+        it("should return multiple param", function() {
+            expect(getParamsOfUrl("www.test.com?a=1&b=2&c=3")).toEqual({a: "1", b: "2", c: "3"});
         });
 
-        it("should return empty object if no query parameters", function() {
-            expect(getParametersOfUrl("www.test.com")).toEqual({});
+        it("should return empty object if no query param", function() {
+            expect(getParamsOfUrl("www.test.com")).toEqual({});
         });
 
         it("should return empty object if no key values after ?", function() {
-            expect(getParametersOfUrl("www.test.com?")).toEqual({});
+            expect(getParamsOfUrl("www.test.com?")).toEqual({});
         });
 
         it("should return empty string value if empty after key '='", function() {
-            expect(getParametersOfUrl("www.test.com?a=&b=")).toEqual({a: "", b: ""});
+            expect(getParamsOfUrl("www.test.com?a=&b=")).toEqual({a: "", b: ""});
         });
 
         it("should return null value if no '=' separator between key and value", function() {
-            expect(getParametersOfUrl("www.test.com?a&b")).toEqual({a: null, b: null});
+            expect(getParamsOfUrl("www.test.com?a&b")).toEqual({a: null, b: null});
         });
 
         it("should return empty object for null url", function() {
-            expect(getParametersOfUrl(null)).toEqual({});
+            expect(getParamsOfUrl(null)).toEqual({});
         });
 
         it("should return empty object for empty string", function() {
-            expect(getParametersOfUrl("")).toEqual({});
+            expect(getParamsOfUrl("")).toEqual({});
         });
     });
 

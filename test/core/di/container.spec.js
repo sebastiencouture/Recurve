@@ -124,7 +124,7 @@ describe("container", function(){
             });
         });
 
-        it("should resolve Type factory with additional parameters", function(){
+        it("should resolve Type factory with additional params", function(){
             function Animal(name) {
                 this.name = name;
             }
@@ -165,7 +165,7 @@ describe("container", function(){
             });
         });
 
-        it("should resolve type factory dependencies with additional parameters", function(){
+        it("should resolve type factory dependencies with additional params", function(){
             moduleA.value("type", "cat");
 
             function Animal(type, name) {

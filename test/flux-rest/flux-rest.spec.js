@@ -81,7 +81,7 @@ describe("$rest", function() {
                     rest.a.save();
                 });
 
-                it("should merge second function parameter as data key into sent http options", function() {
+                it("should merge second function param as data key into sent http options", function() {
                     handler = $httpProvider.on("POST", "www.a.com");
                     handler.expect({"data": "a"});
 
@@ -242,7 +242,7 @@ describe("$rest", function() {
             });
         });
 
-        describe("method parameters", function() {
+        describe("method params", function() {
             it("should throw error if no name", function() {
                 expect(function() {
                     rest.resource();
@@ -392,7 +392,7 @@ describe("$rest", function() {
                     rest.a.save();
                 });
 
-                it("should merge second function parameter as data into http options", function() {
+                it("should merge second function param as data into http options", function() {
                     rest.resource("a", "www.test.com", null, {save: {method: "POST"}});
                     handler = $httpProvider.on("POST", "www.test.com");
 

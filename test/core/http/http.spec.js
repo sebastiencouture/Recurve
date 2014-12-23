@@ -219,19 +219,19 @@ describe("$http", function() {
             handler = $httpProvider.on("GET", "www.a.com");
         });
 
-        it("should append random parameter to prevent browser cache", function() {
+        it("should append random param to prevent browser cache", function() {
             handler.expect({params: {cache: /[0-9]{13}/}});
             $http({url: "www.a.com", cache: false});
         });
 
-        // in-depth testing of adding parameters to URL is already
-        // covered in common.spec for addParametersToUrl(..)
-        it("should add parameters", function() {
+        // in-depth testing of adding params to URL is already
+        // covered in common.spec for addParamsToUrl(..)
+        it("should add params", function() {
             handler.expect({params: {a: 1, b: 2}});
             $http({url: "www.a.com", params: {a: 1, b: 2}});
         });
 
-        it("should replace query parameters", function() {
+        it("should replace query params", function() {
             handler = $httpProvider.on("GET", "www.a.com?a=99");
             handler.expect({params: {a: 1, b: 2}});
             $http({url: "www.a.com?a=99", params: {a: 1, b: 2}});
@@ -493,7 +493,7 @@ describe("$http", function() {
                 $http.post("www.a.com");
             });
 
-            it("should allow data and options parameters", function() {
+            it("should allow data and options params", function() {
                 handler.expect(extend(options, {data: "a"}));
                 $http.post("www.a.com", "a", options);
             });
@@ -541,7 +541,7 @@ describe("$http", function() {
                 $http.put("www.a.com");
             });
 
-            it("should allow data and options parameters", function() {
+            it("should allow data and options params", function() {
                 handler.expect(extend(options, {data: "a"}));
                 $http.put("www.a.com", "a", options);
             });
@@ -557,7 +557,7 @@ describe("$http", function() {
                 $http.patch("www.a.com");
             });
 
-            it("should allow data and options parameters", function() {
+            it("should allow data and options params", function() {
                 handler.expect(extend(options, {data: "a"}));
                 $http.patch("www.a.com", "a", options);
             });

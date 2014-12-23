@@ -25,15 +25,15 @@
                 return url.replace(/^\/+|\/+$/g, "");
             }
 
-            function updateUrl(options, url, parameters) {
+            function updateUrl(options, url, params) {
                 // replace in url if exists
                 var urlSplit = url.split("/");
                 recurve.forEach(urlSplit, function(value, index) {
                     if (0 === value.indexOf(":")) {
                         value = value.slice(1);
-                        if (!recurve.isUndefined(parameters[value])) {
-                            urlSplit[index] = encodeURIComponent(parameters[value]);
-                            delete parameters[value];
+                        if (!recurve.isUndefined(params[value])) {
+                            urlSplit[index] = encodeURIComponent(params[value]);
+                            delete params[value];
                         }
                     }
                 });
@@ -42,7 +42,7 @@
 
                 // add rest as query params
                 options.params = options.params || {};
-                recurve.extend(options.params, parameters);
+                recurve.extend(options.params, params);
             }
 
             function resource(url, paramDefaults, endPoints) {
@@ -107,7 +107,6 @@
 
             return {
                 resource: function(name, url, paramDefaults, endPoints) {
-                    // TODO TBD should flux layer and below be as strict with parameter checking?
                     recurve.assert(name, "expected name to be set");
                     recurve.assert("resource" !== name, "resource cannot be named 'resource'");
                     recurve.assert(url, "expected url to be set");

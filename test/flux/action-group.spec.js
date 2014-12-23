@@ -29,7 +29,7 @@ describe("$actionGroup", function() {
         var context = {};
         var dataStore = {};
 
-        it("should call on with the provided parameters for registered action", function() {
+        it("should call on with the provided params for registered action", function() {
             spyOn(action, "on");
             actionGroup.add(action);
             actionGroup.on(callback, context, dataStore);

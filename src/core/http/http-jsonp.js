@@ -61,8 +61,8 @@ function addHttpJsonpService(module) {
             return {
                 send: function() {
                     var callbackId = "_recurve_" + generateUUID();
-                    var url = removeParameterFromUrl(options.url, "callback");
-                    url = addParametersToUrl(url, {callback: callbackId});
+                    var url = removeParamFromUrl(options.url, "callback");
+                    url = addParamsToUrl(url, {callback: callbackId});
 
                     var script = $document.createElement("script");
                     script.src = url;

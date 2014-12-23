@@ -39,9 +39,9 @@
  addEvent: true,
  removeEvent: true,
  supportsEvent: true,
- addParametersToUrl: true,
- removeParameterFromUrl: true,
- getParametersOfUrl: true,
+ addParamsToUrl: true,
+ removeParamFromUrl: true,
+ getParamsOfUrl: true,
  assert: true
 */
 
@@ -508,15 +508,15 @@ function supportsEvent(obj, name) {
 
 ////
 
-function addParametersToUrl(url, parameters) {
-    if (!url || !parameters) {
+function addParamsToUrl(url, params) {
+    if (!url || !params) {
         return url;
     }
 
     var seperator = contains(url, "?") ? "&" : "?";
 
-    for (var key in parameters) {
-        var value = parameters[key];
+    for (var key in params) {
+        var value = params[key];
 
         if (isObject(value)) {
             if (isDate(value)) {
@@ -534,12 +534,12 @@ function addParametersToUrl(url, parameters) {
     return url;
 }
 
-function removeParameterFromUrl(url, parameter) {
-    if (!url || !parameter) {
+function removeParamFromUrl(url, param) {
+    if (!url || !param) {
         return url;
     }
 
-    var search = encodeURIComponent(parameter) + "=";
+    var search = encodeURIComponent(param) + "=";
     var startIndex = url.indexOf(search);
 
     if (-1 === startIndex) {
@@ -563,7 +563,7 @@ function removeParameterFromUrl(url, parameter) {
 }
 
 // No support for decoding values
-function getParametersOfUrl(url) {
+function getParamsOfUrl(url) {
     var params = {};
     if (!url) {
         return params;

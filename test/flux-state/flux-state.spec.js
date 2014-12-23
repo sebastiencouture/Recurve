@@ -204,7 +204,7 @@ describe("$state", function() {
                 expect($state.nameToPath("test", params)).toEqual("a" + expected);
             }
 
-            it("should separate the first parameter with ?", function() {
+            it("should separate the first param with ?", function() {
                 testQuery({a: 1}, "?a=1");
             });
 
@@ -212,11 +212,11 @@ describe("$state", function() {
                 testQuery({a: 1, b:2, c:3}, "?a=1&b=2&c=3");
             });
 
-            it("should encode parameter keys", function() {
+            it("should encode param keys", function() {
                 testQuery({"$":1}, "?%24=1");
             });
 
-            it("should encode parameter values", function() {
+            it("should encode param values", function() {
                 testQuery({"$":1}, "?%24=1");
             });
 
@@ -224,7 +224,7 @@ describe("$state", function() {
                 testQuery({"?&": "&?", a: 2}, "?%3F%26=%26%3F&a=2");
             });
 
-            it("should convert date parameter to ISO", function() {
+            it("should convert date param to ISO", function() {
                 testQuery({a:new Date(2014,1,1)}, "?a=2014-02-01T08%3A00%3A00.000Z");
             });
 
@@ -246,7 +246,7 @@ describe("$state", function() {
     });
 
     describe("navigate", function() {
-        it("should replace parameters in the path", function() {
+        it("should replace params in the path", function() {
             setup({
                 test: {
                     path: "a/:id"
@@ -359,7 +359,7 @@ describe("$state", function() {
                 $state.navigate("test");
             });
 
-            it("should include name and route params as action parameters", function() {
+            it("should include name and route params as action params", function() {
                 setupNoSpies({
                     test: {
                         path: "a/:id"
@@ -375,7 +375,7 @@ describe("$state", function() {
         });
 
         describe("changeAction", function() {
-            it("should include name, route params and data as action parameters", function() {
+            it("should include name, route params and data as action params", function() {
                 setupNoSpies({
                     test: {
                         path: "a/:id",
@@ -435,7 +435,7 @@ describe("$state", function() {
                 $state.errorAction.on(callback);
             });
 
-            it("should include error, name, route params and data as action parameters", function() {
+            it("should include error, name, route params and data as action params", function() {
                 $state.errorAction.on(callback);
 
                 $router.start();

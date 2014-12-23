@@ -65,12 +65,12 @@ describe("$httpJsonp", function() {
         expect(scriptEl.async).toEqual(true);
     });
 
-    it("should remove 'callback' parameter from url", function() {
+    it("should remove 'callback' param from url", function() {
         $httpJsonp({url: "www.test.com?callback=a"}).send();
         expect(endsWith(scriptEl.src, "?callback=a")).toEqual(false);
     });
 
-    it("should add callback parameter to url", function() {
+    it("should add callback param to url", function() {
         $httpJsonp({url: "www.test.com"}).send();
         expect(contains(scriptEl.src, "?callback=")).toEqual(true);
     });

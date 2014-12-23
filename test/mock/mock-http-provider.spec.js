@@ -49,13 +49,13 @@ describe("recurveMock-$httpProvider", function() {
             expect(handler).toBe(handler2);
         });
 
-        it("should handle method parameter as case insensitive", function() {
+        it("should handle method param as case insensitive", function() {
             var handler2 = $httpProvider.on("get", "www.a.com");
             expect(handler).toBe(handler2);
         });
 
         // TODO TBD most if not all servers are probably setup to handle case insensitive
-        it("should handle url parameter as case sensitive", function() {
+        it("should handle url param as case sensitive", function() {
             var handler2 = $httpProvider.on("get", "www.A.com");
             expect(handler).not.toBe(handler2);
         });
@@ -427,7 +427,7 @@ describe("recurveMock-$httpProvider", function() {
             $httpProvider.verifyExpectations();
         });
 
-        it("should treat expected options method parameter as case insensitive", function() {
+        it("should treat expected options method param as case insensitive", function() {
             handler.expect({method: "GET"});
 
             $httpProvider.send({method: "get", url: "www.a.com"}, $httpDeferred());
@@ -466,7 +466,7 @@ describe("recurveMock-$httpProvider", function() {
             $httpProvider.verifyExpectations();
         });
 
-        it("should meet expectations for options object parameters", function() {
+        it("should meet expectations for options object params", function() {
             handler.expect({data: {a: 1}});
 
             $httpProvider.send({method: "GET", url: "www.a.com", data: {a: 1}}, $httpDeferred());
@@ -475,7 +475,7 @@ describe("recurveMock-$httpProvider", function() {
             $httpProvider.verifyExpectations();
         });
 
-        it("should meet expectations for partial options object parameters", function() {
+        it("should meet expectations for partial options object params", function() {
             handler.expect({data: {a: 1}});
 
             $httpProvider.send({method: "GET", url: "www.a.com", data: {a: 1, b: 2}}, $httpDeferred());
@@ -571,7 +571,7 @@ describe("recurveMock-$httpProvider", function() {
             $httpProvider.verifyExpectations();
         });
 
-        it("should meet expectations for url with query parameters included in handler url", function() {
+        it("should meet expectations for url with query params included in handler url", function() {
             handler = $httpProvider.on("GET", "www.a.com?a=2");
             handler.expect();
 

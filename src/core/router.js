@@ -83,7 +83,7 @@ function addRouterService(module) {
             route.paramKeys = pathParamKeys(path);
 
             route.handle = function(path) {
-                var queryParams = getParametersOfUrl(path);
+                var queryParams = getParamsOfUrl(path);
                 path = removePathQueryParams(path);
 
                 var params = this.pathRegExp.exec(path);

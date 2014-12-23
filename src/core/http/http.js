@@ -57,11 +57,11 @@ function addHttpService(module) {
                 options.params.cache = Date.now();
             }
 
-            var paramsOnUrl = getParametersOfUrl(options.url);
+            var paramsOnUrl = getParamsOfUrl(options.url);
             var params = extend({}, options.params);
             extend(params, paramsOnUrl);
 
-            options.url = addParametersToUrl(options.url, params);
+            options.url = addParamsToUrl(options.url, params);
         }
 
         function updateHeaders(options) {

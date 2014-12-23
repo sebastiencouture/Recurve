@@ -177,32 +177,32 @@
             return newState;
         }
 
-        function updatePathWithParameters(path, parameters) {
+        function updatePathWithParams(path, params) {
             var pathSplit = path.split("/");
             recurve.forEach(pathSplit, function(value, index) {
                 if (0 === value.indexOf(":")) {
                     value = value.slice(1);
-                    if (!recurve.isUndefined(parameters[value])) {
-                        pathSplit[index] = encodeURIComponent(parameters[value]);
-                        delete parameters[value];
+                    if (!recurve.isUndefined(params[value])) {
+                        pathSplit[index] = encodeURIComponent(params[value]);
+                        delete params[value];
                     }
                 }
             });
 
             path =  pathSplit.join("/");
-            return addQueryParametersToPath(path, parameters);
+            return addQueryParamsToPath(path, params);
         }
 
-        // TODO TBD duplicate of common.js method addParametersToUrl
-        function addQueryParametersToPath(path, parameters) {
-            if (!path || !parameters) {
+        // TODO TBD duplicate of common.js method addParamsToUrl
+        function addQueryParamsToPath(path, params) {
+            if (!path || !params) {
                 return path;
             }
 
             var seperator = -1 < path.indexOf("?") ? "&" : "?";
 
-            for (var key in parameters) {
-                var value = parameters[key];
+            for (var key in params) {
+                var value = params[key];
 
                 if (recurve.isObject(value)) {
                     if (recurve.isDate(value)) {
@@ -229,13 +229,13 @@
             // reload => force reload
             // trigger => only updates url but nothing else is done
             // replace
-            navigate: function(name, parameters, historyState, options) {
+            navigate: function(name, params, historyState, options) {
                 options = options || {};
 
                 var state = get(name);
                 recurve.assert(state, "state '{0}' does not exist", name);
 
-                var path = $state.nameToPath(name, parameters);
+                var path = $state.nameToPath(name, params);
 
                 var reload;
                 if (options.reload) {
@@ -250,11 +250,11 @@
                 }
             },
 
-            nameToPath: function(name, parameters) {
+            nameToPath: function(name, params) {
                 var state = get(name);
                 recurve.assert(state, "state '{0}' does not exist", name);
 
-                return updatePathWithParameters(state.path, parameters);
+                return updatePathWithParams(state.path, params);
             },
 
             // convenience methods

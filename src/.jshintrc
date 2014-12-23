@@ -49,9 +49,9 @@
         "removeEvent": false,
         "removeEventForElement": false,
         "supportsEvent": false,
-        "addParametersToUrl": false,
-        "removeParameterFromUrl": false,
-        "getParametersOfUrl": false,
+        "addParamsToUrl": false,
+        "removeParamFromUrl": false,
+        "getParamsOfUrl": false,
         "assert": false
     }
 }

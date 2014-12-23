@@ -126,7 +126,7 @@ describe("$log", function() {
     testLevel("warn");
     testLevel("error");
 
-    it("should log with additional parameters", function() {
+    it("should log with additional params", function() {
         $log("a", 1, 2, 3);
 
         expect(targetMessages[0]).toEqual(["a", 1, 2, 3]);
