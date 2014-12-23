@@ -162,6 +162,12 @@ describe("$state", function() {
                 setup({test: {path: ""}});
             }).toThrowError("state path must be set for name 'test'");
         });
+
+        it("should throw error for RegExp object path", function() {
+            expect(function() {
+                setup({test: {path: /a/g}});
+            }).toThrowError("state path must be a string for name 'test'");
+        });
     });
 
     describe("nameToPath", function() {
@@ -227,13 +233,15 @@ describe("$state", function() {
             });
         });
 
-        it("should return null if state does not exist", function() {
+        it("should throw error if state does not exist", function() {
             setup({
                 test: {
                     path: "a"
                 }});
 
-            expect($state.nameToPath("other")).toEqual(null);
+            expect(function() {
+                $state.nameToPath("other");
+            }).toThrowError("state 'other' does not exist");
         });
     });
 
@@ -976,23 +984,5 @@ describe("$state", function() {
         var notFoundHandler = function() {};
         setup({}, "a", notFoundHandler);
         expect($router.notFound).toHaveBeenCalledWith(notFoundHandler);
-    });
-
-    describe("path regexp", function() {
-        it("should allow regexp as path", function() {
-
-        });
-
-        it("should not use parent regexp path if child path is regexp", function() {
-
-        });
-
-        it("should not use parent string path if child path is regexp", function() {
-
-        });
-
-        it("should not use parent regexp path if child path is string", function() {
-
-        });
     });
 });

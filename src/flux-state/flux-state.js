@@ -89,6 +89,8 @@
         recurve.forEach($config.states, function(config, name) {
             recurve.assert(name, "state name must be set for path '{0}'", config.path);
             recurve.assert(config.path, "state path must be set for name '{0}'", name);
+            // No support for RegExp objects (regex strings fine though)
+            recurve.assert(recurve.isString(config.path), "state path must be a string for name '{0}'", name);
 
             validateParent(name);
 
@@ -250,12 +252,9 @@
 
             nameToPath: function(name, parameters) {
                 var state = get(name);
-                var path = null;
-                if (state) {
-                    path = updatePathWithParameters(state.path, parameters);
-                }
+                recurve.assert(state, "state '{0}' does not exist", name);
 
-                return path;
+                return updatePathWithParameters(state.path, parameters);
             },
 
             // convenience methods
