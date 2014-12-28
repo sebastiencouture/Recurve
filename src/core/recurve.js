@@ -22,7 +22,9 @@
  */
 "use strict";
 
-function createApi(recurve) {
+function createApi(recurve, version) {
+    recurve.$version = version;
+
     extend(recurve, {
         forEach: forEach,
         extend: extend,
@@ -45,7 +47,6 @@ function createApi(recurve) {
         isRegExp: isRegExp,
         toJson: toJson,
         fromJson: fromJson,
-
         assert: assert
     });
 

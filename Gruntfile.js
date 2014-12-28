@@ -28,7 +28,7 @@ module.exports = function(grunt) {
             options: {
                 stripBanners: true,
                 banner: banner + "\n\n(function(window){\n",
-                footer: "\nvar recurve = window.recurve = {};\ncreateApi(recurve);\n})(window);"
+                footer: "\nvar recurve = window.recurve = {};\ncreateApi(recurve, '<%= pkg.version %>');\n})(window);"
             },
 
             build: {
