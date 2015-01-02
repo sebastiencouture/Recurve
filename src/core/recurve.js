@@ -23,7 +23,13 @@
 "use strict";
 
 function createApi(recurve, version) {
-    recurve.$version = version;
+    var versionSplit = version.split(".");
+    recurve.version = {
+        full: version,
+        major: versionSplit[0],
+        minor: versionSplit[1],
+        patch: versionSplit[2],
+    }
 
     extend(recurve, {
         forEach: forEach,
