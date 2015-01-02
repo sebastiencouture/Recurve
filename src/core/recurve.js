@@ -28,8 +28,8 @@ function createApi(recurve, version) {
         full: version,
         major: versionSplit[0],
         minor: versionSplit[1],
-        patch: versionSplit[2],
-    }
+        patch: versionSplit[2]
+    };
 
     extend(recurve, {
         forEach: forEach,
