@@ -5,7 +5,7 @@ module.exports = function(grunt) {
     "use strict";
 
     require('load-grunt-tasks')(grunt);
-    grunt.loadTasks("docs/grunt-tasks");
+    grunt.loadTasks("docs/tasks");
 
     var banner =
         '/*!\n<%= pkg.name %>.js - v<%= pkg.version %>\n' +

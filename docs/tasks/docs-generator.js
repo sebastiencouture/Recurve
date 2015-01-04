@@ -7,6 +7,7 @@ module.exports = function(grunt) {
     var metadata = require("./docs-metadata");
 
     grunt.registerMultiTask("docs", "generate docs", function() {
+        debugger;
         version.generate(grunt);
         api.generate(grunt);
         rdoc.generate(grunt);
