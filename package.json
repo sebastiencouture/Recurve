@@ -22,7 +22,8 @@
         "karma-firefox-launcher": "~0.1.0",
         "karma-chrome-launcher": "~0.1.4",
         "karma-phantomjs-launcher": "~0.1.4",
-        "load-grunt-tasks": "~0.4.0"
+        "load-grunt-tasks": "~0.4.0",
+        "dox": "~0.6.1"
     },
     "scripts": {
         "test": "karma start"

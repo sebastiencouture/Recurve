@@ -4,6 +4,9 @@
 module.exports = function(grunt) {
     "use strict";
 
+    require('load-grunt-tasks')(grunt);
+    grunt.loadTasks("docs/grunt-tasks");
+
     var banner =
         '/*!\n<%= pkg.name %>.js - v<%= pkg.version %>\n' +
             'Created by <%= pkg.author %> on <%=grunt.template.today("yyyy-mm-dd") %>.\n\n' +
@@ -13,7 +16,6 @@ module.exports = function(grunt) {
     var minBanner = '/*! <%= pkg.name %>.js - v<%= pkg.version %> - by <%= pkg.author %> ' +
         '<%= grunt.template.today("yyyy-mm-dd") %> */';
 
-    require('load-grunt-tasks')(grunt);
     var files = require('./files.js').files;
 
     function concatProcessor(src, filepath) {
@@ -115,6 +117,10 @@ module.exports = function(grunt) {
             server: {
                 port: 8000
             }
+        },
+
+        docs: {
+            test: 1
         }
     });
 
