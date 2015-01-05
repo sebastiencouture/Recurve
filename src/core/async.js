@@ -1,5 +1,9 @@
 /*global window: false */
 
+/**
+ * test
+ */
+
 "use strict";
 
 function addAsyncService(module) {

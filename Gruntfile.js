@@ -120,7 +120,10 @@ module.exports = function(grunt) {
         },
 
         docs: {
-            test: 1
+            recurve: {
+                src: "src",
+                dest: "build/docs"
+            }
         }
     });
 
