@@ -122,7 +122,8 @@ module.exports = function(grunt) {
         docs: {
             recurve: {
                 src: "src",
-                dest: "build/docs"
+                dest: "build/docs",
+                docs: "docs"
             }
         }
     });
