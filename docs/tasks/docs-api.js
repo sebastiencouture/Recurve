@@ -3,6 +3,7 @@
 var fileStream = require("fs-extra");
 var path = require("path");
 var dox = require("dox");
+var markdown = require("marked");
 
 
 function generateDirectory(directoryPath, options) {
@@ -38,7 +39,6 @@ function processComments(comments, filePath, options) {
         processedComment.description = comment.description;
         processedComment.line = comment.line;
         processedComment.codeStart = comment.codeStart;
-        processedComment.isPrivate = comment.isPrivate;
 
         processTags(processedComment, comment.tags, filePath, options);
 
@@ -54,6 +54,7 @@ function processTags(processedComment, tags, filePath, options) {
             case "rdoc":
             case "name":
             case "module":
+            case "kind":
                 processedComment[tag.type] = tag.string;
                 break;
             case "require":
@@ -68,6 +69,33 @@ function processTags(processedComment, tags, filePath, options) {
                     path: path,
                     code: code
                 });
+                break;
+            case "description":
+                processedComment.description = markdown(tag.string);
+                break;
+            case "param":
+                processedComment.params = processedComment.params || [];
+                processedComment.params.push({
+                    name: tag.name,
+                    description: tag.description,
+                    types: tag.types
+                });
+                break;
+            case "throws":
+                processedComment.throws = {
+                    description: tag.description,
+                    types: tag.types
+                };
+                break;
+            case "return":
+            case "returns":
+                processedComment.return = {
+                    description: tag.description,
+                    types: tag.types
+                };
+                break;
+            case "private":
+                processedComment.isPrivate = true;
                 break;
             default:
                 processedComment.tags = processedComment.tags || [];

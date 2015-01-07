@@ -1,7 +1,6 @@
 /*global window: false */
 
 /**
- * #WOWOW
  * @rdoc module
  * @name $async
  * @module core
@@ -9,6 +8,11 @@
  * @example async-demo-2.js
  * @require something
  * @require something2
+ * @description
+ * #wow
+ * ##wow2
+ * [inline link](www.google.com)
+ * @require something 3
  */
 
 "use strict";
@@ -23,11 +27,19 @@ function addAsyncService(module) {
 
         return extend($async, {
             /**
-             * blah blah blah
+             * @rdoc method
+             * @name $async#cancel
+             * @kind function
              *
              * @param {String} id this is a value :)
-             * @returns {String} some value [inline link](www.google.com)
+             * @param {object} test not here!
+             * @return {String} some value [inline link](www.google.com) {@link core.$promise promise}
              * @throws {Error} nothing!
+             * @private
+             * @description test
+             *
+             * description
+             * #wow
              */
             cancel: function(id) {
                 window.clearTimeout(id);
