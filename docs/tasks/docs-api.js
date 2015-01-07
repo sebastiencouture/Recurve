@@ -36,7 +36,7 @@ function processComments(comments, filePath, options) {
     var processed = [];
     comments.forEach(function(comment) {
         var processedComment = {};
-        processedComment.description = comment.description;
+        processedComment.description = processInternalLinks(comment.description, options.api.baseUrl);
         processedComment.line = comment.line;
         processedComment.codeStart = comment.codeStart;
 
@@ -49,6 +49,8 @@ function processComments(comments, filePath, options) {
 }
 
 function processTags(processedComment, tags, filePath, options) {
+    var baseUrl = options.api.baseUrl;
+
     tags.forEach(function(tag) {
         switch (tag.type) {
             case "rdoc":
@@ -72,25 +74,26 @@ function processTags(processedComment, tags, filePath, options) {
                 break;
             case "description":
                 processedComment.description = markdown(tag.string);
+                processedComment.description = processInternalLinks(processedComment.description, baseUrl);
                 break;
             case "param":
                 processedComment.params = processedComment.params || [];
                 processedComment.params.push({
                     name: tag.name,
-                    description: tag.description,
+                    description: processInternalLinks(tag.description, baseUrl),
                     types: tag.types
                 });
                 break;
             case "throws":
                 processedComment.throws = {
-                    description: tag.description,
+                    description: processInternalLinks(tag.description, baseUrl),
                     types: tag.types
                 };
                 break;
             case "return":
             case "returns":
-                processedComment.return = {
-                    description: tag.description,
+                processedComment.returns = {
+                    description: processInternalLinks(tag.description, baseUrl),
                     types: tag.types
                 };
                 break;
@@ -102,12 +105,45 @@ function processTags(processedComment, tags, filePath, options) {
                 processedComment.tags.push({
                     type: tag.type,
                     name: tag.name,
-                    description: tag.description,
+                    description: processInternalLinks(tag.description, baseUrl),
                     types: tag.types
                 });
                 break;
         }
     });
+}
+
+function processInternalLinks(description, baseUrl) {
+    if (!description) {
+        return description;
+    }
+
+    // input:
+    // 1. {@link module.name description}
+    // 2. {@link module.name}
+    // 3. {@link module description}
+    // 4. {@link module}
+    // output:
+    // <a href="baseUrl + /module/name">description</a>
+
+    var processedDescription = description;
+    var regExp = /\{@link(.*?)\}/g;
+    var match;
+
+    while (match = regExp.exec(description)) {
+        var original = match[0];
+        var linkSplit = match[1].trim().split(" ");
+        var path = linkSplit.shift();
+        var pathSplit = path.split(".");
+        var module = pathSplit[0];
+        var name = pathSplit[1];
+        var description = linkSplit.join(" ") || path;
+
+        var anchor = '<a href="' + baseUrl + "/" + module + "/" + name + '">' + description + "</a>";
+        processedDescription = processedDescription.replace(original, anchor);
+    }
+
+    return processedDescription;
 }
 
 function getFileExtension(filePath) {
@@ -118,20 +154,19 @@ function getOutputPath(filePath, options) {
     var noRoot = filePath.split(options.input)[1];
     var noExtension = noRoot.split(".")[0];
 
-    return options.apiOutput + noExtension + ".json";
+    return options.api.output + noExtension + ".json";
 }
 
 function getExamplePath(examplePath, filePath, options) {
     var noRoot = filePath.split(options.input)[1];
     var noExtension = noRoot.split(".")[0];
 
-    return "./" + options.docs + "/content/api/examples" + noExtension + "/" + examplePath;
+    return options.api.examples + noExtension + "/" + examplePath;
 }
 
 
 module.exports = {
     generate: function(options) {
-        options.apiOutput = options.output + "/api";
         generateDirectory(options.input, options);
     }
 };

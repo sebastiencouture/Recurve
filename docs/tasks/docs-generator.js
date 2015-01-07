@@ -12,7 +12,13 @@ module.exports = function(grunt) {
             input: this.data.src,
             output: this.data.dest,
             docs: this.data.docs
-        }
+        };
+
+        options.api = {
+            examples: options.docs + "/content/api/examples",
+            output: options.output + "/api",
+            baseUrl: "api"
+        };
 
         fileStream.removeSync(options.output);
 
