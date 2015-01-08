@@ -4,9 +4,7 @@ var fileStream = require("fs-extra");
 
 module.exports = {
     generate: function(options) {
-        var content = fileStream.readFileSync(options.version.input, "utf8");
-        content = JSON.parse(content);
-
+        var content = fileStream.readJsonSync(options.version.input, "utf8");
         fileStream.outputJsonSync(options.version.output, {
             version: content.version
         });

@@ -8,7 +8,7 @@ function getExamplePath(examplePath, filePath, options) {
     var noRoot = filePath.split(options.input)[1];
     var noExtension = noRoot.split(".")[0];
 
-    return options.api.examples + noExtension + "/" + examplePath;
+    return options.examples + noExtension + "/" + examplePath;
 }
 
 
@@ -17,7 +17,7 @@ module.exports = {
         var processed = [];
         comments.forEach(function(comment) {
             var processedComment = {};
-            processedComment.description = this.processInternalLinks(comment.description, options.api.baseUrl);
+            processedComment.description = this.processInternalLinks(comment.description, options.baseUrl);
             processedComment.line = comment.line;
             processedComment.codeStart = comment.codeStart;
 
@@ -30,7 +30,7 @@ module.exports = {
     },
 
     processTags: function(processedComment, tags, filePath, options) {
-        var baseUrl = options.api.baseUrl;
+        var baseUrl = options.baseUrl;
 
         tags.forEach(function(tag) {
             switch (tag.type) {
@@ -39,6 +39,9 @@ module.exports = {
                 case "module":
                 case "kind":
                     processedComment[tag.type] = tag.string;
+                    break;
+                case "sort":
+                    processedComment[tag.type] = parseInt(tag.string);
                     break;
                 case "require":
                     processedComment.requires = processedComment.requires || [];

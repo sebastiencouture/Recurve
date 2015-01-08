@@ -9,21 +9,25 @@ var fileStream = require("fs-extra");
 module.exports = function(grunt) {
     grunt.registerMultiTask("docs", "generate docs", function() {
         var options = {
-            input: this.data.src,
             output: this.data.dest,
             docs: this.data.docs
-        };
-
-        options.api = {
-            examples: options.docs + "/content/api/examples",
-            output: options.output + "/api",
-            baseUrl: "api"
         };
 
         options.version = {
             input: "package.json",
             output: options.output + "/version.json"
+        };
 
+        options.api = {
+            input: this.data.src,
+            output: options.output + "/api",
+            examples: options.docs + "/content/api/examples",
+            baseUrl: "api"
+        };
+
+        options.rdoc = {
+            input: options.docs + "/content",
+            output: options.output + "/content"
         };
 
         fileStream.removeSync(options.output);
