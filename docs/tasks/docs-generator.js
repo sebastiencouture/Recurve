@@ -20,6 +20,12 @@ module.exports = function(grunt) {
             baseUrl: "api"
         };
 
+        options.version = {
+            input: "package.json",
+            output: options.output + "/version.json"
+
+        };
+
         fileStream.removeSync(options.output);
 
         grunt.log.writeln("generating version docs");
