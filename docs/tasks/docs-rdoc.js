@@ -7,27 +7,7 @@ var dox = require("dox");
 var utils = require("./docs-utils");
 var processor = require("./docs-comments-processor");
 
-// TODO TBD move common functionality between api and rdoc with iterating directories/files
-
-function generateDirectory(directoryPath, metadata, options) {
-    var files = fileStream.readdirSync(directoryPath);
-    files.forEach(function(fileName) {
-        var filePath = directoryPath + "/" + fileName;
-        if (fileStream.statSync(filePath).isDirectory()) {
-            generateDirectory(filePath, metadata, options);
-        }
-        else {
-            generateFile(filePath, metadata, options);
-        }
-    });
-}
-
-function generateFile(filePath, metadata, options) {
-    if ("rdoc" !== utils.getFileExtension(filePath)) {
-        return;
-    }
-
-    var content = fileStream.readFileSync(filePath, "utf8");
+function processFile(filePath, content, metadata, options) {
     var rawComments = dox.parseComments(content, {skipSingleStar: true});
     var comments = processor.processComments(rawComments, filePath, {
         input: options.api.input,
@@ -38,18 +18,12 @@ function generateFile(filePath, metadata, options) {
     assert(1 === comments.length, "expected only one comment block per rdoc");
     var comment = comments[0];
 
-    addCommentToMetadata(comment, metadata, options);
+    prepareComment(comment, filePath, options);
+    addCommentToMetadata(comment, metadata, filePath);
 
     var description = processDescription(content, comment);
     var outputPath = getOutputPath(filePath, options);
     fileStream.outputFileSync(outputPath, description);
-}
-
-function getOutputPath(filePath, options) {
-    var noRoot = filePath.split(options.rdoc.input)[1];
-    var noExtension = noRoot.split(".")[0];
-
-    return options.rdoc.output + noExtension + ".html";
 }
 
 function processDescription(content, comment) {
@@ -61,31 +35,39 @@ function processDescription(content, comment) {
     return markdown(description);
 }
 
-function addCommentToMetadata(comment, metadata, options) {
-    prepareComment(comment, options);
-
-    // TODO TBD
-    // should be nested
-    // tutorial overview => docs array => tutorial steps
-    metadata.push(comment);
+function addCommentToMetadata(comment, metadata, filePath) {
+    var directory = utils.getDirectory(filePath);
+    metadata[directory] = metadata[directory] || [];
+    metadata[directory].push(comment);
 }
 
-function prepareComment(comment, options) {
+function prepareComment(comment, filePath, options) {
     delete comment.description;
     delete comment.codeStart;
     delete comment.line;
 
-    // TODO TBD
-    comment.url = "TODO";
+    comment.isIndex = "index" === utils.getFileName(filePath);
+    comment.url = options.rdoc.baseUrl + getRelativePathNoExtension(filePath, options) + ".html";
 }
 
+function getOutputPath(filePath, options) {
+    return options.rdoc.output + getRelativePathNoExtension(filePath, options) + ".html";
+}
+
+function getRelativePathNoExtension(filePath, options) {
+    var noRoot = filePath.split(options.rdoc.input)[1];
+    var noExtension = noRoot.split(".")[0];
+
+    return noExtension;
+}
 
 module.exports = {
     generate: function(options) {
-        var metadata = [];
-        generateDirectory(options.rdoc.input, metadata, options);
+        var metadata = {};
+        utils.iterateDirectory(options.rdoc.input, "rdoc", function(filePath, content) {
+            processFile(filePath, content, metadata, options);
+        });
 
-        var metadataPath = options.rdoc.output + "/metadata.json";
-        fileStream.outputJsonSync(metadataPath, metadata);
+        fileStream.outputJsonSync(options.rdoc.metadataOutput, metadata);
     }
 };

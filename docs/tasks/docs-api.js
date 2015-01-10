@@ -6,25 +6,7 @@ var utils = require("./docs-utils");
 var processor = require("./docs-comments-processor");
 
 
-function generateDirectory(directoryPath, options) {
-    var files = fileStream.readdirSync(directoryPath);
-    files.forEach(function(fileName) {
-        var filePath = directoryPath + "/" + fileName;
-        if (fileStream.statSync(filePath).isDirectory()) {
-            generateDirectory(filePath, options);
-        }
-        else {
-            generateFile(filePath, options);
-        }
-    });
-}
-
-function generateFile(filePath, options) {
-    if ("js" !== utils.getFileExtension(filePath)) {
-        return;
-    }
-
-    var content = fileStream.readFileSync(filePath, "utf8");
+function processFile(filePath, content, options) {
     var rawComments = dox.parseComments(content, {skipSingleStar: true});
     var processedComments = processor.processComments(rawComments, filePath, {
         input: options.api.input,
@@ -46,6 +28,8 @@ function getOutputPath(filePath, options) {
 
 module.exports = {
     generate: function(options) {
-        generateDirectory(options.api.input, options);
+        utils.iterateDirectory(options.api.input, "js", function(filePath, content) {
+            processFile(filePath, content, options);
+        });
     }
 };

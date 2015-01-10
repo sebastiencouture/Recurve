@@ -22,12 +22,15 @@ module.exports = function(grunt) {
             input: this.data.src,
             output: options.output + "/api",
             examples: options.docs + "/content/api/examples",
-            baseUrl: "api"
+            baseUrl: "api",
+            metadataOutput: options.output + "/api.json"
         };
 
         options.rdoc = {
             input: options.docs + "/content",
-            output: options.output + "/content"
+            output: options.output + "/content",
+            baseUrl: "content",
+            metadataOutput: options.output + "/content.json"
         };
 
         fileStream.removeSync(options.output);
