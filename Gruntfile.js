@@ -121,9 +121,28 @@ module.exports = function(grunt) {
 
         docs: {
             recurve: {
-                src: "src",
-                dest: "build/docs",
-                docs: "docs"
+                output: "build/docs",
+                docs: "docs",
+
+                version: {
+                    input: "package.json",
+                    output: "build/docs/version.json"
+                },
+
+                api: {
+                    input: "src",
+                    output: "build/docs/api",
+                    metadataOutput: "build/docs/api.json",
+                    examples: "docs/content/api/examples",
+                    baseUrl: "api"
+                },
+
+                rdoc: {
+                    input: "docs/content",
+                    output: "build/docs/content",
+                    metadataOutput: "build/docs/content.json",
+                    baseUrl: "content"
+                }
             }
         }
     });
