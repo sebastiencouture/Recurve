@@ -1,7 +1,7 @@
 /*global window: false */
 
 /**
- * @rdoc module
+ * @rdoc service
  * @name $async
  * @module core
  * @example async-demo.js

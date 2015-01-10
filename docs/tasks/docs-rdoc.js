@@ -42,23 +42,17 @@ function addCommentToMetadata(comment, metadata, filePath) {
 }
 
 function prepareComment(comment, filePath, options) {
-    delete comment.description;
     delete comment.codeStart;
     delete comment.line;
 
     comment.isIndex = "index" === utils.getFileName(filePath);
-    comment.url = options.rdoc.baseUrl + getRelativePathNoExtension(filePath, options) + ".html";
+    comment.url = options.rdoc.baseUrl + utils.getRelativePathNoExtension(filePath, options.rdoc.input) + ".html";
+
+    assert(comment.url, "unable to determine url for rdoc comment", comment);
 }
 
 function getOutputPath(filePath, options) {
-    return options.rdoc.output + getRelativePathNoExtension(filePath, options) + ".html";
-}
-
-function getRelativePathNoExtension(filePath, options) {
-    var noRoot = filePath.split(options.rdoc.input)[1];
-    var noExtension = noRoot.split(".")[0];
-
-    return noExtension;
+    return options.rdoc.output + utils.getRelativePathNoExtension(filePath, options.rdoc.input) + ".html";
 }
 
 module.exports = {

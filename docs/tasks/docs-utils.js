@@ -17,6 +17,13 @@ module.exports = {
         return 1 < split.length ? split[split.length - 2] : "";
     },
 
+    getRelativePathNoExtension: function (filePath, ignorePath) {
+        var noRoot = filePath.split(ignorePath)[1];
+        var noExtension = noRoot.split(".")[0];
+
+        return noExtension;
+    },
+
     iterateDirectory: function(root, extension, onFile) {
         var files = fileStream.readdirSync(root);
         files.forEach(function(fileName) {

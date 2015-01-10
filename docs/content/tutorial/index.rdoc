@@ -1,7 +1,9 @@
 /**
-* @rdoc overview
 * @name Tutorials
 * @sort 0
+* @description
+* some short summary
+* some short summary
 **/
 
 #THIS
