@@ -24,7 +24,7 @@
 
 function createApi(recurve, version) {
     var versionSplit = version.split(".");
-    recurve.version = {
+    recurve.$version = {
         full: version,
         major: versionSplit[0],
         minor: versionSplit[1],
