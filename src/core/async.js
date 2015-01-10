@@ -33,7 +33,7 @@ function addAsyncService(module) {
              *
              * @param {String} id this is a value :)
              * @param {object} test not here!
-             * @return {String} some value [inline link](www.google.com) {@link core.$promise#all promise something}
+             * @return {String} some value [inline link](www.google.com) @{core.$promise#all promise something}
              * @throws {Error} nothing!
              * @private
              * @description test

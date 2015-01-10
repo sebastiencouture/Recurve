@@ -103,15 +103,15 @@ module.exports = {
         }
 
         // input:
-        // 1. {@link module.name description}
-        // 2. {@link module.name}
-        // 3. {@link module description}
-        // 4. {@link module}
+        // 1. @{module.name description}
+        // 2. @{module.name}
+        // 3. @{module description}
+        // 4. @{module}
         // output:
         // <a href="baseUrl + /module/name">description</a>
 
         var processedDescription = description;
-        var regExp = /\{@link(.*?)\}/g;
+        var regExp = /\@{(.*?)\}/g;
         var match;
 
         while (match = regExp.exec(description)) {
