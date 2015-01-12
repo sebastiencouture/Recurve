@@ -3,7 +3,6 @@
 var version = require("./docs-version");
 var api = require("./docs-api");
 var rdoc = require("./docs-rdoc");
-var metadata = require("./docs-metadata");
 var fileStream = require("fs-extra");
 
 module.exports = function(grunt) {
@@ -18,8 +17,5 @@ module.exports = function(grunt) {
 
         grunt.log.writeln("generating rdoc docs");
         rdoc.generate(this.data);
-
-        grunt.log.writeln("generating metadata docs");
-        metadata.generate(this.data);
     });
 }

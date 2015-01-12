@@ -27,6 +27,7 @@ module.exports = function(grunt) {
         pkg: grunt.file.readJSON("package.json"),
         license: grunt.file.read("LICENSE"),
         buildDir: "build",
+        buildDocsDir: "build/docs",
         distDir: "dist",
 
         clean: [ "<%= distDir %>" ],
@@ -58,6 +59,18 @@ module.exports = function(grunt) {
                 }
             },
 
+            buildDocs: {
+                options: {
+                    stripBanners: true,
+                    banner: "(function(window){\n\n'use strict';\n\n",
+                    footer: "\n\n})(window);",
+                    process: concatProcessor
+                },
+                files: {
+                    "<%= buildDocsDir %>/app/js/<%= pkg.name %>-docs.js": files.docs
+                }
+            },
+
             release: {
                 options: {
                     banner: banner + "\n\n"
@@ -68,6 +81,15 @@ module.exports = function(grunt) {
                     "<%= distDir %>/<%= pkg.name %>-flux.js": "<%= buildDir %>/<%= pkg.name %>-flux.js",
                     "<%= distDir %>/<%= pkg.name %>-flux-rest.js": "<%= buildDir %>/<%= pkg.name %>-flux-rest.js",
                     "<%= distDir %>/<%= pkg.name %>-flux-state.js": "<%= buildDir %>/<%= pkg.name %>-flux-state.js"
+                }
+            },
+
+            releaseDocs: {
+                options: {
+                    banner: banner + "\n\n"
+                },
+                files: {
+                    "<%= distDir %>/<%= pkg.name %>-docs.js": "<%= buildDir %>/<%= pkg.name %>-docs.js"
                 }
             }
         },
@@ -81,6 +103,7 @@ module.exports = function(grunt) {
             recurveFlux: files.recurveModules.flux,
             recurveFluxRest: files.recurveModules.fluxRest,
             recurveFluxState: files.recurveModules.fluxState,
+            docs: files.docs,
             test: files.test
         },
 
@@ -121,26 +144,26 @@ module.exports = function(grunt) {
 
         docs: {
             recurve: {
-                output: "build/docs",
+                output: "build/docs/data",
                 docs: "docs",
 
                 version: {
                     input: "package.json",
-                    output: "build/docs/version.json"
+                    output: "build/docs/data/version.json"
                 },
 
                 api: {
                     input: "src",
-                    output: "build/docs/api",
-                    metadataOutput: "build/docs/api.json",
+                    output: "build/docs/data/api",
+                    metadataOutput: "build/docs/data/api.json",
                     examples: "docs/content/api/examples",
                     baseUrl: "api"
                 },
 
                 rdoc: {
                     input: "docs/content",
-                    output: "build/docs/content",
-                    metadataOutput: "build/docs/content.json",
+                    output: "build/docs/data/content",
+                    metadataOutput: "build/docs/data/content.json",
                     baseUrl: "content"
                 }
             }

@@ -59,6 +59,10 @@ var recurveFiles = {
         ]
     },
 
+    "docs": [
+        "docs/app/src/**/*.js"
+    ],
+
     "test": [
         "test/**/*.spec.js"
     ]
