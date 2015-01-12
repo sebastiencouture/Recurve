@@ -1,0 +1,9 @@
+$testing: bold;
+
+body {
+  font-weight: $testing;
+
+  .test {
+    font-weight: normal;
+  }
+}

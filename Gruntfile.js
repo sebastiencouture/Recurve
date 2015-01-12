@@ -28,10 +28,14 @@ module.exports = function(grunt) {
         license: grunt.file.read("LICENSE"),
         buildDir: "build",
         buildDocsDir: "build/docs",
+        buildDocsDataDir: "<%= buildDocsDir %>/data",
         distDir: "dist",
+        distDocsDir: "dist/docs",
+        distDocsDataDir: "<%= distDocsDir %>/data",
 
-        clean: [ "<%= distDir %>" ],
+        clean: [ "<%= buildDir %>", "<%= distDir %>" ],
 
+        /* TODO TBD clean up naming concat:build:core instead of concat:buildCore, etc. */
         concat: {
             buildCore: {
                 options: {
@@ -59,7 +63,7 @@ module.exports = function(grunt) {
                 }
             },
 
-            buildDocs: {
+            buildDocsJs: {
                 options: {
                     stripBanners: true,
                     banner: "(function(window){\n\n'use strict';\n\n",
@@ -67,7 +71,22 @@ module.exports = function(grunt) {
                     process: concatProcessor
                 },
                 files: {
-                    "<%= buildDocsDir %>/app/js/<%= pkg.name %>-docs.js": files.docs
+                    "<%= buildDocsDir %>/js/<%= pkg.name %>-docs.js": files.docs.js
+                }
+            },
+
+            buildDocsCss: {
+                options: {
+                    process: concatProcessor
+                },
+                files: {
+                    "<%= buildDocsDir %>/scss/<%= pkg.name %>-docs.scss": files.docs.css
+                }
+            },
+
+            buildDocsHtml: {
+                files: {
+                    "<%= buildDocsDir %>/index.html" : "docs/app/index-debug.html"
                 }
             },
 
@@ -89,22 +108,18 @@ module.exports = function(grunt) {
                     banner: banner + "\n\n"
                 },
                 files: {
-                    "<%= distDir %>/<%= pkg.name %>-docs.js": "<%= buildDir %>/<%= pkg.name %>-docs.js"
+                    "<%= distDocsDir %>/js/<%= pkg.name %>-docs.js": "<%= buildDocsDir %>/js/<%= pkg.name %>-docs.js"
+                }
+            },
+
+            releaseDocsHtml: {
+                options: {
+                    banner: banner + "\n\n"
+                },
+                files: {
+                    "<%= distDocsDir %>/index.html" : "docs/app/index-release.html"
                 }
             }
-        },
-
-        jshint: {
-            options: {
-                jshintrc: true,
-            },
-            recurve: files.recurveSrc,
-            recurveMock: files.recurveModules.mock,
-            recurveFlux: files.recurveModules.flux,
-            recurveFluxRest: files.recurveModules.fluxRest,
-            recurveFluxState: files.recurveModules.fluxState,
-            docs: files.docs,
-            test: files.test
         },
 
         uglify: {
@@ -121,6 +136,80 @@ module.exports = function(grunt) {
                     "<%= distDir %>/<%= pkg.name %>-flux-state.min.js": "<%= buildDir %>/<%= pkg.name %>-flux-state.js"
                 }
             },
+
+            docs: {
+                files: {
+                    "<%= distDocsDir %>/js/<%= pkg.name %>-docs.min.js": "<%= buildDocsDir %>/js/<%= pkg.name %>-docs.js"
+                }
+            }
+        },
+
+        sass: {
+            options: {
+                lineNumbers: true,
+                style: "expanded"
+            },
+            docs: {
+                files : {
+                    "<%= buildDocsDir %>/css/<%= pkg.name %>-docs.css": "<%= buildDocsDir %>/scss/<%= pkg.name %>-docs.scss"
+                }
+            }
+        },
+
+        copy: {
+            docs: {
+                build: {
+                    files: [
+                        {
+                            expand: true,
+                            cwd: "docs/app/assets/img/",
+                            src: "**",
+                            dest: "<%= buildDocsDir %>/img"
+                        },
+                        {
+                            expand: true,
+                            cwd: "docs/app/assets/vendor/",
+                            src: "**",
+                            dest: "<%= buildDocsDir %>/vendor"
+                        }
+                    ]
+                },
+                release: {
+                    files: [
+                        {
+                            expand: true,
+                            cwd: "docs/app/assets/img/",
+                            src: "**",
+                            dest: "<%= distDocsDir %>/img"
+                        },
+                        {
+                            expand: true,
+                            cwd: "docs/app/assets/vendor/",
+                            src: "**",
+                            dest: "<%= distDocsDir %>/vendor"
+                        },
+                        {
+                            expand: true,
+                            cwd: "<%= buildDocsDir %>",
+                            src: "**",
+                            dest: "<%= distDocsDir %>/data"
+                        }
+                    ]
+                }
+            }
+        },
+
+        jshint: {
+            options: {
+                jshintrc: true
+            },
+            recurve: files.recurveSrc,
+            recurveMock: files.recurveModules.mock,
+            recurveFlux: files.recurveModules.flux,
+            recurveFluxRest: files.recurveModules.fluxRest,
+            recurveFluxState: files.recurveModules.fluxState,
+            docs: files.docs,
+            test: files.test
         },
 
         karma: {
@@ -144,34 +233,34 @@ module.exports = function(grunt) {
 
         docs: {
             recurve: {
-                output: "build/docs/data",
+                output: "<%= buildDocsDataDir %>",
                 docs: "docs",
 
                 version: {
                     input: "package.json",
-                    output: "build/docs/data/version.json"
+                    output: "<%= buildDocsDataDir %>/version.json"
                 },
 
                 api: {
                     input: "src",
-                    output: "build/docs/data/api",
-                    metadataOutput: "build/docs/data/api.json",
+                    output: "<%= buildDocsDataDir %>/api",
+                    metadataOutput: "<%= buildDocsDataDir %>/api.json",
                     examples: "docs/content/api/examples",
-                    baseUrl: "api"
+                    baseUrl: "data/api"
                 },
 
                 rdoc: {
                     input: "docs/content",
-                    output: "build/docs/data/content",
-                    metadataOutput: "build/docs/data/content.json",
-                    baseUrl: "content"
+                    output: "<%= buildDocsDataDir %>/content",
+                    metadataOutput: "<%= buildDocsDataDir %>/content.json",
+                    baseUrl: "data/content"
                 }
             }
         }
     });
 
     grunt.registerTask("default", ["build", "jshint", "karma"]);
-    grunt.registerTask("build", "Perform a normal build", ["concat", "uglify"]);
+    grunt.registerTask("build", "Perform a normal build", ["concat", "uglify", "sass", "docs", "copy"]);
     grunt.registerTask("dist", "Perform a clean build", ["clean", "build"]);
     grunt.registerTask("dev", "Run dev server and watch for changes", ["concat:buildCore", "connect", "karma", "watch"]);
     grunt.registerTask("test", "Run tests once", ["karma:unit:run"]);

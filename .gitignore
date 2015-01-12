@@ -1,5 +1,7 @@
 .idea/
+.sass-cache
 *.iml
 node_modules
 dist/tests.js
+dist/docs
 build
