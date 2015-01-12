@@ -35,8 +35,10 @@ function addCommentToMetadata(comment, metadata, filePath, options) {
 
     assert(url, "unable to determine url for api comment", comment);
 
-    metadata[module] = metadata[module] || [];
-    metadata[module].push({
+    metadata[module] = metadata[module] || {};
+    metadata[module][comment.rdoc] = metadata[module][comment.rdoc] || [];
+
+    metadata[module][comment.rdoc].push({
         name: comment.name,
         description: comment.description,
         isIndex: isIndex,
