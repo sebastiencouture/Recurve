@@ -35,7 +35,6 @@ module.exports = function(grunt) {
 
         clean: [ "<%= buildDir %>", "<%= distDir %>" ],
 
-        /* TODO TBD clean up naming concat:build:core instead of concat:buildCore, etc. */
         concat: {
             buildCore: {
                 options: {
@@ -90,7 +89,7 @@ module.exports = function(grunt) {
                 }
             },
 
-            release: {
+            dist: {
                 options: {
                     banner: banner + "\n\n"
                 },
@@ -103,7 +102,7 @@ module.exports = function(grunt) {
                 }
             },
 
-            releaseDocs: {
+            distDocs: {
                 options: {
                     banner: banner + "\n\n"
                 },
@@ -112,7 +111,7 @@ module.exports = function(grunt) {
                 }
             },
 
-            releaseDocsHtml: {
+            distDocsHtml: {
                 options: {
                     banner: banner + "\n\n"
                 },
@@ -149,6 +148,7 @@ module.exports = function(grunt) {
                 lineNumbers: true,
                 style: "expanded"
             },
+
             docs: {
                 files : {
                     "<%= buildDocsDir %>/css/<%= pkg.name %>-docs.css": "<%= buildDocsDir %>/scss/<%= pkg.name %>-docs.scss"
@@ -157,45 +157,50 @@ module.exports = function(grunt) {
         },
 
         copy: {
-            docs: {
-                build: {
-                    files: [
-                        {
-                            expand: true,
-                            cwd: "docs/app/assets/img/",
-                            src: "**",
-                            dest: "<%= buildDocsDir %>/img"
-                        },
-                        {
-                            expand: true,
-                            cwd: "docs/app/assets/vendor/",
-                            src: "**",
-                            dest: "<%= buildDocsDir %>/vendor"
-                        }
-                    ]
-                },
-                release: {
-                    files: [
-                        {
-                            expand: true,
-                            cwd: "docs/app/assets/img/",
-                            src: "**",
-                            dest: "<%= distDocsDir %>/img"
-                        },
-                        {
-                            expand: true,
-                            cwd: "docs/app/assets/vendor/",
-                            src: "**",
-                            dest: "<%= distDocsDir %>/vendor"
-                        },
-                        {
-                            expand: true,
-                            cwd: "<%= buildDocsDir %>",
-                            src: "**",
-                            dest: "<%= distDocsDir %>/data"
-                        }
-                    ]
-                }
+            docsBuild: {
+                files: [
+                    {
+                        expand: true,
+                        cwd: "docs/app/assets/img/",
+                        src: "**",
+                        dest: "<%= buildDocsDir %>/img"
+                    },
+                    {
+                        expand: true,
+                        cwd: "docs/app/assets/vendor/",
+                        src: "**",
+                        dest: "<%= buildDocsDir %>/vendor"
+                    }
+                ]
+            },
+
+            docsDist: {
+                files: [
+                    {
+                        expand: true,
+                        cwd: "docs/app/assets/img/",
+                        src: "**",
+                        dest: "<%= distDocsDir %>/img"
+                    },
+                    {
+                        expand: true,
+                        cwd: "docs/app/assets/vendor/",
+                        src: "**",
+                        dest: "<%= distDocsDir %>/vendor"
+                    },
+                    {
+                        expand: true,
+                        cwd: "<%= buildDocsDir %>/css",
+                        src: "**",
+                        dest: "<%= distDocsDir %>/css"
+                    },
+                    {
+                        expand: true,
+                        cwd: "<%= buildDocsDir %>/data",
+                        src: "**",
+                        dest: "<%= distDocsDir %>/data"
+                    }
+                ]
             }
         },
 
@@ -203,6 +208,7 @@ module.exports = function(grunt) {
             options: {
                 jshintrc: true
             },
+
             recurve: files.recurveSrc,
             recurveMock: files.recurveModules.mock,
             recurveFlux: files.recurveModules.flux,
@@ -221,18 +227,35 @@ module.exports = function(grunt) {
         },
 
         watch: {
-            files: ["src/**/*.js", "test/**/*.js"],
-            tasks: ["concat:buildCore", "karma:unit:run"]
-        },
+            recurve: {
+                files: ["src/**/*.js", "test/**/*.js"],
+                tasks: ["concat:buildCore", "karma:unit:run"]
+            },
 
-        connect: {
-            server: {
-                port: 8000
+            docs: {
+                files: ["src/**/*.js", "docs/app/src/**/*.js", "docs/app/assets/css/**.scss", "docs/app/*.html", "docs/tasks/**/*.js"],
+                tasks: ["concat:buildDocsJs", "concat:buildDocsCss", "concat:buildDocsHtml", "sass", "docsGen", "copy"]
             }
         },
 
-        docs: {
+        connect: {
             recurve: {
+                options: {
+                    port: 8000
+                }
+
+            },
+
+            docs: {
+                options: {
+                    port: 9000,
+                    base: "build/docs"
+                }
+            }
+        },
+
+        docsGen: {
+            docs: {
                 output: "<%= buildDocsDataDir %>",
                 docs: "docs",
 
@@ -259,9 +282,9 @@ module.exports = function(grunt) {
         }
     });
 
-    grunt.registerTask("default", ["build", "jshint", "karma"]);
-    grunt.registerTask("build", "Perform a normal build", ["concat", "uglify", "sass", "docs", "copy"]);
+    grunt.registerTask("build", "Perform a normal build", ["concat", "uglify", "sass", "docsGen", "copy", "jshint", "karma"]);
     grunt.registerTask("dist", "Perform a clean build", ["clean", "build"]);
-    grunt.registerTask("dev", "Run dev server and watch for changes", ["concat:buildCore", "connect", "karma", "watch"]);
-    grunt.registerTask("test", "Run tests once", ["karma:unit:run"]);
+    grunt.registerTask("dev", "Run dev server and watch for changes for recurve", ["concat:buildCore", "connect:recurve", "karma", "watch:recurve"]);
+    grunt.registerTask("devDocs", "Run dev server and watch for changes for docs", ["concat:buildDocsJs", "concat:buildDocsCss", "concat:buildDocsHtml", "sass", "docsGen", "copy", "connect:docs", "watch:docs"]);
+    grunt.registerTask("test", "Run recurve tests once", ["karma:unit:run"]);
 };

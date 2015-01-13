@@ -6,7 +6,7 @@ var rdoc = require("./docs-rdoc");
 var fileStream = require("fs-extra");
 
 module.exports = function(grunt) {
-    grunt.registerMultiTask("docs", "generate docs", function() {
+    grunt.registerMultiTask("docsGen", "generate docs", function() {
         fileStream.removeSync(this.data.output);
 
         grunt.log.writeln("generating version docs");
