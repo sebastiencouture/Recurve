@@ -154,11 +154,10 @@ function addHttpXhrService(module) {
                         assert(false, "recurve only supports IE8+");
                     }
 
-                    config();
-
                     xhr.onreadystatechange = stateChangeHandler;
-
                     xhr.open(options.method.toUpperCase(), options.url, true);
+
+                    config();
                     xhr.send(options.data);
 
                     deferred = $promise.defer();
