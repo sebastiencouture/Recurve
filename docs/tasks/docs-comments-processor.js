@@ -112,19 +112,21 @@ module.exports = {
 
         var processedDescription = description;
         var regExp = /\@{(.*?)\}/g;
-        var match;
 
-        while (match = regExp.exec(description)) {
+        var match = regExp.exec(description);
+        while (match) {
             var original = match[0];
             var linkSplit = match[1].trim().split(" ");
             var path = linkSplit.shift();
             var pathSplit = path.split(".");
             var module = pathSplit[0];
             var name = pathSplit[1];
-            var description = linkSplit.join(" ") || path;
+            var linkDescription = linkSplit.join(" ") || path;
 
-            var anchor = '<a href="' + baseUrl + "/" + module + "/" + name + '">' + description + "</a>";
+            var anchor = '<a href="' + baseUrl + "/" + module + "/" + name + '">' + linkDescription + "</a>";
             processedDescription = processedDescription.replace(original, anchor);
+
+            match = regExp.exec(description);
         }
 
         return processedDescription;

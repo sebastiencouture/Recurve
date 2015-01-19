@@ -1,0 +1,5 @@
+(function(window, recurve) {
+    "use strict";
+
+    var docsModule = recurve.module();
+

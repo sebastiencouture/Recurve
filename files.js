@@ -65,6 +65,9 @@ var recurveFiles = {
         ],
         css: [
             "docs/app/assets/**/*.scss"
+        ],
+        tasks: [
+            "docs/tasks/*.js"
         ]
     },
 

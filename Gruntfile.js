@@ -39,8 +39,8 @@ module.exports = function(grunt) {
             buildCore: {
                 options: {
                     stripBanners: true,
-                    banner: "(function(window){\n\n'use strict';\n\n",
-                    footer: "\n\nvar recurve = window.recurve = {};\ncreateApi(recurve, '<%= pkg.version %>');\n\n})(window);",
+                    banner: grunt.file.read("src/recurve.banner").toString(),
+                    footer: grunt.file.read("src/recurve.footer").toString(),
                     process: concatProcessor
                 },
                 src: files.recurveSrc,
@@ -50,8 +50,8 @@ module.exports = function(grunt) {
             buildModules: {
                 options: {
                     stripBanners: true,
-                    banner: "(function(window){\n\n'use strict';\n\n",
-                    footer: "\n\n})(window);",
+                    banner: grunt.file.read("src/module.banner").toString(),
+                    footer: grunt.file.read("src/module.footer").toString(),
                     process: concatProcessor
                 },
                 files: {
@@ -65,8 +65,8 @@ module.exports = function(grunt) {
             buildDocsJs: {
                 options: {
                     stripBanners: true,
-                    banner: "(function(window){\n\n'use strict';\n\n",
-                    footer: "\n\n})(window);",
+                    banner: grunt.file.read("docs/app/src/docs.banner").toString(),
+                    footer: grunt.file.read("docs/app/src/docs.footer").toString(),
                     process: concatProcessor
                 },
                 files: {
@@ -99,15 +99,6 @@ module.exports = function(grunt) {
                     "<%= distDir %>/<%= pkg.name %>-flux.js": "<%= buildDir %>/<%= pkg.name %>-flux.js",
                     "<%= distDir %>/<%= pkg.name %>-flux-rest.js": "<%= buildDir %>/<%= pkg.name %>-flux-rest.js",
                     "<%= distDir %>/<%= pkg.name %>-flux-state.js": "<%= buildDir %>/<%= pkg.name %>-flux-state.js"
-                }
-            },
-
-            distDocs: {
-                options: {
-                    banner: banner + "\n\n"
-                },
-                files: {
-                    "<%= distDocsDir %>/js/<%= pkg.name %>-docs.js": "<%= buildDocsDir %>/js/<%= pkg.name %>-docs.js"
                 }
             },
 
@@ -156,6 +147,14 @@ module.exports = function(grunt) {
             }
         },
 
+        cssmin: {
+            docs: {
+                files: {
+                    "<%= distDocsDir %>/css/<%= pkg.name %>-docs.min.css": "<%= buildDocsDir %>/css/<%= pkg.name %>-docs.css"
+                }
+            }
+        },
+
         copy: {
             docsBuild: {
                 files: [
@@ -170,6 +169,24 @@ module.exports = function(grunt) {
                         cwd: "docs/app/assets/vendor/",
                         src: "**",
                         dest: "<%= buildDocsDir %>/vendor"
+                    },
+                    {
+                        expand: true,
+                        cwd: "<%= buildDir %>",
+                        src: "<%= pkg.name %>.js",
+                        dest: "<%= buildDocsDir %>/vendor"
+                    },
+                    {
+                        expand: true,
+                        cwd: "<%= buildDir %>",
+                        src: "<%= pkg.name %>-flux.js",
+                        dest: "<%= buildDocsDir %>/vendor"
+                    },
+                    {
+                        expand: true,
+                        cwd: "<%= buildDir %>",
+                        src: "<%= pkg.name %>-flux-state.js",
+                        dest: "<%= buildDocsDir %>/vendor"
                     }
                 ]
             },
@@ -178,7 +195,13 @@ module.exports = function(grunt) {
                 files: [
                     {
                         expand: true,
-                        cwd: "docs/app/assets/img/",
+                        cwd: "<%= buildDocsDir %>/data",
+                        src: "**",
+                        dest: "<%= distDocsDir %>/data"
+                    },
+                    {
+                        expand: true,
+                        cwd: "<%= buildDir %>/img",
                         src: "**",
                         dest: "<%= distDocsDir %>/img"
                     },
@@ -190,15 +213,21 @@ module.exports = function(grunt) {
                     },
                     {
                         expand: true,
-                        cwd: "<%= buildDocsDir %>/css",
-                        src: "**",
-                        dest: "<%= distDocsDir %>/css"
+                        cwd: "<%= distDir %>",
+                        src: "<%= pkg.name %>.min.js",
+                        dest: "<%= distDocsDir %>/vendor"
                     },
                     {
                         expand: true,
-                        cwd: "<%= buildDocsDir %>/data",
-                        src: "**",
-                        dest: "<%= distDocsDir %>/data"
+                        cwd: "<%= distDir %>",
+                        src: "<%= pkg.name %>-flux.min.js",
+                        dest: "<%= distDocsDir %>/vendor"
+                    },
+                    {
+                        expand: true,
+                        cwd: "<%= distDir %>",
+                        src: "<%= pkg.name %>-flux-state.min.js",
+                        dest: "<%= distDocsDir %>/vendor"
                     }
                 ]
             }
@@ -214,13 +243,21 @@ module.exports = function(grunt) {
             recurveFlux: files.recurveModules.flux,
             recurveFluxRest: files.recurveModules.fluxRest,
             recurveFluxState: files.recurveModules.fluxState,
-            docs: files.docs,
+            docs: files.docs.js.concat(files.docs.tasks),
             test: files.test
         },
 
         karma: {
+            options: {
+                configFile: "karma.conf.js"
+            },
+
+            continous: {
+                singleRun: true,
+                browsers: ['PhantomJS']
+            },
+
             unit: {
-                configFile: "karma.conf.js",
                 background: true,
                 singleRun: false
             }
@@ -233,7 +270,7 @@ module.exports = function(grunt) {
             },
 
             docs: {
-                files: ["src/**/*.js", "docs/app/src/**/*.js", "docs/app/assets/css/**.scss", "docs/app/*.html", "docs/tasks/**/*.js"],
+                files: ["src/**/*.js", "docs/app/src/**/*.js", "docs/app/assets/**/*.scss", "docs/app/*.html", "docs/tasks/**/*.js"],
                 tasks: ["concat:buildDocsJs", "concat:buildDocsCss", "concat:buildDocsHtml", "sass", "docsGen", "copy"]
             }
         },
@@ -282,9 +319,9 @@ module.exports = function(grunt) {
         }
     });
 
-    grunt.registerTask("build", "Perform a normal build", ["concat", "uglify", "sass", "docsGen", "copy", "jshint", "karma"]);
-    grunt.registerTask("dist", "Perform a clean build", ["clean", "build"]);
-    grunt.registerTask("dev", "Run dev server and watch for changes for recurve", ["concat:buildCore", "connect:recurve", "karma", "watch:recurve"]);
+
+    grunt.registerTask("dev", "Run dev server and watch for changes for recurve", ["concat:buildCore", "connect:recurve", "karma:unit", "watch:recurve"]);
     grunt.registerTask("devDocs", "Run dev server and watch for changes for docs", ["concat:buildDocsJs", "concat:buildDocsCss", "concat:buildDocsHtml", "sass", "docsGen", "copy", "connect:docs", "watch:docs"]);
-    grunt.registerTask("test", "Run recurve tests once", ["karma:unit:run"]);
+    grunt.registerTask("dist", "Create a distribution build of recurve and docs", ["clean", "concat", "uglify", "sass", "cssmin", "docsGen", "copy", "karma:continous", "jshint"]);
+    grunt.registerTask("test", "Run unit tests and jshint", ["karma:continous", "jshint"]);
 };

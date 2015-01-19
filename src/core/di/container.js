@@ -68,7 +68,7 @@ function container(modules) {
         }
 
         var service = services[name];
-        assert(service, "no service exists with the name {0}", name);
+        assert(service, "no service or public service exists with the name {0}", name);
 
         if (0 <= resolving.indexOf(name)) {
             var dependencyStack = resolving.join(" -> ");
@@ -80,6 +80,7 @@ function container(modules) {
         resolving.push(name);
 
         var instance = invoke(service.dependencies, service.value);
+        assert(instance, "factory {0} must return an instance", name);
 
         instances[name] = decorate(name, instance);
         assert(undefined !== instances[name], "decorator {0} must return an instance", name);

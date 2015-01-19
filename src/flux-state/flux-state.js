@@ -14,6 +14,9 @@
     // trigger action change => clear startChange + error, update current + previous
     // trigger action error => clear startChange, update error
 
+    //
+    // config: path, data, resolve
+
     module.factory("$state", ["$router", "$action", "$promise", "$config"],
         function($router, $action, $promise, $config) {
         var states = [];

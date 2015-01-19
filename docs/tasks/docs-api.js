@@ -20,7 +20,7 @@ function processFile(filePath, content, metadata, options) {
 
     processedComments.forEach(function(comment) {
         addCommentToMetadata(comment, metadata, filePath, options);
-    })
+    });
 }
 
 function addCommentToMetadata(comment, metadata, filePath, options) {

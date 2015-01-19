@@ -210,7 +210,7 @@ describe("container", function(){
             containerA = container(moduleA);
             expect(function(){
                 containerA.invoke(["a"], function(){});
-            }).toThrow(new Error("no service exists with the name a"));
+            }).toThrow(new Error("no service or public service exists with the name a"));
         });
 
         it("should throw an error if unable to resolve service dependency", function(){
@@ -219,7 +219,7 @@ describe("container", function(){
             containerA = container(moduleA);
             expect(function(){
                 containerA.invoke(["a"], function(){});
-            }).toThrow(new Error("no service exists with the name b"));
+            }).toThrow(new Error("no service or public service exists with the name b"));
         });
 
         it("should resolve factory as dependency", function(){
@@ -473,19 +473,19 @@ describe("container", function(){
         it("should throw error if doesn't exist", function(){
             expect(function(){
                 container(moduleA).get("a");
-            }).toThrow(new Error("no service exists with the name a"));
+            }).toThrow(new Error("no service or public service exists with the name a"));
         });
 
         it("should throw error for null", function(){
             expect(function(){
                 container(moduleA).get(null);
-            }).toThrow(new Error("no service exists with the name null"));
+            }).toThrow(new Error("no service or public service exists with the name null"));
         });
 
         it("should throw error undefined", function(){
             expect(function(){
                 container(moduleA).get(undefined);
-            }).toThrow(new Error("no service exists with the name {0}"));
+            }).toThrow(new Error("no service or public service exists with the name {0}"));
         });
     });
 
@@ -579,7 +579,7 @@ describe("container", function(){
             it("should not allow to be used outside of module", function(){
                 expect(function() {
                     containerA.get("c");
-                }).toThrow(new Error("no service exists with the name a"));
+                }).toThrow(new Error("no service or public service exists with the name a"));
             });
         });
 

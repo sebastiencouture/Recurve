@@ -18,4 +18,4 @@ module.exports = function(grunt) {
         grunt.log.writeln("generating rdoc docs");
         rdoc.generate(this.data);
     });
-}
+};

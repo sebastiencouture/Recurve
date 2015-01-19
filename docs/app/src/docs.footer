@@ -1,0 +1,8 @@
+
+    var container = recurve.container([
+        recurve.flux.$module,
+        recurve.flux.state.$module,
+        docsModule]);
+
+    container.load();
+})(window, recurve);

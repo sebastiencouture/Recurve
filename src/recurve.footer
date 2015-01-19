@@ -1,0 +1,5 @@
+
+    var recurve = window.recurve = {};
+    createApi(recurve, '<%= pkg.version %>');
+
+})(window);
