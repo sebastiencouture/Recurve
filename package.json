@@ -20,6 +20,7 @@
         "grunt-contrib-cssmin": "~0.11.0",
         "grunt-jasmine": "~0.1.0",
         "grunt-debug-task": "~0.1.5",
+        "connect-modrewrite": "~0.7.9",
         "jshint-stylish": "~0.1.5",
         "karma": "~0.12.19",
         "karma-jasmine": "~0.2.0",
