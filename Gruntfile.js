@@ -329,14 +329,14 @@ module.exports = function(grunt) {
                     output: "<%= buildDocsDataDir %>/api",
                     metadataOutput: "<%= buildDocsDataDir %>/api.json",
                     examples: "docs/content/api/examples",
-                    baseUrl: "data/api"
+                    baseUrl: "/data/api"
                 },
 
                 rdoc: {
                     input: "docs/content",
                     output: "<%= buildDocsDataDir %>/content",
                     metadataOutput: "<%= buildDocsDataDir %>/content.json",
-                    baseUrl: "data/content"
+                    baseUrl: "/data/content"
                 }
             }
         }

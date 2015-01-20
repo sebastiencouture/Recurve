@@ -84,7 +84,7 @@ function createApi(recurve, version) {
         "$document", "$window", "$timeout", "$signal",
         "$eventEmitter", "$cache", "$log", "$logConsole",
         "$errorHandler", "$uncaughtErrorHandler", "$performance",
-        "$cookies", "$promise", "$http", "$router"
+        "$cookies", "$promise", "$router", "$http"
     ]);
 
     recurve.module = function(dependentModules) {

@@ -1,13 +1,15 @@
 "use strict";
 
-docsModule.factory("app", [,"$promise", "$action", "$state", "docsService", "utils"], function($promise, $action, $state, docsService, utils) {
+docsModule.factory("app", ["$promise", "$action", "$state", "docsService", "utils"], function($promise, $action, $state, docsService, utils) {
 
-    app.actions.loadStart.trigger();
+    var actions = utils.createActions(["loadStart", "loadDone", "loadError"]);
+
+    actions.loadStart.trigger();
     getStartupData().then(function() {
         $state.start();
-        app.actions.loadDone.trigger();
+        actions.loadDone.trigger();
     }, function() {
-        app.actions.loadError.trigger();
+        actions.loadError.trigger();
     });
 
     function getStartupData() {
@@ -19,9 +21,7 @@ docsModule.factory("app", [,"$promise", "$action", "$state", "docsService", "uti
         return $promise.all(promises);
     }
 
-    var app = {
-        actions: utils.createActions(["loadStart", "loadDone", "loadError"])
+    return {
+        actions: actions
     };
-
-    return app;
 });

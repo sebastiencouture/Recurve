@@ -1,6 +1,7 @@
 "use strict";
 
-docsModule.factory("config.$state", ["$promise", "$http"], function($promise, $http) {
+docsModule.factory("config.$state", ["$promise", "$http", "apiDataStore", "guideDataStore", "tutorialDataStore"],
+    function($promise, $http, apiDataStore, guideDataStore, tutorialDataStore) {
 
     function createDescriptionResolver(urlCreator) {
         return {
@@ -23,23 +24,19 @@ docsModule.factory("config.$state", ["$promise", "$http"], function($promise, $h
             });
     }
 
-    // TODO TBD this should be pulled from api.json
-    // TODO TBD move some of this to docs-service.js as well
-    function getParentService(name) {
-        var split = name.split(".");
-        return 1 < split.length ? split[1] : split[0];
-    }
     function getApiUrl(params) {
-        var parentService = getParentService(params.name);
-        return recurve.format("/data/api/{0}/{1}.json", params.module, parentService);
+        var resource = apiDataStore.getResource(params.module, params.type, params.name);
+        return resource ? resource.url : null;
     }
 
     function getTutorialUrl(params) {
-        return "TODO";
+        var resource = tutorialDataStore.getContentResource(params.id);
+        return resource ? resource.url : null;
     }
 
     function getGuideUrl(params) {
-        return "TODO";
+        var resource = guideDataStore.getResource(params.id);
+        return resource ? resource.url : null;;
     }
 
     return {
@@ -50,12 +47,12 @@ docsModule.factory("config.$state", ["$promise", "$http"], function($promise, $h
             },
 
             tutorial: {
-                path: "tutorial/:step",
+                path: "tutorial/:id",
                 resolve: createDescriptionResolver(getTutorialUrl)
             },
 
             guide: {
-                path: "guide/:step",
+                path: "guide/:id",
                 resolve: createDescriptionResolver(getGuideUrl)
             },
 
