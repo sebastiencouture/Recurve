@@ -36,7 +36,7 @@ docsModule.factory("config.$state", ["$promise", "$http", "apiDataStore", "guide
 
     function getGuideUrl(params) {
         var resource = guideDataStore.getResource(params.id);
-        return resource ? resource.url : null;;
+        return resource ? resource.url : null;
     }
 
     return {
