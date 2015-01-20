@@ -2,6 +2,7 @@
 
 docsModule.factory("app", [,"$promise", "$action", "$state", "docsService", "utils"], function($promise, $action, $state, docsService, utils) {
 
+    app.actions.loadStart.trigger();
     getStartupData().then(function() {
         $state.start();
         app.actions.loadDone.trigger();
@@ -10,8 +11,6 @@ docsModule.factory("app", [,"$promise", "$action", "$state", "docsService", "uti
     });
 
     function getStartupData() {
-        app.actions.loadStart.trigger();
-
         var promises = [];
         promises.push(docsService.getApiMetadata());
         promises.push(docsService.getContentMetadata());
