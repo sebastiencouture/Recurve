@@ -1,6 +1,7 @@
 "use strict";
 
-docsModule.factory("docsService", ["$http", "$action", "appConfig", "utils"], function($http, $action, appConfig, utils) {
+docsModule.factory("docsService", ["$promise", "$http", "$action", "appConfig", "utils"],
+    function($promise, $http, $action, appConfig, utils) {
 
     var metadataActions = {
         api: createActions(),
@@ -14,6 +15,12 @@ docsModule.factory("docsService", ["$http", "$action", "appConfig", "utils"], fu
         tutorial: createActions
     };
 
+    var contentActions = {
+        api: createActions(),
+        guide: createActions(),
+        tutorial: createActions()
+    };
+
     function createActions() {
         return utils.createActions(["success", "error", "cancel"]);
     }
@@ -25,13 +32,25 @@ docsModule.factory("docsService", ["$http", "$action", "appConfig", "utils"], fu
     }
 
     function createResourceGetMethod(actions) {
-        return function(url) {
+        return function(metadata) {
+            var url = metadata ? metadata.url : null;
             return send(url, actions);
         };
     }
 
-    function send(url, actions) {
-        var promise = $http.get(url);
+    function createContentGetMethod(actions) {
+        return function(metadata) {
+            var url = metadata ? metadata.url : null;
+            send(url, actions, {dataType: "html"});
+        };
+    }
+
+    function send(url, actions, options) {
+        if (!url) {
+            return $promise.reject("url does not exist");
+        }
+
+        var promise = $http.get(url, options);
         promise.then(function(response) {
             actions.success.trigger(response.data);
         });
@@ -50,16 +69,18 @@ docsModule.factory("docsService", ["$http", "$action", "appConfig", "utils"], fu
     return {
         actions: {
             metadata: metadataActions,
-            resource: resourceActions
+            resource: resourceActions,
+            content: contentActions
         },
 
-        getApiMetadata: createMetadataGetMethod(appConfig.url.apiMetadata, metadataActions.api),
-        getContentMetadata: createMetadataGetMethod(appConfig.url.contentMetadata, metadataActions.content),
-        getVersionMetadata: createMetadataGetMethod(appConfig.url.versionMetadata, metadataActions.version),
+        getApiMetadata: createMetadataGetMethod(appConfig.metadataUrl.api, metadataActions.api),
+        getContentMetadata: createMetadataGetMethod(appConfig.metadataUrl.content, metadataActions.content),
+        getVersionMetadata: createMetadataGetMethod(appConfig.metadataUrl.version, metadataActions.version),
 
         getApiResource: createResourceGetMethod(resourceActions.api),
-        getGuideResource: createResourceGetMethod(resourceActions.guide),
-        getTutorialResource: createResourceGetMethod(resourceActions.tutorial)
 
+        getApiContent: createContentGetMethod(contentActions.api),
+        getGuideContent: createContentGetMethod(contentActions.guide),
+        getTutorialContent: createContentGetMethod(contentActions.tutorial)
     };
 });

@@ -31,6 +31,7 @@ module.exports = function(grunt) {
         buildDir: "build",
         buildDocsDir: "build/docs",
         buildDocsDataDir: "<%= buildDocsDir %>/data",
+        buildJsxDir: "build/jsx",
         distDir: "dist",
         distDocsDir: "dist/docs",
         distDocsDataDir: "<%= distDocsDir %>/data",
@@ -72,7 +73,7 @@ module.exports = function(grunt) {
                     process: concatProcessor
                 },
                 files: {
-                    "<%= buildDocsDir %>/js/<%= pkg.name %>-docs.js": files.docs.js
+                    "<%= buildDocsDir %>/js/<%= pkg.name %>-docs.js": files.docs.js.concat("<%= buildJsxDir %>/docs/**/*.js")
                 }
             },
 
@@ -81,13 +82,13 @@ module.exports = function(grunt) {
                     process: concatProcessor
                 },
                 files: {
-                    "<%= buildDocsDir %>/scss/<%= pkg.name %>-docs.scss": files.docs.css
+                    "<%= buildDocsDir %>/scss/<%= pkg.name %>-docs.scss": files.docs.scss
                 }
             },
 
             buildDocsHtml: {
                 files: {
-                    "<%= buildDocsDir %>/index.html" : "docs/app/index-debug.html"
+                    "<%= buildDocsDir %>/index.html" : "docs/app/index-dev.html"
                 }
             },
 
@@ -109,8 +110,22 @@ module.exports = function(grunt) {
                     banner: banner + "\n\n"
                 },
                 files: {
-                    "<%= distDocsDir %>/index.html" : "docs/app/index-release.html"
+                    "<%= distDocsDir %>/index.html" : "docs/app/index-prod.html"
                 }
+            }
+        },
+
+        react: {
+            docs: {
+                files: [
+                    {
+                        expand: true,
+                        cwd: "docs",
+                        src: ["**/*.jsx"],
+                        dest: "<%= buildJsxDir %>/docs",
+                        ext: ".js"
+                    }
+                ]
             }
         },
 
@@ -272,8 +287,8 @@ module.exports = function(grunt) {
             },
 
             docs: {
-                files: ["src/**/*.js", "docs/app/src/**/*.js", "docs/app/assets/**/*.scss", "docs/app/*.html", "docs/tasks/**/*.js"],
-                tasks: ["concat:buildDocsJs", "concat:buildDocsCss", "concat:buildDocsHtml", "sass", "docsGen", "copy"]
+                files: ["src/**/*.js", "docs/app/src/**/*.js", "docs/app/src/**/*.jsx", "docs/app/assets/**/*.scss", "docs/app/*.html", "docs/tasks/**/*.js"],
+                tasks: ["react", "concat:buildDocsJs", "concat:buildDocsCss", "concat:buildDocsHtml", "sass", "docsGen", "copy"]
             }
         },
 
@@ -344,7 +359,7 @@ module.exports = function(grunt) {
 
 
     grunt.registerTask("dev", "Run dev server and watch for changes for recurve", ["concat:buildCore", "connect:recurve", "karma:unit", "watch:recurve"]);
-    grunt.registerTask("devDocs", "Run dev server and watch for changes for docs", ["concat:buildDocsJs", "concat:buildDocsCss", "concat:buildDocsHtml", "sass", "docsGen", "copy", "connect:docs", "watch:docs"]);
-    grunt.registerTask("dist", "Create a distribution build of recurve and docs", ["clean", "concat", "uglify", "sass", "cssmin", "docsGen", "copy", "karma:continous", "jshint"]);
+    grunt.registerTask("devDocs", "Run dev server and watch for changes for docs", ["react", "concat:buildDocsJs", "concat:buildDocsCss", "concat:buildDocsHtml", "sass", "docsGen", "copy", "connect:docs", "watch:docs"]);
+    grunt.registerTask("dist", "Create a distribution build of recurve and docs", ["clean", "react", "concat", "uglify", "sass", "cssmin", "docsGen", "copy", "karma:continous", "jshint"]);
     grunt.registerTask("test", "Run unit tests and jshint", ["karma:continous", "jshint"]);
 };

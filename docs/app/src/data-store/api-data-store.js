@@ -1,9 +1,8 @@
 "use strict";
 
-docsModule.factory("apiDataStore", ["$dataStore", "docsService"], function($dataStore, docsService) {
-    var dataStore = $dataStore();
+docsModule.factory("apiDataStore", ["contentDataStore", "docsService"], function(contentDataStore, docsService) {
+    var dataStore = contentDataStore(contentParser);
     var metadata;
-    var contentMetadata;
 
     var apiActions = docsService.actions.metadata.api;
     apiActions.success.on(function(data) {
@@ -15,30 +14,24 @@ docsModule.factory("apiDataStore", ["$dataStore", "docsService"], function($data
         dataStore.changed();
     });
 
-    var contentActions = docsService.actions.metadata.content;
-    contentActions.success.on(function(data) {
-        contentMetadata = data.api;
-        dataStore.changed();
-    }, null, dataStore);
-    contentActions.error.on(function() {
-        contentMetadata = null;
-        dataStore.changed();
-    });
+    function contentParser(data) {
+        return data.api;
+    }
 
     return recurve.extend(dataStore, {
-        getResource: function(module, type, name) {
+        getResourceMetadata: function(module, type, name) {
             if (!metadata) {
                 return null;
             }
 
             var metadataModule = metadata[module];
-            if (!metadataModule) {
-                return null;
+            if (!metadataModule || !type) {
+                return metadataModule;
             }
 
             var metadataType = metadataModule[type];
-            if (!metadataType) {
-                return null;
+            if (!name) {
+                return metadataType;
             }
 
             var found = null;
@@ -52,21 +45,25 @@ docsModule.factory("apiDataStore", ["$dataStore", "docsService"], function($data
             return found;
         },
 
-        // TODO TBD duplicate, implement content-data-store that this, guide-data-store, and tutorial-data-store extends
-        getContentResource: function(id) {
-            if (!contentMetadata) {
+        getIndexResourceMetadata: function(module) {
+            if (!metadata) {
+                return null;
+            }
+
+            var metadataModule = metadata[module];
+            if (!metadataModule) {
                 return null;
             }
 
             var found = null;
-            recurve.forEach(contentMetadata, function(content) {
-                if (content.id === id) {
-                    found = content;
+            recurve.forEach(metadataModule, function(resource) {
+                if (resource.isIndex) {
+                    found = resource;
                     return false;
                 }
             });
 
             return found;
-        }
+        },
     });
 });

@@ -2,6 +2,8 @@
     "extends": "../../../.jshintrc-common",
     "globals": {
         "recurve": true,
+        "React": true,
+        "ReactBootstrap": true,
         "docsModule": true
     }
 }

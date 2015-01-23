@@ -1,59 +1,87 @@
 "use strict";
 
-docsModule.factory("config.$state", ["$promise", "$http", "apiDataStore", "guideDataStore", "tutorialDataStore"],
-    function($promise, $http, apiDataStore, guideDataStore, tutorialDataStore) {
-
-    function createDescriptionResolver(urlCreator) {
-        return {
-            description: function(params) {
-                var url = urlCreator(params);
-                return getDescription(url, params);
-            }
-        };
-    }
-
-    function getDescription(url, params) {
-        if (!url) {
-            return $promise.reject(params);
-        }
-
-        return $http.get(url).success(function(response) {
-                return response.data;
-            }).error(function(response) {
-                return response.data;
-            });
-    }
-
-    function getApiUrl(params) {
-        var resource = apiDataStore.getResource(params.module, params.type, params.name);
-        return resource ? resource.url : null;
-    }
-
-    function getTutorialUrl(params) {
-        var resource = tutorialDataStore.getContentResource(params.id);
-        return resource ? resource.url : null;
-    }
-
-    function getGuideUrl(params) {
-        var resource = guideDataStore.getResource(params.id);
-        return resource ? resource.url : null;
-    }
+docsModule.factory("config.$state", ["apiDataStore", "guideDataStore", "tutorialDataStore", "docsService"],
+    function(apiDataStore, guideDataStore, tutorialDataStore, docsService) {
 
     return {
         states: {
-            api: {
+            apiModuleResource: {
                 path: "api/:module/:type/:name",
-                resolve: createDescriptionResolver(getApiUrl)
+                resolve: {
+                    resource: function(params) {
+                        var metadata = apiDataStore.getResourceMetadata(params.module, params.type, params.name);
+                        return docsService.getApiResource(metadata);
+                    }
+                }
+            },
+
+            apiModuleType: {
+                path: "api/:module/:type",
+                resolve: {
+                    metadata: function(params) {
+                        return apiDataStore.getResourceMetadata(params.module, params.type);
+                    }
+                }
+            },
+
+            apiModule: {
+                path: "api/:module",
+                resolve: {
+                    resource: function(params) {
+                        var metadata = apiDataStore.getIndexResourceMetadata(params.module);
+                        return docsService.getApiResource(metadata);
+                    }
+                }
+            },
+
+            api: {
+                path: "api",
+                resolve: {
+                    content: function() {
+                        var metadata = apiDataStore.getIndexContentMetadata();
+                        return docsService.getApiContent(metadata);
+                    }
+                }
+            },
+
+            tutorialStep: {
+                path: "tutorial/:id",
+                resolve: {
+                    content: function(params) {
+                        var metadata = tutorialDataStore.getContentMetadata(params.id);
+                        return docsService.getTutorialContent(metadata);
+                    }
+                }
             },
 
             tutorial: {
-                path: "tutorial/:id",
-                resolve: createDescriptionResolver(getTutorialUrl)
+                path: "tutorial",
+                resolve: {
+                    content: function() {
+                        var metadata = tutorialDataStore.getIndexContentMetadata();
+                        return docsService.getTutorialContent(metadata);
+                    }
+                }
+            },
+
+            guideStep: {
+                path: "guide/:id",
+                resolve: {
+                    content: function(params) {
+                        var metadata = guideDataStore.getContentMetadata(params.id);
+                        return docsService.getGuideContent(metadata);
+                    }
+                }
             },
 
             guide: {
-                path: "guide/:id",
-                resolve: createDescriptionResolver(getGuideUrl)
+                path: "guide",
+                resolve: {
+                    content: function() {
+                        var metadata = guideDataStore.getIndexContentMetadata();
+                        return docsService.getGuideContent(metadata);
+                    }
+                }
             },
 
             notFound: {
