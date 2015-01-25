@@ -7,7 +7,7 @@ docsModule.factory("TutorialView", null, function() {
     return React.createClass({
         render: function() {
             return (
-                <div>tutorial</div>
+                <div className="container">tutorial</div>
             );
         }
     });

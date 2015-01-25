@@ -7,7 +7,7 @@ docsModule.factory("ApiView", null, function() {
     return React.createClass({
         render: function() {
             return (
-                <div>api</div>
+                <div className="container">api</div>
             );
         }
     });

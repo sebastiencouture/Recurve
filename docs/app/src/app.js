@@ -1,27 +1,56 @@
 "use strict";
 
-docsModule.factory("app", ["$promise", "$action", "$state", "utils", "docsService", "AppViewController"],
-    function($promise, $action, $state, utils, docsService, AppViewController) {
+docsModule.factory("app", ["$document", "$window", "$promise", "$action", "$router", "$state", "utils", "docsService", "AppViewController"],
+    function($document, $window, $promise, $action, $router, $state, utils, docsService, AppViewController) {
 
     var actions = utils.createActions(["loadStart", "loadDone", "loadError"]);
 
-    React.render(React.createElement(AppViewController, null), document.querySelector(".container"));
+    setupInternalLinkHandling();
+    render();
+    getStartupData();
 
-    actions.loadStart.trigger();
-    getStartupData().then(function() {
-        $state.start();
-        actions.loadDone.trigger();
-    }, function() {
-        actions.loadError.trigger();
-    });
+    function render() {
+        React.render(React.createElement(AppViewController, null), $document.body);
+    }
 
     function getStartupData() {
+        actions.loadStart.trigger();
+        getMetadata().then(function() {
+            $state.start();
+            actions.loadDone.trigger();
+        }, function() {
+            actions.loadError.trigger();
+        });
+    }
+
+    function getMetadata() {
         var promises = [];
         promises.push(docsService.getApiMetadata());
         promises.push(docsService.getContentMetadata());
         promises.push(docsService.getVersionMetadata());
 
         return $promise.all(promises);
+    }
+
+    // TODO TBD find better spot for this
+    function setupInternalLinkHandling() {
+        $document.body.onclick = function(event) {
+            var target = event ? event.target : $window.event.srcElement;
+
+            if( "a" === target.nodeName.toLowerCase()) {
+                var origin = $window.location.origin;
+                var index = target.href.indexOf(origin);
+                if (-1 === index) {
+                    return;
+                }
+
+                event.stopPropagation();
+                event.preventDefault();
+
+                var path = target.href.substring(origin.length);
+                $router.navigate(path);
+            }
+        };
     }
 
     return {

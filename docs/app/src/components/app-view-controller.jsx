@@ -2,28 +2,21 @@
 
 "use strict";
 
-docsModule.factory("AppViewController", ["stateDataStore", "HeaderView", "SubHeaderView", "LoadingView", "ErrorView", "ApiView", "TutorialView", "GuideView"],
-    function(stateDataStore, HeaderView, SubHeaderView, LoadingView, ErrorView, ApiView, TutorialView, GuideView) {
+docsModule.factory("AppViewController", ["stateDataStore", "NavBarView", "LoadingView", "ErrorView", "ApiView", "TutorialView", "GuideView"],
+    function(stateDataStore, NavBarView, LoadingView, ErrorView, ApiView, TutorialView, GuideView) {
 
     function getState() {
-        var state = {
-            isLoading: stateDataStore.isLoading(),
-            error: stateDataStore.getError()
-        };
-
         var current = stateDataStore.getCurrent();
-        if (current) {
-            recurve.extend(state, {
-                name: current.name,
-                params: current.params,
-                data: current.data,
-                isApi: stateDataStore.isCurrentApi(),
-                isTutorial: stateDataStore.isCurrentTutorial(),
-                isGuide: stateDataStore.isCurrentGuide()
-            });
-        }
-
-        return state;
+        return {
+            name: current.name,
+            params: current.params,
+            data: current.data,
+            isLoading: stateDataStore.isLoading(),
+            isError: stateDataStore.isError(),
+            isApi: stateDataStore.isApi(),
+            isTutorial: stateDataStore.isTutorial(),
+            isGuide: stateDataStore.isGuide()
+        };
     }
 
     return React.createClass({
@@ -41,7 +34,7 @@ docsModule.factory("AppViewController", ["stateDataStore", "HeaderView", "SubHea
 
         render: function() {
             var Section;
-            if (this.state.error) {
+            if (this.state.isError) {
                 Section = ErrorView;
             }
             else if (this.state.isLoading) {
@@ -59,8 +52,7 @@ docsModule.factory("AppViewController", ["stateDataStore", "HeaderView", "SubHea
 
             return (
                 <div>
-                    <HeaderView />
-                    <SubHeaderView />
+                    <NavBarView />
                     <Section name={this.state.name} params={this.state.params} data={this.state.data}/>
                 </div>
             );

@@ -7,7 +7,7 @@ docsModule.factory("GuideView", null, function() {
     return React.createClass({
         render: function() {
             return (
-                <div>guide</div>
+                <div className="container">guide</div>
             );
         }
     });

@@ -2,11 +2,9 @@
 
 docsModule.factory("stateDataStore", ["$dataStore", "$state"], function($dataStore, $state) {
     var dataStore = $dataStore();
-    var current = null;
-    var error = null;
+    var current = {name: "loading"};
 
     $state.changeAction.on(function(name, params, data) {
-        error = null;
         current = {
             name: name,
             params: params,
@@ -15,10 +13,10 @@ docsModule.factory("stateDataStore", ["$dataStore", "$state"], function($dataSto
         dataStore.changed.trigger();
     });
 
-    $state.errorAction.on(function(message, name, params) {
-        error = {
-            name: name,
-            message: message,
+    $state.errorAction.on(function(details, name, params) {
+        current = {
+            name: "error",
+            details: details,
             params: params
         };
         dataStore.changed.trigger();
@@ -29,36 +27,24 @@ docsModule.factory("stateDataStore", ["$dataStore", "$state"], function($dataSto
             return current;
         },
 
-        getError: function() {
-            return error;
-        },
-
         isLoading: function() {
-            return null === current;
+            return "loading" === current.name;
         },
 
-        isCurrentApi: function() {
-            if (!current) {
-                return false;
-            }
+        isError: function() {
+            return "error" === current.name;
+        },
 
+        isApi: function() {
             return "api" === current.name || "apiModule" === current.name ||
                 "apiModuleType" === current.name || "apiModuleResource" === current.name;
         },
 
-        isCurrentTutorial: function() {
-            if (!current) {
-                return false;
-            }
-
+        isTutorial: function() {
             return "tutorial" === current.name || "tutorialStep" === current.name;
         },
 
-        isCurrentGuide: function() {
-            if (!current) {
-                return false;
-            }
-
+        isGuide: function() {
             return "guide" === current.name || "guideStep" === current.name;
         }
     });
