@@ -167,7 +167,7 @@ function addRouterService(module) {
             });
 
             if (!handled && notFoundCallback) {
-                notFoundCallback();
+                notFoundCallback(path);
             }
         }
 

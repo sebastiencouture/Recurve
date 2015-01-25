@@ -87,7 +87,9 @@
         };
 
         $router.setRoot($config.root);
-        $router.notFound($config.notFound);
+        $router.notFound(function(path) {
+            $state.notFoundAction.trigger(path);
+        });
 
         recurve.forEach($config.states, function(config, name) {
             recurve.assert(name, "state name must be set for path '{0}'", config.path);
@@ -226,6 +228,7 @@
             startChangeAction: $action(),
             changeAction: $action(),
             errorAction: $action(),
+            notFoundAction: $action(),
 
             // options:
             // reload => force reload
@@ -259,6 +262,10 @@
                 return updatePathWithParams(state.path, params);
             },
 
+            nameToHref: function(name, params) {
+                return "/" + this.nameToPath(name, params);
+            },
+
             // convenience methods
             back: function() {
                 $router.back();
@@ -282,7 +289,6 @@
 
     module.config("$state", {
         root: "",
-        states: {},
-        notFound: null
+        states: {}
     });
 })();

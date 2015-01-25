@@ -205,6 +205,17 @@ describe("$router", function() {
             expect(callback).not.toHaveBeenCalled();
             expect(noMatch).toHaveBeenCalled();
         });
+
+        it("should call notFound callback with path as parameter", function() {
+            var noMatch = jasmine.createSpy("noMatch");
+            setupRoute("a", noMatch);
+            pushState("b");
+
+            $router.start();
+
+            expect(callback).not.toHaveBeenCalledWith("b");
+            expect(noMatch).toHaveBeenCalled();
+        });
     });
 
     describe("on", function() {

@@ -22,12 +22,11 @@ describe("$state", function() {
         callback = jasmine.createSpy("callback");
     });
 
-    function setup(states, root, notFound, noSpies) {
+    function setup(states, root, noSpies) {
         $include(null, function(module) {
             module.config("$state", {
                 root: root,
-                states: states,
-                notFound: notFound
+                states: states
             });
 
             if (!noSpies) {
@@ -52,8 +51,8 @@ describe("$state", function() {
         });
     }
 
-    function setupNoSpies(states, root, notFound) {
-        setup(states, root, notFound, true);
+    function setupNoSpies(states, root) {
+        setup(states, root, true);
     }
 
     function testCallRouterMethod(method) {
@@ -242,6 +241,13 @@ describe("$state", function() {
             expect(function() {
                 $state.nameToPath("other");
             }).toThrowError("state 'other' does not exist");
+        });
+    });
+
+    describe("nameToHref", function() {
+        it("should include '/'", function() {
+            setup({test: {path: "a"}});
+            expect($state.nameToHref("test")).toEqual("/a");
         });
     });
 
@@ -1018,9 +1024,21 @@ describe("$state", function() {
         });
     });
 
-    it("should set not found callback on $router", function() {
-        var notFoundHandler = function() {};
-        setup({}, "a", notFoundHandler);
-        expect($router.notFound).toHaveBeenCalledWith(notFoundHandler);
+    it("should trigger not found action with url path as parameter", function() {
+        setupNoSpies({
+            test: {
+                path: "a/:id",
+                data: {
+                    some: "data"
+                }
+            }});
+
+        $state.notFoundAction.on(callback);
+
+        $router.start();
+        $router.navigate("b/2");
+        $async.flush();
+
+        expect(callback).toHaveBeenCalledWith("b/2");
     });
 });
