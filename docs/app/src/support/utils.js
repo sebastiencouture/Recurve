@@ -9,6 +9,14 @@ docsModule.factory("utils", ["$action"], function($action) {
             });
 
             return actions;
+        },
+
+        capitalizeFirstCharacter: function(value) {
+            if (!recurve.isString(value) || 0 === value.length) {
+                return value;
+            }
+
+            return value.charAt(0).toUpperCase() + value.slice(1);
         }
     };
 });

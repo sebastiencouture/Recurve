@@ -19,6 +19,10 @@ docsModule.factory("apiDataStore", ["contentDataStore", "docsService"], function
     }
 
     return recurve.extend(dataStore, {
+        getMetadata: function() {
+            return metadata;
+        },
+
         getResourceMetadata: function(module, type, name) {
             if (!metadata) {
                 return null;

@@ -2,7 +2,7 @@
 
 "use strict";
 
-docsModule.factory("ApiView", ["ApiSideBarView"], function(ApiSideBarView) {
+docsModule.factory("ApiView", ["apiDataStore", "SideBarView"], function(apiDataStore, SideBarView) {
 
     return React.createClass({
         render: function() {
@@ -15,7 +15,7 @@ docsModule.factory("ApiView", ["ApiSideBarView"], function(ApiSideBarView) {
                     <Grid>
                         <Row>
                             <Col xs={6} md={3}>
-                                <ApiSideBarView />
+                                <SideBarView items={apiDataStore.getMetadata()} />
                             </Col>
                             <Col xs={12} md={9}>
                                 <div>main api</div>
