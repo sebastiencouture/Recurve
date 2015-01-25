@@ -7,7 +7,7 @@ docsModule.factory("ErrorView", null, function() {
     return React.createClass({
         render: function() {
             return (
-                <div>error!</div>
+                <div className="container">error!</div>
             );
         }
     });

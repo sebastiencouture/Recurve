@@ -288,7 +288,7 @@ module.exports = function(grunt) {
 
             docs: {
                 files: ["src/**/*.js", "docs/app/src/**/*.js", "docs/app/src/**/*.jsx", "docs/app/assets/**/*.scss", "docs/app/*.html", "docs/tasks/**/*.js"],
-                tasks: ["react", "concat:buildDocsJs", "concat:buildDocsCss", "concat:buildDocsHtml", "sass", "docsGen", "copy"]
+                tasks: ["react", "concat:buildCore", "concat:buildModules", "concat:buildDocsJs", "concat:buildDocsCss", "concat:buildDocsHtml", "sass", "docsGen", "copy"]
             }
         },
 
@@ -359,7 +359,7 @@ module.exports = function(grunt) {
 
 
     grunt.registerTask("dev", "Run dev server and watch for changes for recurve", ["concat:buildCore", "connect:recurve", "karma:unit", "watch:recurve"]);
-    grunt.registerTask("devDocs", "Run dev server and watch for changes for docs", ["react", "concat:buildDocsJs", "concat:buildDocsCss", "concat:buildDocsHtml", "sass", "docsGen", "copy", "connect:docs", "watch:docs"]);
+    grunt.registerTask("devDocs", "Run dev server and watch for changes for docs", ["react", "concat:buildCore", "concat:buildModules", "concat:buildDocsJs", "concat:buildDocsCss", "concat:buildDocsHtml", "sass", "docsGen", "copy", "connect:docs", "watch:docs"]);
     grunt.registerTask("dist", "Create a distribution build of recurve and docs", ["clean", "react", "concat", "uglify", "sass", "cssmin", "docsGen", "copy", "karma:continous", "jshint"]);
     grunt.registerTask("test", "Run unit tests and jshint", ["karma:continous", "jshint"]);
 };

@@ -1,0 +1,46 @@
+.nav-sidenav ul {
+  list-style: none;
+  padding: 0px;
+}
+.nav-sidenav > li.first {
+  border-left: 5px solid #a58fc4;
+}
+.nav-sidenav > li.second {
+  border-left: 5px solid #58c5c7;
+}
+.nav-sidenav > li.third {
+  border-left: 5px solid #915f13;
+}
+.nav-sidenav > li.fourth {
+  border-left: 5px solid #b6cf2f;
+}
+.nav-sidenav > li.fifth {
+  border-left: 5px solid #fdb731;
+}
+.nav-sidenav > li.sixth {
+  border-left: 5px solid #00aef0;
+}
+.nav-sidenav li.divider {
+  border-bottom: 1px solid #e6e6e6;
+}
+.nav-sidenav > li {
+  margin: 1px 0px;
+}
+.nav-sidenav > li.sidenav-active-background {
+  background-color: #e6e6e6;
+}
+.nav-sidenav li a {
+  color: #4d4d4f;
+  display: block;
+  text-decoration: none;
+  outline: none;
+}
+.nav-sidenav li li a {
+  padding: 5px 25px;
+}
+.nav-sidenav li li li a {
+  padding: 5px 35px;
+}
+.nav-sidenav li a:hover, .nav-sidenav li a:focus {
+  background-color: #d1d1d1;
+}

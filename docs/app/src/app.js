@@ -38,6 +38,11 @@ docsModule.factory("app", ["$document", "$window", "$promise", "$action", "$rout
             var target = event ? event.target : $window.event.srcElement;
 
             if( "a" === target.nodeName.toLowerCase()) {
+                // Some bootstrap components depend on href="#", so let these pass through
+                if (/#$/.test(target.href)) {
+                    return;
+                }
+
                 var origin = $window.location.origin;
                 var index = target.href.indexOf(origin);
                 if (-1 === index) {
