@@ -1,7 +1,7 @@
 "use strict";
 
-docsModule.factory("apiDataStore", ["contentDataStore", "docsService"], function(contentDataStore, docsService) {
-    var dataStore = contentDataStore(contentParser);
+docsModule.factory("apiStore", ["contentStore", "docsService"], function(contentStore, docsService) {
+    var dataStore = contentStore(contentParser);
     var metadata;
 
     var apiActions = docsService.actions.metadata.api;

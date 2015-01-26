@@ -2,7 +2,7 @@
 
 "use strict";
 
-docsModule.factory("LoadingView", null, function() {
+docsModule.factory("Loading", null, function() {
 
     return React.createClass({
         render: function() {

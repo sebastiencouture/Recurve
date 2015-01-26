@@ -2,12 +2,12 @@
 
 "use strict";
 
-docsModule.factory("TutorialView", null, function() {
+docsModule.factory("ApiOverview", null, function() {
 
     return React.createClass({
         render: function() {
             return (
-                <div className="container">tutorial</div>
+                <div>api overview {this.props.name}</div>
             );
         }
     });

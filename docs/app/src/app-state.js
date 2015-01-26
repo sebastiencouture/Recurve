@@ -1,7 +1,7 @@
 "use strict";
 
-docsModule.factory("config.$state", ["apiDataStore", "guideDataStore", "tutorialDataStore", "docsService"],
-    function(apiDataStore, guideDataStore, tutorialDataStore, docsService) {
+docsModule.factory("config.$state", ["apiStore", "guideStore", "tutorialStore", "docsService"],
+    function(apiStore, guideStore, tutorialStore, docsService) {
 
     return {
         states: {
@@ -9,7 +9,7 @@ docsModule.factory("config.$state", ["apiDataStore", "guideDataStore", "tutorial
                 path: "api/:module/:type/:name",
                 resolve: {
                     resource: function(params) {
-                        var metadata = apiDataStore.getResourceMetadata(params.module, params.type, params.name);
+                        var metadata = apiStore.getResourceMetadata(params.module, params.type, params.name);
                         return docsService.getApiResource(metadata);
                     }
                 }
@@ -19,7 +19,7 @@ docsModule.factory("config.$state", ["apiDataStore", "guideDataStore", "tutorial
                 path: "api/:module/:type",
                 resolve: {
                     metadata: function(params) {
-                        return apiDataStore.getResourceMetadata(params.module, params.type);
+                        return apiStore.getResourceMetadata(params.module, params.type);
                     }
                 }
             },
@@ -28,7 +28,7 @@ docsModule.factory("config.$state", ["apiDataStore", "guideDataStore", "tutorial
                 path: "api/:module",
                 resolve: {
                     resource: function(params) {
-                        var metadata = apiDataStore.getIndexResourceMetadata(params.module);
+                        var metadata = apiStore.getIndexResourceMetadata(params.module);
                         return docsService.getApiResource(metadata);
                     }
                 }
@@ -38,7 +38,7 @@ docsModule.factory("config.$state", ["apiDataStore", "guideDataStore", "tutorial
                 path: "api",
                 resolve: {
                     content: function() {
-                        var metadata = apiDataStore.getIndexContentMetadata();
+                        var metadata = apiStore.getIndexContentMetadata();
                         return docsService.getApiContent(metadata);
                     }
                 }
@@ -48,7 +48,7 @@ docsModule.factory("config.$state", ["apiDataStore", "guideDataStore", "tutorial
                 path: "tutorial/:id",
                 resolve: {
                     content: function(params) {
-                        var metadata = tutorialDataStore.getContentMetadata(params.id);
+                        var metadata = tutorialStore.getContentMetadata(params.id);
                         return docsService.getTutorialContent(metadata);
                     }
                 }
@@ -58,7 +58,7 @@ docsModule.factory("config.$state", ["apiDataStore", "guideDataStore", "tutorial
                 path: "tutorial",
                 resolve: {
                     content: function() {
-                        var metadata = tutorialDataStore.getIndexContentMetadata();
+                        var metadata = tutorialStore.getIndexContentMetadata();
                         return docsService.getTutorialContent(metadata);
                     }
                 }
@@ -68,7 +68,7 @@ docsModule.factory("config.$state", ["apiDataStore", "guideDataStore", "tutorial
                 path: "guide/:id",
                 resolve: {
                     content: function(params) {
-                        var metadata = guideDataStore.getContentMetadata(params.id);
+                        var metadata = guideStore.getContentMetadata(params.id);
                         return docsService.getGuideContent(metadata);
                     }
                 }
@@ -78,7 +78,7 @@ docsModule.factory("config.$state", ["apiDataStore", "guideDataStore", "tutorial
                 path: "guide",
                 resolve: {
                     content: function() {
-                        var metadata = guideDataStore.getIndexContentMetadata();
+                        var metadata = guideStore.getIndexContentMetadata();
                         return docsService.getGuideContent(metadata);
                     }
                 }

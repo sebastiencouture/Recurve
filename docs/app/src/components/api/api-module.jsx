@@ -2,12 +2,12 @@
 
 "use strict";
 
-docsModule.factory("GuideSideBarView", null, function() {
+docsModule.factory("ApiModule", null, function() {
 
     return React.createClass({
         render: function() {
             return (
-                <div>guide side bar</div>
+                <div>api module {this.props.name}</div>
             );
         }
     });

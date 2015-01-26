@@ -1,6 +1,6 @@
 "use strict";
 
-docsModule.factory("contentDataStore", ["$dataStore", "docsService"], function($dataStore, docsService) {
+docsModule.factory("contentStore", ["$dataStore", "docsService"], function($dataStore, docsService) {
     return function(parser) {
         var dataStore = $dataStore();
         var metadata;

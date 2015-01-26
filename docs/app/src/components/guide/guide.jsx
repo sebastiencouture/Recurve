@@ -2,12 +2,12 @@
 
 "use strict";
 
-docsModule.factory("ErrorView", null, function() {
+docsModule.factory("Guide", null, function() {
 
     return React.createClass({
         render: function() {
             return (
-                <div className="container">error!</div>
+                <div className="container">guide</div>
             );
         }
     });

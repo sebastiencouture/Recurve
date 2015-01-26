@@ -2,12 +2,12 @@
 
 "use strict";
 
-docsModule.factory("GuideView", null, function() {
+docsModule.factory("Tutorial", null, function() {
 
     return React.createClass({
         render: function() {
             return (
-                <div className="container">guide</div>
+                <div className="container">tutorial</div>
             );
         }
     });

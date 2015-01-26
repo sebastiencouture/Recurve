@@ -1,6 +1,6 @@
 "use strict";
 
-docsModule.factory("versionDataStore", ["$dataStore", "docsService"], function($dataStore, docsService) {
+docsModule.factory("versionStore", ["$dataStore", "docsService"], function($dataStore, docsService) {
     var dataStore = $dataStore();
     var metadata;
 

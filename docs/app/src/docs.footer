@@ -4,5 +4,8 @@
         recurve.flux.state.$module,
         docsModule]);
 
-    container.load();
+    container.invoke(["$document", "App"], function($document, App) {
+        React.render(React.createElement(App, null), $document.body);
+    });
+
 })(window, recurve);

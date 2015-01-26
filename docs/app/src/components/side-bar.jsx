@@ -2,31 +2,31 @@
 
 "use strict";
 
-docsModule.factory("SideBarView", ["utils"], function(utils) {
+docsModule.factory("SideBar", ["utils"], function(utils) {
 
-    function renderListItems(items) {
+    function renderItems(items) {
         var Glyphicon = ReactBootstrap.Glyphicon;
-        var listItems = null;
+        var renderables = null;
 
         if (recurve.isArray(items)) {
-            listItems = items.map(function(item) {
+            renderables = items.map(function(item) {
                 return (
                     <li>{item.name}</li>
                 );
             });
         }
         else if (items) {
-            listItems = [];
+            renderables = [];
             recurve.forEach(items, function(item, name) {
                 name = utils.capitalizeFirstCharacter(name);
                 var id = "list-section-" + name;
 
-                listItems.push(
+                renderables.push(
                     <li>
                         {name}
                         <Glyphicon className="pull-left" data-toggle="collapse" data-target={"#" + id}></Glyphicon>
                         <ul id={id} className="list-unstyled collapse in">
-                            {renderListItems(item)}
+                            {renderItems(item)}
                         </ul>
                     </li>
                 );
@@ -36,7 +36,7 @@ docsModule.factory("SideBarView", ["utils"], function(utils) {
             // do nothing - nothing to render
         }
 
-        return listItems;
+        return renderables;
     }
 
     return React.createClass({
@@ -47,7 +47,7 @@ docsModule.factory("SideBarView", ["utils"], function(utils) {
                 <div className="side-bar">
                     <Panel>
                         <ul className="list-unstyled collapse in">
-                            {renderListItems(this.props.items)}
+                            {renderItems(this.props.items)}
                         </ul>
                     </Panel>
                 </div>

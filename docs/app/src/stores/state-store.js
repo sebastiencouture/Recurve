@@ -1,6 +1,6 @@
 "use strict";
 
-docsModule.factory("stateDataStore", ["$dataStore", "$state"], function($dataStore, $state) {
+docsModule.factory("stateStore", ["$dataStore", "$state"], function($dataStore, $state) {
     var dataStore = $dataStore();
     var current = {name: "loading"};
 

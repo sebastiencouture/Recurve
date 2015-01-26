@@ -2,12 +2,12 @@
 
 "use strict";
 
-docsModule.factory("TutorialSideBarView", null, function() {
+docsModule.factory("Error", null, function() {
 
     return React.createClass({
         render: function() {
             return (
-                <div>tutorial side bar</div>
+                <div className="container">error!</div>
             );
         }
     });

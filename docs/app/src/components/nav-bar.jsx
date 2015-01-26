@@ -2,7 +2,7 @@
 
 "use strict";
 
-docsModule.factory("NavBarView", ["$state"], function($state) {
+docsModule.factory("NavBar", ["$state"], function($state) {
     return React.createClass({
         render: function() {
             var Navbar = ReactBootstrap.Navbar;
