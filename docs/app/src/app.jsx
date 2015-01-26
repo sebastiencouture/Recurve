@@ -2,8 +2,8 @@
 
 "use strict";
 
-docsModule.factory("App", ["$window", "$document", "$router", "$state", "$promise", "stateStore", "docsService", "NavBar", "Loading", "Error", "Api", "Tutorial", "Guide"],
-    function($window, $document, $router, $state, $promise, stateStore, docsService, NavBar, Loading, Error, Api, Tutorial, Guide) {
+docsModule.factory("App", ["$window", "$document", "$router", "$state", "stateStore", "docsService", "NavBar", "Loading", "Error", "Api", "Tutorial", "Guide"],
+    function($window, $document, $router, $state, stateStore, docsService, NavBar, Loading, Error, Api, Tutorial, Guide) {
 
     // TODO TBD find better spot for this
     function setupInternalLinkHandling() {
@@ -66,15 +66,6 @@ docsModule.factory("App", ["$window", "$document", "$router", "$state", "$promis
         return Section;
     }
 
-    function loadInitialData() {
-        var promises = [];
-        promises.push(docsService.getApiMetadata());
-        promises.push(docsService.getContentMetadata());
-        promises.push(docsService.getVersionMetadata());
-
-        return $promise.all(promises);
-    }
-
     return React.createClass({
         getInitialState: function() {
             return getStateFromStores();
@@ -84,7 +75,7 @@ docsModule.factory("App", ["$window", "$document", "$router", "$state", "$promis
             stateStore.changed.on(this._changeHandler, this);
 
             setupInternalLinkHandling();
-            loadInitialData().then(function() {
+            docsService.getStartupData().then(function() {
                 $state.start();
             });
         },

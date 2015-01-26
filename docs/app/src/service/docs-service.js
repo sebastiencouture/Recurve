@@ -73,6 +73,15 @@ docsModule.factory("docsService", ["$promise", "$http", "$action", "appConfig", 
             content: contentActions
         },
 
+        getStartupData: function() {
+            var promises = [];
+            promises.push(this.getApiMetadata());
+            promises.push(this.getContentMetadata());
+            promises.push(this.getVersionMetadata());
+
+            return $promise.all(promises);
+        },
+
         getApiMetadata: createMetadataGetMethod(appConfig.metadataUrl.api, metadataActions.api),
         getContentMetadata: createMetadataGetMethod(appConfig.metadataUrl.content, metadataActions.content),
         getVersionMetadata: createMetadataGetMethod(appConfig.metadataUrl.version, metadataActions.version),
