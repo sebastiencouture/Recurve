@@ -37,6 +37,7 @@ function createApi(recurve, version) {
         clone: clone,
         format: format,
         contains: contains,
+        find: find,
         addEvent: addEvent,
         removeEvent: removeEvent,
         areEqual: areEqual,

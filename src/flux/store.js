@@ -1,7 +1,7 @@
 "use strict";
 
-function addDataStoreService(module) {
-    module.factory("$dataStore", ["$signal"], function($signal) {
+function addStoreService(module) {
+    module.factory("$store", ["$signal"], function($signal) {
         return function() {
             return {
                 changed: $signal(),

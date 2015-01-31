@@ -17,8 +17,16 @@ module.exports = function(karma) {
     frameworks: ['jasmine'],
 
     // list of files / patterns to load in the browser
-    files: [].concat(files.recurveSrc, "build/recurve.js",
-        files.recurveModules.mock, files.recurveModules.flux, files.recurveModules.fluxRest, files.recurveModules.fluxState, files.test),
+    // TODO TBD react dependency for fluxReact
+    files: [].concat(
+        files.recurveSrc,
+        "build/recurve.js",
+        files.recurveModules.mock,
+        files.recurveModules.flux,
+        files.recurveModules.fluxRest,
+        files.recurveModules.fluxState,
+        files.recurveModules.fluxReact,
+        files.test),
 
     // list of files / patterns to exclude
     exclude: [],

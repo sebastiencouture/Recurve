@@ -61,7 +61,8 @@ module.exports = function(grunt) {
                     "<%= buildDir %>/<%= pkg.name %>-mock.js": files.recurveModules.mock,
                     "<%= buildDir %>/<%= pkg.name %>-flux.js": files.recurveModules.flux,
                     "<%= buildDir %>/<%= pkg.name %>-flux-rest.js": files.recurveModules.fluxRest,
-                    "<%= buildDir %>/<%= pkg.name %>-flux-state.js": files.recurveModules.fluxState
+                    "<%= buildDir %>/<%= pkg.name %>-flux-state.js": files.recurveModules.fluxState,
+                    "<%= buildDir %>/<%= pkg.name %>-flux-react.js": files.recurveModules.fluxReact
                 }
             },
 
@@ -101,7 +102,8 @@ module.exports = function(grunt) {
                     "<%= distDir %>/<%= pkg.name %>-mock.js": "<%= buildDir %>/<%= pkg.name %>-mock.js",
                     "<%= distDir %>/<%= pkg.name %>-flux.js": "<%= buildDir %>/<%= pkg.name %>-flux.js",
                     "<%= distDir %>/<%= pkg.name %>-flux-rest.js": "<%= buildDir %>/<%= pkg.name %>-flux-rest.js",
-                    "<%= distDir %>/<%= pkg.name %>-flux-state.js": "<%= buildDir %>/<%= pkg.name %>-flux-state.js"
+                    "<%= distDir %>/<%= pkg.name %>-flux-state.js": "<%= buildDir %>/<%= pkg.name %>-flux-state.js",
+                    "<%= distDir %>/<%= pkg.name %>-flux-react.js": "<%= buildDir %>/<%= pkg.name %>-flux-react.js"
                 }
             },
 
@@ -140,7 +142,8 @@ module.exports = function(grunt) {
                     "<%= distDir %>/<%= pkg.name %>-mock.min.js": "<%= buildDir %>/<%= pkg.name %>-mock.js",
                     "<%= distDir %>/<%= pkg.name %>-flux.min.js": "<%= buildDir %>/<%= pkg.name %>-flux.js",
                     "<%= distDir %>/<%= pkg.name %>-flux-rest.min.js": "<%= buildDir %>/<%= pkg.name %>-flux-rest.js",
-                    "<%= distDir %>/<%= pkg.name %>-flux-state.min.js": "<%= buildDir %>/<%= pkg.name %>-flux-state.js"
+                    "<%= distDir %>/<%= pkg.name %>-flux-state.min.js": "<%= buildDir %>/<%= pkg.name %>-flux-state.js",
+                    "<%= distDir %>/<%= pkg.name %>-flux-react.min.js": "<%= buildDir %>/<%= pkg.name %>-flux-react.js"
                 }
             },
 
@@ -260,6 +263,7 @@ module.exports = function(grunt) {
             recurveFlux: files.recurveModules.flux,
             recurveFluxRest: files.recurveModules.fluxRest,
             recurveFluxState: files.recurveModules.fluxState,
+            recurveFluxReact: files.recurveModules.fluxReact,
             docs: files.docs.js.concat(files.docs.tasks),
             test: files.test
         },
