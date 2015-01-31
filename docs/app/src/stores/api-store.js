@@ -1,24 +1,25 @@
 "use strict";
 
 docsModule.factory("apiStore", ["contentStore", "docsService"], function(contentStore, docsService) {
-    var dataStore = contentStore(contentParser);
+    var store = contentStore(contentParser);
     var metadata;
 
     var apiActions = docsService.actions.metadata.api;
-    apiActions.success.on(function(data) {
+    store.onAction(apiActions.success, function(data) {
         metadata = data;
-        dataStore.changed();
-    }, null, dataStore);
-    apiActions.error.on(function() {
+        store.changed();
+    });
+
+    store.onAction(apiActions.error, function() {
         metadata = null;
-        dataStore.changed();
+        store.changed();
     });
 
     function contentParser(data) {
         return data.api;
     }
 
-    return recurve.extend(dataStore, {
+    return recurve.extend(store, {
         getMetadata: function() {
             return metadata;
         },
@@ -68,6 +69,6 @@ docsModule.factory("apiStore", ["contentStore", "docsService"], function(content
             });
 
             return found;
-        },
+        }
     });
 });

@@ -1,20 +1,21 @@
 "use strict";
 
-docsModule.factory("versionStore", ["$dataStore", "docsService"], function($dataStore, docsService) {
-    var dataStore = $dataStore();
+docsModule.factory("versionStore", ["$store", "docsService"], function($store, docsService) {
+    var store = $store();
     var metadata;
 
     var actions = docsService.actions.metadata.version;
-    actions.success.on(function(data) {
+    store.onAction(actions.success, function(data) {
         metadata = data;
-        dataStore.changed();
-    }, null, dataStore);
-    actions.error.on(function() {
+        store.changed();
+    }, null, store);
+
+    store.onAction(actions.error, function() {
         metadata = null;
-        dataStore.changed();
+        store.changed();
     });
 
-    return recurve.extend(dataStore, {
+    return recurve.extend(store, {
         getVersion: function() {
             return metadata ? metadata.version : null;
         }

@@ -1,28 +1,28 @@
 "use strict";
 
-docsModule.factory("stateStore", ["$dataStore", "$state"], function($dataStore, $state) {
-    var dataStore = $dataStore();
+docsModule.factory("stateStore", ["$store", "$state"], function($store, $state) {
+    var store = $store();
     var current = {name: "loading"};
 
-    $state.changeAction.on(function(name, params, data) {
+    store.onAction($state.changeAction, function(name, params, data) {
         current = {
             name: name,
             params: params,
             data: data
         };
-        dataStore.changed.trigger();
+        store.changed.trigger();
     });
 
-    $state.errorAction.on(function(details, name, params) {
+    store.onAction($state.errorAction, function(details, name, params) {
         current = {
             name: "error",
             details: details,
             params: params
         };
-        dataStore.changed.trigger();
+        store.changed.trigger();
     });
 
-    return recurve.extend(dataStore, {
+    return recurve.extend(store, {
         getCurrent: function() {
             return current;
         },

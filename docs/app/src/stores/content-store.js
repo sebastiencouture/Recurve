@@ -1,22 +1,22 @@
 "use strict";
 
-docsModule.factory("contentStore", ["$dataStore", "docsService"], function($dataStore, docsService) {
+docsModule.factory("contentStore", ["$store", "docsService"], function($store, docsService) {
     return function(parser) {
-        var dataStore = $dataStore();
+        var store = $store();
         var metadata;
 
         var actions = docsService.actions.metadata.content;
-        actions.success.on(function(data) {
+        store.onAction(actions.success, function(data) {
             metadata = parser(data);
-            dataStore.changed();
-        }, null, dataStore);
-
-        actions.error.on(function() {
-            metadata = null;
-            dataStore.changed();
+            store.changed();
         });
 
-        return recurve.extend(dataStore, {
+        store.onAction(actions.error, function() {
+            metadata = null;
+            store.changed();
+        });
+
+        return recurve.extend(store, {
             getContentMetadata: function(id) {
                 if (!metadata) {
                     return null;
