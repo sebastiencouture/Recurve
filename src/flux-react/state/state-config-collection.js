@@ -16,16 +16,18 @@ function addStateConfigCollectionService(module) {
             function calculatePath(name, options) {
                 var path;
                 if (options.default) {
-                    recurve.assert(!options.path, "path should not be set for default state config {0}", name);
+                    recurve.assert(!options.path, "path should not be set for default state config '{0}'", name);
                     path = "";
                 }
                 else if (options.notFound) {
-                    recurve.assert(!options.path, "path should not be set for not found state config {0}", name);
+                    recurve.assert(!options.path, "path should not be set for not found state config '{0}'", name);
                     path = "*";
                 }
                 else {
                     path = options.path;
                 }
+
+                recurve.assert(!recurve.isUndefined(path) && null !== path, "no path for state config '{0}'", name);
 
                 var parent = stateConfigCollection.getParent(name);
                 if (parent) {
@@ -36,7 +38,7 @@ function addStateConfigCollectionService(module) {
                     path = removeLeadingTrailingSlashes(path);
                 }
 
-                recurve.assert(path && path.length, "no path for state config {0}", name);
+                recurve.assert(!recurve.isUndefined(path) && null !== path, "no path for state config '{0}'", name);
 
                 return path;
             }
