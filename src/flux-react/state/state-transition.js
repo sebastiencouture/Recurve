@@ -8,7 +8,7 @@ function addStateTransitionService(module) {
             var redirected = $signal();
             var canceled = false;
             var started = false;
-            var transitionStateIndex = 0;
+            var currentStateIndex = 0;
 
             function createStates() {
                 states = [];
@@ -25,11 +25,11 @@ function addStateTransitionService(module) {
             }
 
             function transition() {
-                if (canceled || states.length < transitionStateIndex) {
+                if (canceled || states.length < currentStateIndex) {
                     return;
                 }
 
-                var state = states[transitionStateIndex];
+                var state = states[currentStateIndex];
                 if (state.resolved) {
                     transitionToChild();
                     return;
@@ -77,7 +77,7 @@ function addStateTransitionService(module) {
             }
 
             function transitionToChild() {
-                transitionStateIndex++;
+                currentStateIndex++;
                 transition();
             }
 
@@ -96,6 +96,7 @@ function addStateTransitionService(module) {
 
                 start: function() {
                     recurve.assert(!started, "state transition can only be started once");
+                    recurve.assert(!canceled, "state transition cannot be started if already canceled");
 
                     started = true;
                     createStates();

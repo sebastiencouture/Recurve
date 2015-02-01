@@ -19,7 +19,7 @@ describe("$stateConfigCollection", function() {
         expect(isFunction($stateConfigCollection)).toEqual(true);
     });
 
-    ddescribe("add", function() {
+    describe("add", function() {
         it("should return state config object", function() {
             var config = collection.add("a", {path: "test"});
             expect(config).toBeDefined();
