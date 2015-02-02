@@ -16,7 +16,16 @@ function addStateConfigService(module) {
             return -1 < value.indexOf(".");
         }
 
-        function $stateConfig(name, path, parent, resolver) {
+        function $stateConfig(name, options) {
+            recurve.assert(name, "expected name to be set for state config");
+
+            var path = options.path;
+            var parent = options.parent;
+            var resolver = options.resolver;
+
+            recurve.assert(!recurve.isUndefined(path) && null !== path, "expected path to be set for state config '{0}'", name);
+            recurve.assert(resolver, "expected resolver to be set for state config '{0}'", name);
+
             return {
                 name: name,
                 path: path,

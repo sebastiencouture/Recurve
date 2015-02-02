@@ -56,7 +56,7 @@ function addStateConfigCollectionService(module) {
                     validateParentExists(name);
 
                     var path = calculatePath(name, options);
-                    var newConfig = $stateConfig(name, path, parent, options.resolver);
+                    var newConfig = $stateConfig(name, {path: path, parent: parent, resolver: options.resolver});
 
                     var updated = false;
                     recurve.forEach(stateConfigs, function(config, index) {

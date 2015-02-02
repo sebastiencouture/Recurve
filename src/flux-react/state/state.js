@@ -4,22 +4,14 @@ function addStateService(module) {
     module.factory("$state", ["$promise"], function($promise) {
         return function(config, parent, params) {
             var resolver = config.resolver;
-            var data = recurve.extend({}, parent.data);
-            recurve.extend(data, config.data);
+            var data = {};
 
             function beforeAfterResolve(method, onRedirect) {
                 if (!recurve.isFunction(method)) {
                     return;
                 }
 
-                method(function (name, params, historyState, options) {
-                    onRedirect({
-                        name: name,
-                        params: params,
-                        historyState: historyState,
-                        options: options
-                    });
-                });
+                method(onRedirect);
             }
 
             return {
@@ -38,6 +30,11 @@ function addStateService(module) {
                 resolve: function() {
                     var promises = [];
                     var error;
+
+                    if (parent) {
+                        recurve.extend(data, parent.data);
+                    }
+                    recurve.extend(data, resolver.data);
 
                     recurve.forEach(resolver.resolve, function(factory, key) {
                         if (recurve.isFunction(factory)) {
@@ -78,7 +75,7 @@ function addStateService(module) {
                 },
 
                 afterResolve: function(onRedirect) {
-                    beforeAfterResolve(resolver.beforeResolve, onRedirect);
+                    beforeAfterResolve(resolver.afterResolve, onRedirect);
                 }
             };
         };

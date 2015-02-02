@@ -8,7 +8,7 @@ function addStateRouterService(module) {
 
             $router.setRoot($config.root);
             $router.notFound(function(path) {
-                //$state.notFoundAction.trigger(path);
+                // TODO TBD with redirects
             });
 
             recurve.forEach($config.states, function(config, name) {
@@ -32,9 +32,9 @@ function addStateRouterService(module) {
                     currentTransition.changed.on(function(states) {
                         $stateRouter.changeAction.trigger(states);
                     });
-                    currentTransition.redirected.on(function(redirect) {
+                    currentTransition.redirected.on(function(name, params, historyState, options) {
                         cancelCurrentTransition();
-                        $stateRouter.navigate(redirect.name, redirect.params, redirect.historyState, redirect.options);
+                        $stateRouter.navigate(name, params, historyState, options);
                     });
 
                     currentTransition.start();

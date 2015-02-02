@@ -500,6 +500,7 @@ describe("$state", function() {
                 };
             }
 
+            // TODO TBD use in state spec
             it("should trigger change action if no data to resolve", function() {
                 setupNoSpies({
                     test: {
@@ -714,6 +715,8 @@ describe("$state", function() {
                 expect(callback).toHaveBeenCalledWith("parent.child", {}, {a: "2"});
             });
 
+            // TODO TBD use in state-transition spec
+
             it("should resolve deeply nested parents without promises", function() {
                 setupNoSpies({
                     grandparent: {
@@ -839,6 +842,7 @@ describe("$state", function() {
             });
         });
 
+        // TODO TBD most move to state.js spec
         describe("custom", function() {
             it("should not invoke methods", function() {
                 setupNoSpies({

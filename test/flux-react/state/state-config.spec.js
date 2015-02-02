@@ -17,17 +17,41 @@ describe("$stateConfig", function() {
         expect(isFunction($stateConfig)).toEqual(true);
     });
 
+    describe("validation", function() {
+        it("should throw error if no name is set", function() {
+            expect(function() {
+                $stateConfig();
+            }).toThrowError("expected name to be set for state config");
+        });
+
+        it("should throw error if no path", function() {
+            expect(function() {
+                $stateConfig("a", {});
+            }).toThrowError("expected path to be set for state config 'a'");
+        });
+
+        it("should not throw error for empty path", function() {
+            $stateConfig("a", {path: "", resolver: {}});
+        });
+
+        it("should throw error if no resolver", function() {
+            expect(function() {
+                $stateConfig("a", {path: "a"});
+            }).toThrowError("expected resolver to be set for state config 'a'");
+        });
+    });
+
     describe("getAncestors", function() {
         it("should return all ancestors in order", function() {
-            var grandParent = $stateConfig("grandParent");
-            var parent = $stateConfig("parent", null, grandParent);
-            var child = $stateConfig("child", null, parent);
+            var grandParent = $stateConfig("grandParent", {path: "", resolver: {}});
+            var parent = $stateConfig("parent", {path: "", parent: grandParent, resolver: {}});
+            var child = $stateConfig("child", {path: "", parent: parent, resolver: {}});
 
             expect(child.getAncestors()).toEqual([parent, grandParent]);
         });
 
         it("should return empty array if none", function() {
-            expect($stateConfig().getAncestors()).toEqual([]);
+            expect($stateConfig("a", {path: "", resolver: {}}).getAncestors()).toEqual([]);
         })
     });
 
