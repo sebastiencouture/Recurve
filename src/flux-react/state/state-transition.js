@@ -15,6 +15,7 @@ function addStateTransitionService(module) {
                 recurve.forEach(stateConfigs, function(config) {
                     var found = recurve.find(prevStates, "config", config);
                     if (found) {
+                        found.params = params;
                         states.push(found);
                     }
                     else {
@@ -25,7 +26,7 @@ function addStateTransitionService(module) {
             }
 
             function transition() {
-                if (canceled || states.length < currentStateIndex) {
+                if (canceled || states.length - 1 < currentStateIndex) {
                     return;
                 }
 
@@ -66,10 +67,11 @@ function addStateTransitionService(module) {
 
                     triggerChange();
                     transitionToChild();
-                }, errorHandler);
+                }, errorHandler).then(null, errorHandler);
 
                 function errorHandler(error) {
                     if (!canceled) {
+                        state.loading = false;
                         state.error = error;
                         triggerChange();
                     }
@@ -85,9 +87,9 @@ function addStateTransitionService(module) {
                 changed.trigger(states);
             }
 
-            function triggerRedirect(options) {
+            function triggerRedirect() {
                 canceled = true;
-                redirected.trigger(options);
+                redirected.trigger.apply(redirected, arguments);
             }
 
             return {
@@ -96,12 +98,14 @@ function addStateTransitionService(module) {
 
                 start: function() {
                     recurve.assert(!started, "state transition can only be started once");
-                    recurve.assert(!canceled, "state transition cannot be started if already canceled");
+
+                    if (canceled) {
+                        return;
+                    }
 
                     started = true;
                     createStates();
                     transition();
-                    triggerChange();
                 },
 
                 cancel: function() {

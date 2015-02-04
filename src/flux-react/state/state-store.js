@@ -3,10 +3,10 @@
 function addStateStoreService(module) {
     module.factory("$stateStore", ["$store", "$stateRouter"], function($store, $stateRouter) {
         var store = $store();
-        var states = null;
+        var states = [];
         var name = null;
 
-        store.onAction($stateRouter.changed, function(activeStates) {
+        store.onAction($stateRouter.changeAction, function(activeStates) {
             states = activeStates;
             if (activeStates.length) {
                 name = activeStates[activeStates.length - 1].name;

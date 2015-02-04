@@ -1,9 +1,9 @@
 "use strict";
 
 function addStateRouterService(module) {
-    module.factory("$stateRouter", ["$router", "$action", "$promise", "$config", "$state", "$stateCollection", "$stateTransition"],
-        function($router, $action, $promise, $config, $state, $stateCollection, $stateTransition) {
-            var collection = $stateCollection();
+    module.factory("$stateRouter", ["$config", "$router", "$action", "$promise", "$state", "$stateConfigCollection", "$stateTransition"],
+        function($config, $router, $action, $promise, $state, $stateConfigCollection, $stateTransition) {
+            var collection = $stateConfigCollection();
             var currentTransition;
 
             $router.setRoot($config.root);
@@ -20,12 +20,9 @@ function addStateRouterService(module) {
                 var stateConfig = collection.add(name, config);
 
                 $router.on(stateConfig.path, function(params) {
-                    var prevStates = [];
-                    if (currentTransition) {
-                        prevStates = currentTransition.getStates();
-                        cancelCurrentTransition();
-                    }
+                    cancelCurrentTransition();
 
+                    var prevStates = currentTransition.getStates();
                     var activeStateConfigs = stateConfig.getAncestors().concat(stateConfig);
                     currentTransition = $stateTransition(activeStateConfigs, prevStates, params);
 

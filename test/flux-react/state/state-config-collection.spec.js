@@ -8,8 +8,8 @@ describe("$stateConfigCollection", function() {
         recurve.flux.react.$module.exports([]);
         $include(recurve.flux.react.$module);
 
-        $invoke(["$stateConfigCollection"], function(stateConfigCollection) {
-            $stateConfigCollection = stateConfigCollection;
+        $invoke(["$stateConfigCollection"], function(stateConfigCollectionService) {
+            $stateConfigCollection = stateConfigCollectionService;
             collection = $stateConfigCollection();
         });
     });

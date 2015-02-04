@@ -7,8 +7,8 @@ describe("$stateConfig", function() {
         recurve.flux.react.$module.exports([]);
         $include(recurve.flux.react.$module);
 
-        $invoke(["$stateConfig"], function(stateConfig) {
-            $stateConfig = stateConfig;
+        $invoke(["$stateConfig"], function(stateConfigService) {
+            $stateConfig = stateConfigService;
         });
     });
 
