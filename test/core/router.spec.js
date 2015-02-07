@@ -263,6 +263,14 @@ describe("$router", function() {
             $router.start();
             expect(callback).not.toHaveBeenCalled();
         });
+
+        it("should allow special character '*' in the path", function() {
+            $router.on("this/.*", callback);
+            pushState("/this/should/work");
+
+            $router.start();
+            expect(callback).toHaveBeenCalled();
+        })
     });
 
     describe("notFound", function() {

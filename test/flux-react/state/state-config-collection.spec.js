@@ -118,4 +118,15 @@ describe("$stateConfigCollection", function() {
             expect(collection.getParent("a.b")).toEqual(null);
         });
     });
+
+    describe("getFromPath", function() {
+        it("should return the config for the path", function() {
+            var config = collection.add("a", {path: "test", resolver: {}});
+            expect(collection.getFromPath("test")).toEqual(config);
+        });
+
+        it("should return null if no config for the path", function() {
+            expect(collection.getFromPath("test")).toEqual(null);
+        });
+    });
 });

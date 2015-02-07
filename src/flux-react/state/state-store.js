@@ -19,8 +19,20 @@ function addStateStoreService(module) {
         });
 
         return recurve.extend(store, {
-            getStates: function() {
+            getAll: function() {
                 return states;
+            },
+
+            getAtDepth: function(depth) {
+                if (0 > depth || depth > states.length - 1) {
+                    return null;
+                }
+
+                return states[depth];
+            },
+
+            getMaxDepth: function() {
+                return states.length - 1;
             },
 
             getName: function() {

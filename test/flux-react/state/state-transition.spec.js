@@ -482,6 +482,27 @@ describe("$stateTransition", function() {
 
             expect(callback.calls.mostRecent().args[0]).toEqual(stateTransition.getStates());
         });
+
+        it("should not trigger a change for a state that is already resolved (or no data to resolve)", function() {
+            parentConfig = $stateConfig("parent", {path: "a", resolver: {}});
+            setupChild();
+
+            var called = false;
+            transition([parentConfig, childConfig], null, null, function(states) {
+                called = true;
+                expect(states[0].resolved).toEqual(true);
+            });
+
+            expect(called).toEqual(true);
+        });
+
+        // use case => start app and all states don't require any data to resolve
+        it("should trigger once if all states are already resolved on start", function() {
+            var config = $stateConfig("a", {path: "a", resolver: {}});
+            transition([config], null, null, callback);
+
+            expect(callback.calls.count()).toEqual(1);
+        });
     });
 
     describe("redirected", function() {

@@ -57,6 +57,7 @@ function addCacheService(module) {
                     evict();
                 },
 
+                // TODO TBD update to getCountLimit for consistency
                 countLimit: function() {
                     return countLimit;
                 },
@@ -66,6 +67,7 @@ function addCacheService(module) {
                     evict();
                 },
 
+                // TODO TBD update to getTotalCostLimit for consistency
                 totalCostLimit: function() {
                     return totalCostLimit;
                 },

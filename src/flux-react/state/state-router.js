@@ -1,42 +1,50 @@
 "use strict";
 
 function addStateRouterService(module) {
-    module.factory("$stateRouter", ["$config", "$router", "$action", "$promise", "$state", "$stateConfigCollection", "$stateTransition"],
-        function($config, $router, $action, $promise, $state, $stateConfigCollection, $stateTransition) {
+    module.factory("$stateRouter", ["$config", "$router", "$action", "$promise", "$stateConfigCollection", "$stateTransition"],
+        function($config, $router, $action, $promise, $stateConfigCollection, $stateTransition) {
             var collection = $stateConfigCollection();
             var currentTransition;
 
             $router.setRoot($config.root);
             $router.notFound(function(path) {
-                // TODO TBD with redirects
+                $stateRouter.notFoundAction.trigger(path);
             });
 
-            recurve.forEach($config.states, function(config, name) {
+            setupStates();
+            setupRedirects();
+
+            function setupStates() {
+                recurve.forEach($config.states, function(config, name) {
+                    validateStateConfig(name, config);
+
+                    var stateConfig = collection.add(name, config);
+                    $router.on(stateConfig.path, function(params) {
+                        transitionToState(stateConfig, params);
+                    });
+                });
+            }
+
+            function validateStateConfig(name, config) {
                 recurve.assert(name, "state name must be set for path '{0}'", config.path);
                 recurve.assert(config.path, "state path must be set for name '{0}'", name);
-                // No support for RegExp objects (regex strings fine though)
+                // No support for RegExp objects (regex strings fine though) since being specified as object key
                 recurve.assert(recurve.isString(config.path), "state path must be a string for name '{0}'", name);
+            }
 
-                var stateConfig = collection.add(name, config);
+            function transitionToState(stateConfig, params) {
+                cancelCurrentTransition();
+                currentTransition = createTransition(stateConfig, params);
 
-                $router.on(stateConfig.path, function(params) {
-                    cancelCurrentTransition();
-
-                    var prevStates = currentTransition.getStates();
-                    var activeStateConfigs = stateConfig.getAncestors().concat(stateConfig);
-                    currentTransition = $stateTransition(activeStateConfigs, prevStates, params);
-
-                    currentTransition.changed.on(function(states) {
-                        $stateRouter.changeAction.trigger(states);
-                    });
-                    currentTransition.redirected.on(function(name, params, historyState, options) {
-                        cancelCurrentTransition();
-                        $stateRouter.navigate(name, params, historyState, options);
-                    });
-
-                    currentTransition.start();
+                currentTransition.changed.on(function(states) {
+                    $stateRouter.changeAction.trigger(states);
                 });
-            });
+                currentTransition.redirected.on(function(name, params, historyState, options) {
+                    $stateRouter.navigate(name, params, historyState, options);
+                });
+
+                currentTransition.start();
+            }
 
             function cancelCurrentTransition() {
                 if (!currentTransition) {
@@ -46,6 +54,56 @@ function addStateRouterService(module) {
                 currentTransition.cancel();
                 currentTransition.changed.off();
                 currentTransition.redirected.off();
+            }
+
+            function createTransition(stateConfig, params) {
+                var prevStates = [];
+                if (currentTransition) {
+                    prevStates = currentTransition.getStates();
+                }
+
+                var activeStateConfigs = stateConfig.getAncestors().concat(stateConfig);
+                return $stateTransition(activeStateConfigs, prevStates, params);
+            }
+
+            function setupRedirects() {
+                recurve.forEach($config.redirects, function(redirect) {
+                    var path = updateRedirectFromPath(redirect.from);
+
+                    validateRedirectFrom(path);
+                    validateRedirectTo(redirect.to, path);
+
+                    $router.on(path, function(params) {
+                        transitionToRedirect(redirect, params);
+                    });
+                });
+            }
+
+            function updateRedirectFromPath(from) {
+                if (!from) {
+                    from = ".*";
+                }
+
+                return from;
+            }
+
+            function validateRedirectFrom(path) {
+                var state = collection.getFromPath(path);
+                var stateName = state ? state.name : null;
+                recurve.assert(!stateName, "state '{0}' is defined for redirect path '{1}'", stateName, path);
+            }
+
+            function validateRedirectTo(stateName, path) {
+                recurve.assert(stateName, "'to' must be set for redirect path '{0}'", path);
+                recurve.assert(collection.get(stateName), "state '{0}' does not exist for redirect path '{1}'",
+                    stateName, path);
+            }
+
+            function transitionToRedirect(redirect, params) {
+                var redirectParams = redirect.params || {};
+                recurve.extend(redirectParams, params);
+
+                $stateRouter.navigate(redirect.to, redirectParams);
             }
 
             function updatePathWithParams(path, params) {
@@ -94,6 +152,7 @@ function addStateRouterService(module) {
 
             var $stateRouter = {
                 changeAction: $action(),
+                notFoundAction: $action(),
 
                 // options:
                 // reload => force reload
@@ -106,7 +165,6 @@ function addStateRouterService(module) {
                     recurve.assert(state, "state '{0}' does not exist", name);
 
                     var path = this.nameToPath(name, params);
-
                     var reload;
                     if (options.reload) {
                         if ($router.currentPath() === path) {
@@ -150,7 +208,8 @@ function addStateRouterService(module) {
             };
 
             return $stateRouter;
-        });
+        }
+    );
 
     module.config("$stateRouter", {
         root: "",

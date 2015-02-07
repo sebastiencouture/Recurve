@@ -56,6 +56,7 @@ function addStateConfigCollectionService(module) {
                     validateParentExists(name);
 
                     var path = calculatePath(name, options);
+                    var parent = this.getParent(name);
                     var newConfig = $stateConfig(name, {path: path, parent: parent, resolver: options.resolver});
 
                     var updated = false;
@@ -81,6 +82,10 @@ function addStateConfigCollectionService(module) {
                 getParent: function(name) {
                     var parentName = $stateConfig.getParentNameFromName(name);
                     return this.get(parentName);
+                },
+
+                getFromPath: function(path) {
+                    return recurve.find(stateConfigs, "path", path);
                 }
             };
 

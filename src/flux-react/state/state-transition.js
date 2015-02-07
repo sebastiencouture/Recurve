@@ -36,7 +36,6 @@ function addStateTransitionService(module) {
                     return;
                 }
 
-                // TODO TBD should we handle beforeResolve/afterResolve throwing error?
                 try {
                     state.beforeResolve(triggerRedirect);
                 }
@@ -83,6 +82,18 @@ function addStateTransitionService(module) {
                 transition();
             }
 
+            function areAllResolved() {
+                var allResolved;
+                recurve.forEach(states, function(state) {
+                    allResolved = state.resolved;
+                    if (!allResolved) {
+                        return false;
+                    }
+                });
+
+                return allResolved;
+            }
+
             function triggerChange() {
                 changed.trigger(states);
             }
@@ -105,7 +116,15 @@ function addStateTransitionService(module) {
 
                     started = true;
                     createStates();
-                    transition();
+
+                    // ensure we trigger a change at least once, all states could already be resolved if there is no
+                    // data to resolve
+                    if (areAllResolved()) {
+                        triggerChange();
+                    }
+                    else {
+                        transition();
+                    }
                 },
 
                 cancel: function() {

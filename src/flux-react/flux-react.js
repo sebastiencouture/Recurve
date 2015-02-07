@@ -23,10 +23,9 @@
     addStateService(module);
     addStateStoreService(module);
     addStateTransitionService(module);
-    addStateRootService(module);
-    addStateChildService(module);
+    addStateComponentService(module);
     addStateLinkService(module);
-    addStateNavigationMixinService(module);
+    addStateMixinService(module);
     addStateScrollMixinService(module);
 
     var moduleFactory = recurve.module;
@@ -44,5 +43,5 @@
     };
 
     // TODO TBD can we name react components starting with $ with JSX?
-    module.exports(["$stateRouter", "$stateStore", "$StateRoot", "$StateChild", "$StateLink", "$stateNavigationMixin"]);
+    module.exports(["$stateRouter", "$stateStore", "$State", "$StateLink", "$stateMixin"]);
 })();

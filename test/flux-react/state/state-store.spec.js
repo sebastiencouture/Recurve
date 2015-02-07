@@ -30,14 +30,55 @@ describe("$stateStore", function() {
         expect(isFunction($stateStore)).toEqual(false);
     });
 
-    it("should return the set of states triggered by the router", function() {
-        triggerStateChange();
-        expect($stateStore.getStates()).toEqual(states);
+    describe("getAll", function() {
+        it("should return the set of states triggered by the router", function() {
+            triggerStateChange();
+            expect($stateStore.getAll()).toEqual(states);
+        });
+
+        it("should return empty array when no states", function() {
+            expect($stateStore.getAll()).toEqual([]);
+        });
     });
 
-    it("should return the name of the leaf state", function() {
-        triggerStateChange();
-        expect($stateStore.getName()).toEqual("c");
+    describe("getName", function() {
+        it("should return the name of the leaf state", function() {
+            triggerStateChange();
+            expect($stateStore.getName()).toEqual("c");
+        });
+
+        it("should return null name when no states", function() {
+            expect($stateStore.getName()).toEqual(null);
+        });
+    });
+
+    describe("getAtDepth", function() {
+        beforeEach(function() {
+            triggerStateChange();
+        });
+
+        it("should return state at the depth", function() {
+            expect($stateStore.getAtDepth(1).name).toEqual("b");
+        });
+
+        it("should return null for negative depth", function() {
+            expect($stateStore.getAtDepth(-1)).toEqual(null);
+        });
+
+        it("should return null for depth that is too large", function() {
+            expect($stateStore.getAtDepth(4)).toEqual(null);
+        });
+    });
+
+    describe("getMaxDepth", function() {
+        it("should return the max depth", function() {
+            triggerStateChange();
+            expect($stateStore.getMaxDepth()).toEqual(2);
+        });
+
+        it("should return -1 for no states", function() {
+            expect($stateStore.getMaxDepth()).toEqual(-1);
+        });
     });
 
     it("should trigger changed after updating", function() {
@@ -46,13 +87,5 @@ describe("$stateStore", function() {
         triggerStateChange();
 
         expect(callback.calls.count()).toEqual(1);
-    });
-
-    it("should return empty array when no states", function() {
-        expect($stateStore.getStates()).toEqual([]);
-    });
-
-    it("should return null name when no states", function() {
-        expect($stateStore.getName()).toEqual(null);
     });
 });
