@@ -1,24 +1,8 @@
 "use strict";
 
 function addStateMixinService(module) {
-    module.factory("$stateMixin", ["$stateRouter"], function($stateRouter) {
+    module.factory("$stateMixin", null, function() {
         return {
-            navigate: function() {
-                $stateRouter.navigate.apply($stateRouter, arguments);
-            },
-
-            back: function() {
-                $stateRouter.back();
-            },
-
-            forward: function() {
-                $stateRouter.forward();
-            },
-
-            reload: function() {
-                $stateRouter.reload();
-            },
-
             contextTypes: {
                 depth: React.PropTypes.number
             },

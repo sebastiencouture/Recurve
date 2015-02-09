@@ -1,7 +1,7 @@
 "use strict";
 
-describe("$stateMixin", function() {
-    var $stateMixin;
+describe("$stateNavigationMixin", function() {
+    var $stateNavigationMixin;
     var $stateRouter;
 
     beforeEach(function() {
@@ -20,34 +20,35 @@ describe("$stateMixin", function() {
             });
         });
 
-        $invoke(["$stateRouter", "$stateMixin"], function(stateRouterService, stateMixinService) {
+        $invoke(["$stateRouter", "$stateNavigationMixin"],
+            function(stateRouterService, stateNavigationMixinService) {
             $stateRouter = stateRouterService;
-            $stateMixin = stateMixinService;
+            $stateNavigationMixin = stateNavigationMixinService;
         });
     });
 
     it("should be invokable", function() {
-        expect($stateMixin).toBeDefined();
-        expect(isFunction($stateMixin)).toEqual(false);
+        expect($stateNavigationMixin).toBeDefined();
+        expect(isFunction($stateNavigationMixin)).toEqual(false);
     });
 
-    it("should proxy navigate to $stateRouter", function() {
-        $stateMixin.navigate("a", "b", "c", "d");
+    it("should $stateNavigationMixin navigate to $stateRouter", function() {
+        $stateNavigationMixin.navigate("a", "b", "c", "d");
         expect($stateRouter.navigate).toHaveBeenCalledWith("a", "b", "c", "d");
     });
 
     it("should proxy back to $stateRouter", function() {
-        $stateMixin.back();
+        $stateNavigationMixin.back();
         expect($stateRouter.back).toHaveBeenCalled();
     });
 
     it("should proxy forward to $stateRouter", function() {
-        $stateMixin.forward();
+        $stateNavigationMixin.forward();
         expect($stateRouter.forward).toHaveBeenCalled();
     });
 
     it("should proxy reload to $stateRouter", function() {
-        $stateMixin.reload();
+        $stateNavigationMixin.reload();
         expect($stateRouter.reload).toHaveBeenCalled();
     });
 });
