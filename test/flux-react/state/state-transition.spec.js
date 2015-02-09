@@ -127,7 +127,7 @@ describe("$stateTransition", function() {
             it("should update the route params on previous states", function() {
                 expect(states[0].params).toBe(routeParams);
                 expect(states[1].params).toBe(routeParams);
-            })
+            });
         });
 
         it("should call beforeResolve before resolving", function() {
@@ -536,4 +536,4 @@ describe("$stateTransition", function() {
             expect(callback.calls.mostRecent().args).toEqual(["name", "params", "historyState", "options"]);
         });
     });
-})
+});

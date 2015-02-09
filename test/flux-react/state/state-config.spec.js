@@ -52,7 +52,7 @@ describe("$stateConfig", function() {
 
         it("should return empty array if none", function() {
             expect($stateConfig("a", {path: "", resolver: {}}).getAncestors()).toEqual([]);
-        })
+        });
     });
 
     describe("getParentNameFromName", function() {
@@ -80,6 +80,6 @@ describe("$stateConfig", function() {
 
         it("should return false if no parent", function() {
             expect($stateConfig.hasParentFromName("child")).toEqual(false);
-        })
+        });
     });
 });

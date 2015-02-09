@@ -84,7 +84,7 @@ describe("$state", function() {
 
         beforeEach(function() {
             callback = jasmine.createSpy("callback");
-        })
+        });
 
         it("should return promise", function() {
             setup({});
@@ -197,7 +197,7 @@ describe("$state", function() {
             setup({
                 resolve: {
                     a: function() {
-                        throw error
+                        throw error;
                     }
                 }
             }, null, null, null, callback);

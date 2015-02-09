@@ -270,7 +270,7 @@ describe("$router", function() {
 
             $router.start();
             expect(callback).toHaveBeenCalled();
-        })
+        });
     });
 
     describe("notFound", function() {
