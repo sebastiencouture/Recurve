@@ -205,7 +205,7 @@ module.exports = function(grunt) {
                     {
                         expand: true,
                         cwd: "<%= buildDir %>",
-                        src: "<%= pkg.name %>-flux-state.js",
+                        src: "<%= pkg.name %>-flux-react.js",
                         dest: "<%= buildDocsDir %>/vendor"
                     }
                 ]
@@ -246,7 +246,7 @@ module.exports = function(grunt) {
                     {
                         expand: true,
                         cwd: "<%= distDir %>",
-                        src: "<%= pkg.name %>-flux-state.min.js",
+                        src: "<%= pkg.name %>-flux-react.min.js",
                         dest: "<%= distDocsDir %>/vendor"
                     }
                 ]
