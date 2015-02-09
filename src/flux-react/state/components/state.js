@@ -1,7 +1,7 @@
 "use strict";
 
 function addStateComponentService(module) {
-    module.factory("$State", ["$stateStore"], function($stateStore) {
+    module.factory("$State", ["$stateStore", "$stateMixin"], function($stateStore, $stateMixin) {
         function getStateFromStore(depth) {
             var state = $stateStore.getAtDepth(depth);
             return {
@@ -24,6 +24,10 @@ function addStateComponentService(module) {
         }
 
         return React.createClass({
+            displayName: "$State",
+
+            mixins: [$stateMixin],
+
             getInitialState: function() {
                 return getStateFromStore(getDepth(this.context.depth));
             },
@@ -62,10 +66,9 @@ function addStateComponentService(module) {
                     Component = renderResolver.ready;
                 }
 
-                var params = recurve.extend({}, this.params);
-                params.state = params.state || {};
-                recurve.extend(params.state, {
-                    name: this.state.name,
+                var props = recurve.extend({}, this.props);
+                props.state = props.state || {};
+                recurve.extend(props.state, {
                     loading: this.state.loading,
                     resolved: this.state.resolved,
                     error: this.state.error,
@@ -73,7 +76,7 @@ function addStateComponentService(module) {
                     data: this.state.data
                 });
 
-                return React.createElement(Component, params);
+                return React.createElement(Component, props);
             },
 
             _changeHandler: function() {
