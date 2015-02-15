@@ -50,12 +50,12 @@ docsModule.factory("apiStore", ["contentStore", "docsService"], function(content
             return found;
         },
 
-        getIndexResourceMetadata: function(module) {
+        getIndexResourceMetadata: function(moduleName) {
             if (!metadata) {
                 return null;
             }
 
-            var metadataModule = metadata[module];
+            var metadataModule = metadata[moduleName];
             if (!metadataModule) {
                 return null;
             }

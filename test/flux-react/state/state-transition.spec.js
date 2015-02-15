@@ -10,10 +10,11 @@ describe("$stateTransition", function() {
     var childConfig;
     var stateTransition;
 
-    function setupParent(beforeResolve, afterResolve, resolve) {
+    function setupParent(beforeResolve, afterResolve, resolve, shouldShowLoading) {
         parentConfig = $stateConfig("parent", {path: "a", resolver: {
             beforeResolve: beforeResolve,
             afterResolve: afterResolve,
+            shouldShowLoading: shouldShowLoading,
             resolve: {
                 a: resolve
             }
@@ -419,6 +420,39 @@ describe("$stateTransition", function() {
         it("should trigger with the state set to loading before resolving", function() {
             var resolve = jasmine.createSpy("resolve");
             setupParent(null, null, resolve);
+
+            var callCount = 0;
+            transition([parentConfig], null, null, function(states) {
+                callCount++;
+                if (1 < callCount) {
+                    return;
+                }
+
+                expect(states[0].loading).toEqual(true);
+                expect(resolve).not.toHaveBeenCalled();
+            });
+
+            expect(callCount).toEqual(2);
+        });
+
+        it("should not trigger with the state set to loading before resolving if shouldShowLoading returns false", function() {
+            var resolve = jasmine.createSpy("resolve");
+            setupParent(null, null, resolve, function() {
+                return false;
+            });
+
+            transition([parentConfig], null, null, callback);
+
+            expect(callback.calls.count()).toEqual(1);
+            expect(resolve).toHaveBeenCalled();
+            expect(getParentState().resolved).toEqual(true);
+        });
+
+        it("should trigger with the state set to loading before resolving if shouldShowLoading returns true", function() {
+            var resolve = jasmine.createSpy("resolve");
+            setupParent(null, null, resolve, function() {
+                return true;
+            });
 
             var callCount = 0;
             transition([parentConfig], null, null, function(states) {

@@ -1,10 +1,10 @@
 "use strict";
 
 function addStateComponentService(module) {
-    module.factory("$State", ["$container", "$log", "$stateStore"], function($container, $log, $stateStore) {
+    module.factory("$State", ["$container", "$stateStore"], function($container, $stateStore) {
 
         function getStateFromStore(depth) {
-            return $stateStore.getAtDepth(depth);
+            return $stateStore.getAtDepth(depth) || {};
         }
 
         function isRoot(depth) {
@@ -31,30 +31,34 @@ function addStateComponentService(module) {
             },
 
             contextTypes: {
-                depth: React.PropTypes.number
+                depth: React.PropTypes.number,
+                state: React.PropTypes.object
             },
 
             childContextTypes: {
-                depth: React.PropTypes.number.isRequired
+                depth: React.PropTypes.number.isRequired,
+                state: React.PropTypes.object.isRequired
             },
 
             getChildContext: function() {
                 return {
-                    depth: this._getDepth() + 1
+                    depth: this._getDepth() + 1,
+                    state: getStateFromStore(this._getDepth() + 1)
                 };
             },
 
             render: function() {
-                if (!this.state) {
+                var state = this.context.state ? this.context.state : this.state;
+                if (!state.components) {
                     return null;
                 }
 
                 var componentName;
-                var components = this.state.components;
-                if (this.state.loading) {
+                var components = state.components;
+                if (state.loading) {
                     componentName = components.loading ? components.loading : components.ready;
                 }
-                else if (this.state.error) {
+                else if (state.error) {
                     componentName = components.error ? components.error : components.ready;
                 }
                 else {
@@ -66,21 +70,17 @@ function addStateComponentService(module) {
                 var props = recurve.extend({}, this.props);
                 props.state = props.state || {};
                 recurve.extend(props.state, {
-                    loading: this.state.loading,
-                    resolved: this.state.resolved,
-                    error: this.state.error,
-                    params: this.state.params,
-                    data: this.state.data
+                    loading: state.loading,
+                    error: state.error,
+                    params: state.params,
+                    data: state.data
                 });
 
                 return React.createElement(Component, props);
             },
 
             _changeHandler: function() {
-                var depth = this._getDepth();
-                var state = getStateFromStore(depth);
-
-                this.setState(state);
+                this.setState(getStateFromStore(0));
             },
 
             _getDepth: function() {

@@ -64,19 +64,23 @@ function addStateService(module) {
                         }
                     });
 
-                    var deferred = $promise.defer();
+                    var promise;
                     if (error) {
-                        deferred.reject(error);
+                        promise = $promise.reject(error);
                     }
                     else {
-                        $promise.all(promises).then(deferred.resolve, deferred.reject);
+                        promise = $promise.all(promises);
                     }
 
-                    return deferred.promise;
+                    return promise;
                 },
 
                 afterResolve: function(onRedirect) {
                     beforeAfterResolve(resolver.afterResolve, onRedirect);
+                },
+
+                shouldShowLoading: function() {
+                    return !resolver.shouldShowLoading || resolver.shouldShowLoading();
                 }
             };
         };

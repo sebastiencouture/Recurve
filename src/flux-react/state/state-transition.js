@@ -36,6 +36,7 @@ function addStateTransitionService(module) {
                     return;
                 }
 
+                // TODO TBD we probably should throw error for before and after resolve calls
                 try {
                     state.beforeResolve(triggerRedirect);
                 }
@@ -49,7 +50,9 @@ function addStateTransitionService(module) {
                 }
 
                 state.loading = true;
-                triggerChange();
+                if (state.shouldShowLoading()) {
+                    triggerChange();
+                }
 
                 state.resolve().then(function() {
                     if (canceled) {

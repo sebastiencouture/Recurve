@@ -37,6 +37,7 @@ function addStateConfigCollectionService(module) {
                 else {
                     path = removeLeadingTrailingSlashes(path);
                 }
+                path = removeLeadingTrailingSlashes(path);
 
                 recurve.assert(!recurve.isUndefined(path) && null !== path, "no path for state config '{0}'", name);
 
