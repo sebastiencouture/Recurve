@@ -67,7 +67,6 @@ function addRouterService(module) {
             var found = null;
             recurve.forEach(routes, function(route) {
                 if(recurve.areEqual(pathRegExp, route.pathRegExp)) {
-                    debugger
                     found = route;
                     return false;
                 }

@@ -14,7 +14,6 @@ docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialSt
         return {
             states: {
                 "app": {
-                    // TODO TBD not working if set to "", maybe have root: true? or just have it based on path = ""
                     path: "",
                     resolver: {
                         resolve: {
