@@ -34,7 +34,13 @@ function module(dependentModules) {
         });
 
         return allNames.filter(function(name) {
-            return 0 > exportNames.indexOf(name);
+            var isConfigForExported = false;
+            if (0 === name.indexOf("config.")) {
+                var serviceName = name.slice("config.".length);
+                isConfigForExported = 0 <= exportNames.indexOf(serviceName);
+            }
+
+            return !isConfigForExported && 0 > exportNames.indexOf(name);
         });
     }
 
@@ -91,6 +97,19 @@ function module(dependentModules) {
         }
     }
 
+    function addConfigServicesToExports(names) {
+        var updated = [];
+        forEach(names, function(name) {
+            updated.push(name);
+
+            if (0 !== name.indexOf("config.")) {
+                updated.push("config." + name);
+            }
+        });
+
+        return updated;
+    }
+
     return {
         exports: function(names) {
             exportNames = names;
@@ -119,7 +138,7 @@ function module(dependentModules) {
         },
 
         typeFactory: function(name, dependencies, Type) {
-            // guess it to be a function constructor... why "new" sucks!
+            // guess it to be a function constructor...
             assert(isFunction(Type), "factory services requires a function constructor");
 
             return this.factory(name, dependencies, function() {

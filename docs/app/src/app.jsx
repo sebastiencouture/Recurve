@@ -2,8 +2,7 @@
 
 "use strict";
 
-docsModule.factory("App", ["$window", "$document", "$router", "$state", "stateStore", "docsService", "NavBar", "Loading", "Error", "Api", "Tutorial", "Guide"],
-    function($window, $document, $router, $state, stateStore, docsService, NavBar, Loading, Error, Api, Tutorial, Guide) {
+docsModule.factory("App", ["$window", "$document", "$router", "$State", "NavBar"], function($window, $document, $router, State, NavBar) {
 
     // TODO TBD find better spot for this
     function setupInternalLinkHandling() {
@@ -31,72 +30,18 @@ docsModule.factory("App", ["$window", "$document", "$router", "$state", "stateSt
         };
     }
 
-    function getStateFromStores() {
-        var current = stateStore.getCurrent();
-        return {
-            name: current.name,
-            params: current.params,
-            data: current.data,
-            isLoading: stateStore.isLoading(),
-            isError: stateStore.isError(),
-            isApi: stateStore.isApi(),
-            isTutorial: stateStore.isTutorial(),
-            isGuide: stateStore.isGuide()
-        };
-    }
-
-    function getSection(state) {
-        var Section;
-        if (state.isError) {
-            Section = Error;
-        }
-        else if (state.isLoading) {
-            Section = Loading;
-        }
-        else if (state.isApi) {
-            Section = Api;
-        }
-        else if (state.isTutorial) {
-            Section = Tutorial;
-        }
-        else {
-            Section = Guide;
-        }
-
-        return Section;
-    }
-
     return React.createClass({
-        getInitialState: function() {
-            return getStateFromStores();
-        },
-
-        componentDidMount: function() {
-            stateStore.changed.on(this._changeHandler, this);
-
+        componentWillMount: function() {
             setupInternalLinkHandling();
-            docsService.getStartupData().then(function() {
-                $state.start();
-            });
-        },
-
-        componentWillUnmount: function() {
-            stateStore.changed.off(this._changeHandler, this);
         },
 
         render: function() {
-            var Section = getSection(this.state);
-
             return (
                 <div>
                     <NavBar />
-                    <Section appState={this.state}/>
+                    <State />
                 </div>
             );
-        },
-
-        _changeHandler: function() {
-            this.setState(getStateFromStores());
         }
     })
 });

@@ -21,13 +21,13 @@ function addStateConfigCollectionService(module) {
                 }
                 else if (options.notFound) {
                     recurve.assert(!options.path, "path should not be set for not found state config '{0}'", name);
-                    path = "*";
+                    path = ".*";
                 }
                 else {
                     path = options.path;
                 }
 
-                recurve.assert(!recurve.isUndefined(path) && null !== path, "no path for state config '{0}'", name);
+                validatePath(path, name);
 
                 var parent = stateConfigCollection.getParent(name);
                 if (parent) {
@@ -41,6 +41,12 @@ function addStateConfigCollectionService(module) {
                 recurve.assert(!recurve.isUndefined(path) && null !== path, "no path for state config '{0}'", name);
 
                 return path;
+            }
+
+            function validatePath(path, name) {
+                // No support for RegExp objects (regex strings fine though) since being specified as object key
+                recurve.assert(!recurve.isRegExp(path), "path must be a string for state config '{0}'", name);
+                recurve.assert(!recurve.isUndefined(path) && null !== path, "no path for state config '{0}'", name);
             }
 
             function validateParentExists(name) {

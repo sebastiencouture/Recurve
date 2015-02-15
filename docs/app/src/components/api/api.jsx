@@ -2,31 +2,7 @@
 
 "use strict";
 
-docsModule.factory("Api", ["apiStore", "SideBar", "ApiOverview", "ApiModule", "ApiModuleType", "ApiModuleResource"],
-    function(apiStore, SideBar, ApiOverview, ApiModule, ApiModuleType, ApiModuleResource) {
-
-    function renderSection(appState) {
-        var section;
-        switch (appState.name) {
-            case "api":
-                section = <ApiOverview />;
-                break;
-            case "apiModule":
-                section = <ApiModule />;
-                break;
-            case "apiModuleType":
-                section = <ApiModuleType />;
-                break;
-            case "apiModuleResource":
-                section = <ApiModuleResource />;
-                break;
-            default:
-                recurve.assert(false, "un-expected api state {0}", this.props.appState);
-        }
-
-        return section;
-    }
-
+docsModule.factory("Api", ["apiStore", "$State", "SideBar"], function(apiStore, State, SideBar) {
     return React.createClass({
         render: function() {
             var Grid = ReactBootstrap.Grid;
@@ -41,7 +17,7 @@ docsModule.factory("Api", ["apiStore", "SideBar", "ApiOverview", "ApiModule", "A
                                 <SideBar items={apiStore.getMetadata()} />
                             </Col>
                             <Col xs={12} md={9}>
-                                {renderSection(this.props.appState)}
+                                <State />
                             </Col>
                         </Row>
                     </Grid>

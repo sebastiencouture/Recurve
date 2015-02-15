@@ -1,5 +1,7 @@
 "use strict";
 
+/*
+
 docsModule.factory("config.$state", ["apiStore", "guideStore", "tutorialStore", "docsService"],
     function(apiStore, guideStore, tutorialStore, docsService) {
 
@@ -89,4 +91,4 @@ docsModule.factory("config.$state", ["apiStore", "guideStore", "tutorialStore", 
             }
         }
     };
-});
+});*/

@@ -1,33 +1,28 @@
 "use strict";
 
-docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialStore", "docsService",
-        "Loading", "Error", "App",
-        "Api", "ApiOverview", "ApiModule", "ApiModuleType", "ApiModuleResource".
-        "Tutorial",
-        "Guide"],
-    function(apiStore, guideStore, tutorialStore, docsService,
-        Loading, Error, App,
-        Api, ApiOverview, ApiModule, ApiModuleType, ApiModuleResource,
-        Tutorial,
-        Guide) {
+docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialStore", "docsService"],
+    function(apiStore, guideStore, tutorialStore, docsService) {
 
-        function render(ready) {
+        function componentsConfig(readyComponentName) {
             return {
-                loading: Loading,
-                ready: ready,
-                error: Error
-            }
+                loading: "Loading",
+                ready: readyComponentName,
+                error: "Error"
+            };
         }
 
         return {
             states: {
                 "app": {
+                    // TODO TBD not working if set to "", maybe have root: true? or just have it based on path = ""
                     path: "",
                     resolver: {
                         resolve: {
-                            startUp: docsService.getStartupData()
+                            bootstrap: function() {
+                                docsService.getStartupData();
+                            }
                         },
-                        render: render(App)
+                        components: componentsConfig("App")
                     }
                 },
 
@@ -40,7 +35,7 @@ docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialSt
                                 return docsService.getApiContent(metadata);
                             }
                         },
-                        render: render(Api)
+                        components: componentsConfig("Api")
                     }
                 },
 
@@ -53,7 +48,7 @@ docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialSt
                                 return docsService.getApiResource(metadata);
                             }
                         },
-                        render: render(ApiModule)
+                        components: componentsConfig("ApiModule")
                     }
                 },
 
@@ -65,7 +60,7 @@ docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialSt
                                 return apiStore.getResourceMetadata(params.module, params.type);
                             }
                         },
-                        render: render(ApiModuleType)
+                        components: componentsConfig("ApiModuleType")
                     }
                 },
 
@@ -78,14 +73,14 @@ docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialSt
                                 return docsService.getApiResource(metadata);
                             }
                         },
-                        render: render(ApiModuleResource)
+                        components: componentsConfig("ApiModuleResource")
                     }
                 },
 
                 "app.api.overview": {
                     default: true,
                     resolver: {
-                        render: render(ApiOverview)
+                        components: componentsConfig("ApiOverview")
                     }
                 },
 
@@ -98,7 +93,20 @@ docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialSt
                                 return docsService.getTutorialContent(metadata);
                             }
                         },
-                        render: render(Tutorial)
+                        components: componentsConfig("Tutorial")
+                    }
+                },
+
+                "app.tutorial.step": {
+                    path: ":id",
+                    resolver: {
+                        resolve: {
+                            content: function(params) {
+                                var metadata = tutorialStore.getContentMetadata(params.id);
+                                return docsService.getTutorialContent(metadata);
+                            }
+                        },
+                        components: componentsConfig("Tutorial")
                     }
                 },
 
@@ -111,7 +119,20 @@ docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialSt
                                 return docsService.getGuideContent(metadata);
                             }
                         },
-                        render: render(Guide)
+                        components: componentsConfig("Guide")
+                    }
+                },
+
+                "app.guide.step": {
+                    path: ":id",
+                    resolver: {
+                        resolve: {
+                            content: function(params) {
+                                var metadata = guideStore.getContentMetadata(params.id);
+                                return docsService.getGuideContent(metadata);
+                            }
+                        },
+                        components: componentsConfig("Guide")
                     }
                 },
 
@@ -119,96 +140,10 @@ docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialSt
                 "notFound": {
                     notFound: true,
                     resolver: {
-                        render: render(Error)
+                        components: componentsConfig("Error")
                     }
-                }
-            }
-        }
-
-        return {
-            states: {
-                apiModuleResource: {
-                    path: "api/:module/:type/:name",
-                    resolve: {
-                        resource: function(params) {
-                            var metadata = apiStore.getResourceMetadata(params.module, params.type, params.name);
-                            return docsService.getApiResource(metadata);
-                        }
-                    }
-                },
-
-                apiModuleType: {
-                    path: "api/:module/:type",
-                    resolve: {
-                        metadata: function(params) {
-                            return apiStore.getResourceMetadata(params.module, params.type);
-                        }
-                    }
-                },
-
-                apiModule: {
-                    path: "api/:module",
-                    resolve: {
-                        resource: function(params) {
-                            var metadata = apiStore.getIndexResourceMetadata(params.module);
-                            return docsService.getApiResource(metadata);
-                        }
-                    }
-                },
-
-                api: {
-                    path: "api",
-                    resolve: {
-                        content: function() {
-                            var metadata = apiStore.getIndexContentMetadata();
-                            return docsService.getApiContent(metadata);
-                        }
-                    }
-                },
-
-                tutorialStep: {
-                    path: "tutorial/:id",
-                    resolve: {
-                        content: function(params) {
-                            var metadata = tutorialStore.getContentMetadata(params.id);
-                            return docsService.getTutorialContent(metadata);
-                        }
-                    }
-                },
-
-                tutorial: {
-                    path: "tutorial",
-                    resolve: {
-                        content: function() {
-                            var metadata = tutorialStore.getIndexContentMetadata();
-                            return docsService.getTutorialContent(metadata);
-                        }
-                    }
-                },
-
-                guideStep: {
-                    path: "guide/:id",
-                    resolve: {
-                        content: function(params) {
-                            var metadata = guideStore.getContentMetadata(params.id);
-                            return docsService.getGuideContent(metadata);
-                        }
-                    }
-                },
-
-                guide: {
-                    path: "guide",
-                    resolve: {
-                        content: function() {
-                            var metadata = guideStore.getIndexContentMetadata();
-                            return docsService.getGuideContent(metadata);
-                        }
-                    }
-                },
-
-                notFound: {
-                    path: ".*"
                 }
             }
         };
-    });
+    }
+);

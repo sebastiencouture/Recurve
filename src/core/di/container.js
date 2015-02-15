@@ -3,6 +3,8 @@
 "use strict";
 
 function container(modules) {
+    var CONTAINER_SERVICE_NAME = "$container";
+
     assert(modules, "no modules specified for container");
 
     if (!isArray(modules)) {
@@ -18,6 +20,8 @@ function container(modules) {
     loadModules();
 
     function loadModules() {
+        addContainerServiceModule();
+
         // Only load each module once
         var allModules = [];
         getAllModules(modules, allModules);
@@ -29,6 +33,17 @@ function container(modules) {
             services = extend(services, exported.services);
             decorators = extend(decorators, exported.decorators);
         });
+    }
+
+    function addContainerServiceModule() {
+        var module = recurve.module();
+        module.value(CONTAINER_SERVICE_NAME,  {
+            load: load,
+            invoke: invoke,
+            get: get
+        });
+
+        modules.push(module);
     }
 
     function getAllModules(modules, all) {
@@ -112,9 +127,5 @@ function container(modules) {
         return instances;
     }
 
-    return {
-        load: load,
-        invoke: invoke,
-        get: get
-    };
+    return get(CONTAINER_SERVICE_NAME);
 }

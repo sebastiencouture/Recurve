@@ -1,11 +1,12 @@
 
     var container = recurve.container([
         recurve.flux.$module,
-        recurve.flux.state.$module,
+        recurve.flux.react.$module,
         docsModule]);
 
-    container.invoke(["$document", "App"], function($document, App) {
-        React.render(React.createElement(App, null), $document.body);
+    container.invoke(["$document", "$stateRouter", "$State"], function($document, $stateRouter, $State) {
+        React.render(React.createElement($State, null), $document.body);
+        $stateRouter.start();
     });
 
 })(window, recurve);

@@ -1,8 +1,8 @@
 "use strict";
 
 function addStateRouterService(module) {
-    module.factory("$stateRouter", ["$config", "$router", "$action", "$promise", "$stateConfigCollection", "$stateTransition"],
-        function($config, $router, $action, $promise, $stateConfigCollection, $stateTransition) {
+    module.factory("$stateRouter", ["$config", "$router", "$action", "$stateConfigCollection", "$stateTransition"],
+        function($config, $router, $action, $stateConfigCollection, $stateTransition) {
             var collection = $stateConfigCollection();
             var currentTransition;
 
@@ -26,10 +26,10 @@ function addStateRouterService(module) {
             }
 
             function validateStateConfig(name, config) {
+                recurve.assert(config, "state config must be set for name '{0}'", name);
                 recurve.assert(name, "state name must be set for path '{0}'", config.path);
-                recurve.assert(config.path, "state path must be set for name '{0}'", name);
-                // No support for RegExp objects (regex strings fine though) since being specified as object key
-                recurve.assert(recurve.isString(config.path), "state path must be a string for name '{0}'", name);
+                recurve.assert(config.resolver, "state resolver must be set for path '{0}'", config.path);
+                recurve.assert(config.resolver.components, "state resolver components must be set for path '{0}'", config.path);
             }
 
             function transitionToState(stateConfig, params) {
@@ -62,7 +62,7 @@ function addStateRouterService(module) {
                     prevStates = currentTransition.getStates();
                 }
 
-                var activeStateConfigs = stateConfig.getAncestors().concat(stateConfig);
+                var activeStateConfigs = stateConfig.getAncestors().reverse().concat(stateConfig);
                 return $stateTransition(activeStateConfigs, prevStates, params);
             }
 
@@ -118,7 +118,12 @@ function addStateRouterService(module) {
                     }
                 });
 
-                path =  pathSplit.join("/");
+                // remove any empty paths to avoid appending multiple forward slashes
+                pathSplit = pathSplit.filter(function(value) {
+                    return !!value;
+                });
+                path = pathSplit.join("/");
+
                 return addQueryParamsToPath(path, params);
             }
 

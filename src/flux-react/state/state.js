@@ -22,6 +22,7 @@ function addStateService(module) {
                 loading: false,
                 resolved: recurve.isUndefined(resolver.resolve),
                 error: null,
+                components: resolver.components,
 
                 beforeResolve: function(onRedirect) {
                     beforeAfterResolve(resolver.beforeResolve, onRedirect);

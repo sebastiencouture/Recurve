@@ -1,7 +1,7 @@
 "use strict";
 
 function addStateTransitionService(module) {
-    module.factory("$stateTransition", ["$signal", "$state"], function($signal, $state) {
+    module.factory("$stateTransition", ["$signal", "$async", "$log", "$state"], function($signal, $async, $log, $state) {
         return function(stateConfigs, prevStates, params) {
             var states = [];
             var changed = $signal();
@@ -64,16 +64,25 @@ function addStateTransitionService(module) {
                     state.loading = false;
                     state.resolved = true;
 
-                    triggerChange();
-                    transitionToChild();
+                    // don't want any errors that happen due to the change to get catched, only want
+                    // to catch data resolve errors, everything else should throw
+                    $async(function() {
+                        triggerChange();
+                        transitionToChild();
+                    });
                 }, errorHandler).then(null, errorHandler);
 
                 function errorHandler(error) {
-                    if (!canceled) {
-                        state.loading = false;
-                        state.error = error;
-                        triggerChange();
+                    if (canceled) {
+                        return;
                     }
+
+                    $log.error("error resolving state", error, state);
+
+                    state.loading = false;
+                    state.error = error;
+                    triggerChange();
+
                 }
             }
 

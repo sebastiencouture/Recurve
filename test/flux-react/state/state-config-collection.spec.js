@@ -83,9 +83,9 @@ describe("$stateConfigCollection", function() {
                 }).toThrowError("path should not be set for default state config 'a'");
             });
 
-            it("should set path to '*' for notFound config", function() {
+            it("should set path to '.*' for notFound config", function() {
                 collection.add("a", {notFound: true, resolver:{}});
-                expect(collection.get("a").path).toEqual("*");
+                expect(collection.get("a").path).toEqual(".*");
             });
 
             it("should throw error if path provided and notFound set to true", function() {
@@ -98,6 +98,12 @@ describe("$stateConfigCollection", function() {
                 expect(function() {
                     collection.add("a", {});
                 }).toThrowError("no path for state config 'a'");
+            });
+
+            it("should throw error for RegExp object path", function() {
+                expect(function() {
+                    collection.add("a", {path: /a/g});
+                }).toThrowError("path must be a string for state config 'a'");
             });
         });
     });

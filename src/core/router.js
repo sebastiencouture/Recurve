@@ -67,6 +67,7 @@ function addRouterService(module) {
             var found = null;
             recurve.forEach(routes, function(route) {
                 if(recurve.areEqual(pathRegExp, route.pathRegExp)) {
+                    debugger
                     found = route;
                     return false;
                 }
@@ -91,8 +92,11 @@ function addRouterService(module) {
                     return false;
                 }
 
-                // full path
-                params.shift();
+                var fullPath = params.shift();
+                // edge case with empty path, doesn't work correctly and returns match against any route
+                if (!fullPath.length && fullPath !== path) {
+                    return false;
+                }
 
                 var decodedParams = queryParams;
                 forEach(params, function(param, index) {

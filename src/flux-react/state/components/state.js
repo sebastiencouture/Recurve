@@ -1,42 +1,25 @@
 "use strict";
 
 function addStateComponentService(module) {
-    module.factory("$State", ["$stateStore", "$stateMixin"], function($stateStore, $stateMixin) {
+    module.factory("$State", ["$container", "$log", "$stateStore"], function($container, $log, $stateStore) {
+
         function getStateFromStore(depth) {
-            var state = $stateStore.getAtDepth(depth);
-            return {
-                name: $stateStore.getName(),
-                loading : state.loading,
-                resolved: state.resolved,
-                error: state.error,
-                data: state.data,
-                params: state.params,
-                render: state.resolver.render
-            };
+            return $stateStore.getAtDepth(depth);
         }
 
-        function getDepth(value) {
-            return value || 0;
-        }
-
-        function isRoot(context) {
-            return recurve.isUndefined(context.depth);
+        function isRoot(depth) {
+            return 0 === depth;
         }
 
         return React.createClass({
             displayName: "$State",
 
-            mixins: [$stateMixin],
-
             getInitialState: function() {
-                return getStateFromStore(getDepth(this.context.depth));
+                return getStateFromStore(this._getDepth());
             },
 
             componentWillMount: function() {
-                recurve.assert($stateStore.getMaxDepth() >= this.context.depth,
-                    "$State component does not exist at {0} depth", this.context.depth);
-
-                if (isRoot(this.context)) {
+                if (isRoot(this._getDepth())) {
                     $stateStore.changed.on(this._changeHandler, this);
                 }
             },
@@ -47,24 +30,38 @@ function addStateComponentService(module) {
                 }
             },
 
+            contextTypes: {
+                depth: React.PropTypes.number
+            },
+
+            childContextTypes: {
+                depth: React.PropTypes.number.isRequired
+            },
+
             getChildContext: function() {
                 return {
-                    depth: getDepth(this.context.depth) + 1
+                    depth: this._getDepth() + 1
                 };
             },
 
             render: function() {
-                var Component;
-                var renderResolver = this.state.render;
+                if (!this.state) {
+                    return null;
+                }
+
+                var componentName;
+                var components = this.state.components;
                 if (this.state.loading) {
-                    Component = renderResolver.loading ? renderResolver.loading : renderResolver.ready;
+                    componentName = components.loading ? components.loading : components.ready;
                 }
                 else if (this.state.error) {
-                    Component = renderResolver.error ? renderResolver.error : renderResolver.ready;
+                    componentName = components.error ? components.error : components.ready;
                 }
                 else {
-                    Component = renderResolver.ready;
+                    componentName = components.ready;
                 }
+
+                var Component = $container.get(componentName);
 
                 var props = recurve.extend({}, this.props);
                 props.state = props.state || {};
@@ -80,10 +77,14 @@ function addStateComponentService(module) {
             },
 
             _changeHandler: function() {
-                var depth = getDepth(this.context.depth);
+                var depth = this._getDepth();
                 var state = getStateFromStore(depth);
 
                 this.setState(state);
+            },
+
+            _getDepth: function() {
+                return this.context.depth || 0;
             }
         });
     });

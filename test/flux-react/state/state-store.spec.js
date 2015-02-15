@@ -1,8 +1,8 @@
 "use strict";
 
 describe("$stateStore", function() {
-    var $stateStore;
     var $stateRouter;
+    var $stateStore;
     var states;
 
     function triggerStateChange() {

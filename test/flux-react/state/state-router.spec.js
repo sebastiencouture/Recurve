@@ -8,8 +8,9 @@ describe("$stateRouter", function() {
     function setup(states, redirects, root, noSpies) {
         $include(null, function(module) {
             recurve.forEach(states, function(state) {
-                if (!state.resolver) {
+                if (state && !state.resolver) {
                     state.resolver = {};
+                    state.resolver.components = {};
                 }
             });
 
@@ -32,7 +33,8 @@ describe("$stateRouter", function() {
             }
         });
 
-        $invoke(["$async", "$router", "$stateRouter"], function(asyncService, routerService, stateRouterService) {
+        $invoke(["$async", "$router", "$stateRouter"],
+            function(asyncService, routerService, stateRouterService) {
             $async = asyncService;
             $router = routerService;
             $stateRouter = stateRouterService;
@@ -84,7 +86,7 @@ describe("$stateRouter", function() {
         describe("states", function() {
             it("should call $router.on with path", function() {
                 setup({test: {path: "a"}});
-                expect($router.on).toHaveBeenCalled();
+                expect($router.on).toHaveBeenCalled(); 
             });
 
             it("should include parent path", function() {
@@ -145,22 +147,44 @@ describe("$stateRouter", function() {
                 }).toThrowError("state name must be set for path 'b'");
             });
 
-            it("should throw error for null path", function() {
+            it("should throw error for no state config", function() {
                 expect(function() {
-                    setup({test: {}});
-                }).toThrowError("state path must be set for name 'test'");
+                    setup({"a": null});
+                }).toThrowError("state config must be set for name 'a'");
             });
 
-            it("should throw error for empty path", function() {
+            it("should throw error for no resolver", function() {
                 expect(function() {
-                    setup({test: {path: ""}});
-                }).toThrowError("state path must be set for name 'test'");
+                    $include(null, function(module) {
+                        module.config("$stateRouter", {
+                            states: {
+                                "a": {
+                                    path: "a"
+                                }
+                            }
+                        });
+                    });
+
+                    $invoke(["$async", "$router", "$stateRouter"],
+                        function(asyncService, routerService, stateRouterService) {
+                            $async = asyncService;
+                            $router = routerService;
+                            $stateRouter = stateRouterService;
+                        }
+                    );
+
+                }).toThrowError("state resolver must be set for path 'a'");
             });
 
-            it("should throw error for RegExp object path", function() {
+            it("should throw error for no resolver components", function() {
                 expect(function() {
-                    setup({test: {path: /a/g}});
-                }).toThrowError("state path must be a string for name 'test'");
+                    setup({
+                        "a": {
+                            path: "a",
+                            resolver: {}
+                        }
+                    });
+                }).toThrowError("state resolver components must be set for path 'a'");
             });
         });
 
@@ -281,6 +305,19 @@ describe("$stateRouter", function() {
             expect($stateRouter.nameToPath("parent.child")).toEqual("a/b");
         });
 
+        it("should not include forward slash for empty string parent path", function() {
+            setup({
+                "parent" : {
+                    path: ""
+                },
+                "parent.child": {
+                    path: "b"
+                }
+            });
+
+            expect($stateRouter.nameToPath("parent.child")).toEqual("b");
+        });
+
         it("should replace named params", function() {
             setup({test: {path: "a/:id/b/:count"}});
             expect($stateRouter.nameToPath("test", {id: 1, count: 2})).toEqual("a/1/b/2");
@@ -340,9 +377,22 @@ describe("$stateRouter", function() {
     });
 
     describe("nameToHref", function() {
-        it("should include '/'", function() {
+        it("should include forward slash at the beginning", function() {
             setup({test: {path: "a"}});
             expect($stateRouter.nameToHref("test")).toEqual("/a");
+        });
+
+        it("should not include multiple forward slashes for empty string parent path", function() {
+            setup({
+                "parent" : {
+                    path: ""
+                },
+                "parent.child": {
+                    path: "b"
+                }
+            });
+
+            expect($stateRouter.nameToHref("parent.child")).toEqual("/b");
         });
     });
 
@@ -530,7 +580,8 @@ describe("$stateRouter", function() {
                                 a: function() {
                                     return 1;
                                 }
-                            }
+                            },
+                            components: {}
                         }
                     }
                 });
@@ -558,7 +609,8 @@ describe("$stateRouter", function() {
                                 a: function() {
                                     return 1;
                                 }
-                            }
+                            },
+                            components: {}
                         }
                     }
                 });
@@ -582,7 +634,8 @@ describe("$stateRouter", function() {
                                 a: function() {
                                     throw error;
                                 }
-                            }
+                            },
+                            components: {}
                         }
                     }
                 });
@@ -644,7 +697,8 @@ describe("$stateRouter", function() {
                         test: function() {
                             return 1;
                         }
-                    }
+                    },
+                    components: {}
                 }
             },
             b: {

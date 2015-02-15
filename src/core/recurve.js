@@ -82,7 +82,7 @@ function createApi(recurve, version) {
     addRouterService(recurveModule);
 
     recurveModule.exports([
-        "$document", "$window", "$timeout", "$signal",
+        "$document", "$window", "$async", "$timeout", "$signal",
         "$eventEmitter", "$cache", "$log", "$logConsole",
         "$errorHandler", "$uncaughtErrorHandler", "$performance",
         "$cookies", "$promise", "$router", "$http"

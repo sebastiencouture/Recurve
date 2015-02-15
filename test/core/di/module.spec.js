@@ -188,6 +188,17 @@ describe("module", function(){
             expect(decorators.a).toBeDefined();
             expect(decorators.b).not.toBeDefined();
         });
+
+        it("should export configs for exported services", function() {
+            moduleA.value("a", 1);
+            moduleA.config("a", {});
+
+            moduleA.exports(["a"]);
+
+            var services = moduleA.exported().services;
+            expect(services.a).toBeDefined();
+            expect(services["config.a"]).toBeDefined();
+        });
     });
 
     it("should enable chaining", function() {

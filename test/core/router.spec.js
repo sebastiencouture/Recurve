@@ -103,6 +103,24 @@ describe("$router", function() {
             expect(callback).not.toHaveBeenCalled();
         });
 
+        it("should not call route callback if string matcher is empty string and route is not", function() {
+            setupRoute("");
+            pushState("/a/1/b");
+
+            $router.start();
+
+            expect(callback).not.toHaveBeenCalled();
+        });
+
+        it("should call route callback if string match is empty string and route is", function() {
+            setupRoute("");
+            pushState("/");
+
+            $router.start();
+
+            expect(callback).toHaveBeenCalled();
+        });
+
         it("should return params with keys for string path", function() {
             setupRoute("a/:id/b/:time");
             pushState("/a/1/b/21");

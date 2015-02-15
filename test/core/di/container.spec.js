@@ -600,6 +600,19 @@ describe("container", function(){
         });
     });
 
+    describe("$container service", function() {
+        it("should auto-include", function() {
+            containerA = container([moduleA]);
+            expect(containerA.get("$container")).toEqual(containerA);
+        });
+
+        it("should overwrite any module service named $container", function() {
+            moduleA.value("$container", 1);
+            containerA = container([moduleA]);
+            expect(containerA.get("$container")).toEqual(containerA);
+        });
+    });
+
     it("should export a module only once", function(){
         moduleA.value("a", 1);
         moduleA.value("b", 2);
