@@ -31,7 +31,6 @@ docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialSt
                         resolve: {
                             content: function() {
                                 var metadata = apiStore.getIndexContentMetadata();
-                                console.log(metadata);
                                 recurve.assert(metadata, "content metadata does not exist");
 
                                 return docsService.getApiContent(metadata);
