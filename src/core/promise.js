@@ -158,9 +158,17 @@ function addPromiseService(module) {
                         deferredResolve.apply(deferred, arguments);
                     }
                     else {
-                        var args = arguments;
+                        waitUntilDeferredSet(arguments);
+                    }
+
+                    function waitUntilDeferredSet(args) {
                         async(function() {
-                            deferredResolve.apply(deferred, args);
+                            if (deferredResolve) {
+                                deferredResolve.apply(deferred, args);
+                            }
+                            else {
+                                waitUntilDeferredSet(args);
+                            }
                         });
                     }
                 };
@@ -170,9 +178,17 @@ function addPromiseService(module) {
                         deferredReject.apply(deferred, arguments);
                     }
                     else {
-                        var args = arguments;
+                        waitUntilDeferredSet(arguments);
+                    }
+
+                    function waitUntilDeferredSet(args) {
                         async(function() {
-                            deferredReject.apply(deferred, args);
+                            if (deferredReject) {
+                                deferredReject.apply(deferred, args);
+                            }
+                            else {
+                                waitUntilDeferredSet(args);
+                            }
                         });
                     }
                 };
