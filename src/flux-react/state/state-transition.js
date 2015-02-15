@@ -42,13 +42,11 @@ function addStateTransitionService(module) {
                 }
 
                 state.loading = true;
-                if (state.shouldShowLoading()) {
-                    triggerChange();
-                }
+                triggerChangeIfNeeded(state);
 
                 state.resolve().then(function() {
-                    // don't want any errors that happen due triggering the change and afterResolve to get catched, only want
-                    // to catch data resolve errors, everything else should throw
+                    // don't want any errors that happen due triggering the change and afterResolve to get catched,
+                    // only want to catch data resolve errors, everything else should throw
                     $async(function() {
                         if (canceled) {
                             return;
@@ -62,7 +60,7 @@ function addStateTransitionService(module) {
                         state.loading = false;
                         state.resolved = true;
 
-                        triggerChange();
+                        triggerChangeIfNeeded(state);
                         transitionToChild();
                     }, 0);
                 }, errorHandler);
@@ -76,8 +74,7 @@ function addStateTransitionService(module) {
 
                     state.loading = false;
                     state.error = error;
-                    triggerChange();
-
+                    triggerChangeIfNeeded(state);
                 }
             }
 
@@ -96,6 +93,12 @@ function addStateTransitionService(module) {
                 });
 
                 return allResolved;
+            }
+
+            function triggerChangeIfNeeded(state) {
+                if (state.shouldTriggerChangeAction()) {
+                    triggerChange();
+                }
             }
 
             function triggerChange() {

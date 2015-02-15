@@ -79,8 +79,8 @@ function addStateService(module) {
                     beforeAfterResolve(resolver.afterResolve, onRedirect);
                 },
 
-                shouldShowLoading: function() {
-                    return !resolver.shouldShowLoading || resolver.shouldShowLoading();
+                shouldTriggerChangeAction: function() {
+                    return !resolver.shouldTriggerChangeAction || resolver.shouldTriggerChangeAction(this);
                 }
             };
         };

@@ -10,11 +10,11 @@ describe("$stateTransition", function() {
     var childConfig;
     var stateTransition;
 
-    function setupParent(beforeResolve, afterResolve, resolve, shouldShowLoading) {
+    function setupParent(beforeResolve, afterResolve, resolve, shouldTriggerChangeAction) {
         parentConfig = $stateConfig("parent", {path: "a", resolver: {
             beforeResolve: beforeResolve,
             afterResolve: afterResolve,
-            shouldShowLoading: shouldShowLoading,
+            shouldTriggerChangeAction: shouldTriggerChangeAction,
             resolve: {
                 a: resolve
             }
@@ -425,39 +425,6 @@ describe("$stateTransition", function() {
             expect(callCount).toEqual(2);
         });
 
-        it("should not trigger with the state set to loading before resolving if shouldShowLoading returns false", function() {
-            var resolve = jasmine.createSpy("resolve");
-            setupParent(null, null, resolve, function() {
-                return false;
-            });
-
-            transition([parentConfig], null, null, callback);
-
-            expect(callback.calls.count()).toEqual(1);
-            expect(resolve).toHaveBeenCalled();
-            expect(getParentState().resolved).toEqual(true);
-        });
-
-        it("should trigger with the state set to loading before resolving if shouldShowLoading returns true", function() {
-            var resolve = jasmine.createSpy("resolve");
-            setupParent(null, null, resolve, function() {
-                return true;
-            });
-
-            var callCount = 0;
-            transition([parentConfig], null, null, function(states) {
-                callCount++;
-                if (1 < callCount) {
-                    return;
-                }
-
-                expect(states[0].loading).toEqual(true);
-                expect(resolve).not.toHaveBeenCalled();
-            });
-
-            expect(callCount).toEqual(2);
-        });
-
         it("should trigger if resolve throws an error", function() {
             var error = new Error("oops!");
             setupParent(null, null, function() {
@@ -516,6 +483,71 @@ describe("$stateTransition", function() {
             transition([config], null, null, callback);
 
             expect(callback.calls.count()).toEqual(1);
+        });
+
+        describe("shouldTriggerChangeAction", function() {
+            it("should include the state as param", function() {
+                setupParent(null, null, null, callback);
+                transition([parentConfig]);
+
+                expect(callback).toHaveBeenCalledWith(getParentState());
+            });
+
+            it("should trigger if returns true", function() {
+                var resolve = jasmine.createSpy("resolve");
+                setupParent(null, null, resolve, function() {
+                    return true;
+                });
+
+                var callCount = 0;
+                transition([parentConfig], null, null, function(states) {
+                    callCount++;
+                    if (1 < callCount) {
+                        return;
+                    }
+
+                    expect(states[0].loading).toEqual(true);
+                    expect(resolve).not.toHaveBeenCalled();
+                });
+
+                expect(callCount).toEqual(2);
+            });
+
+            it("should not trigger loading state change if returns false", function() {
+                setupParent(null, null, null, function(state) {
+                    return !state.loading;
+                });
+
+                transition([parentConfig], null, null, callback);
+
+                expect(callback.calls.count()).toEqual(1);
+                expect(getParentState().resolved).toEqual(true);
+            });
+
+            it("should not trigger resolved state change if returns false", function() {
+                setupParent(null, null, null, function(state) {
+                    return !state.resolved;
+                });
+
+                transition([parentConfig], null, null, callback);
+
+                expect(callback.calls.count()).toEqual(1);
+                expect(getParentState().resolved).toEqual(true);
+            });
+
+            it("should not trigger error state change if returns false", function() {
+                var error = new Error("oops!");
+                setupParent(null, null, function() {
+                    throw new Error("oops!");
+                }, function(state) {
+                    return !state.error;
+                });
+
+                transition([parentConfig], null, null, callback);
+
+                expect(callback.calls.count()).toEqual(1);
+                expect(getParentState().error).toEqual(error);
+            });
         });
     });
 
