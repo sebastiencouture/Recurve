@@ -103,7 +103,7 @@ function addStateRouterService(module) {
                 var redirectParams = redirect.params || {};
                 recurve.extend(redirectParams, params);
 
-                $stateRouter.navigate(redirect.to, redirectParams);
+                $stateRouter.navigate(redirect.to, redirectParams, {replace: true});
             }
 
             function updatePathWithParams(path, params) {

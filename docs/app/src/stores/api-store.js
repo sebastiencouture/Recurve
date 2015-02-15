@@ -7,12 +7,12 @@ docsModule.factory("apiStore", ["contentStore", "docsService"], function(content
     var apiActions = docsService.actions.metadata.api;
     store.onAction(apiActions.success, function(data) {
         metadata = data;
-        store.changed();
+        store.changed.trigger();
     });
 
     store.onAction(apiActions.error, function() {
         metadata = null;
-        store.changed();
+        store.changed.trigger();
     });
 
     function contentParser(data) {

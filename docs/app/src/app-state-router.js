@@ -18,7 +18,7 @@ docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialSt
                     resolver: {
                         resolve: {
                             bootstrap: function() {
-                                docsService.getStartupData();
+                                return docsService.getStartupData();
                             }
                         },
                         components: componentsConfig("App")
@@ -31,6 +31,7 @@ docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialSt
                         resolve: {
                             content: function() {
                                 var metadata = apiStore.getIndexContentMetadata();
+                                console.log(metadata);
                                 recurve.assert(metadata, "content metadata does not exist");
 
                                 return docsService.getApiContent(metadata);
@@ -150,13 +151,20 @@ docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialSt
                 },
 
                 /* TODO TBD */
-                "notFound": {
+                /*"notFound": {
                     notFound: true,
                     resolver: {
                         components: componentsConfig("Error")
                     }
-                }
-            }
+                }*/
+            },
+
+            redirects: [
+                {from: "api/.*", to: "app.api.overview"},
+                {from: "guide/.*", to: "app.guide"},
+                {from: "tutorial/.*", to: "app.tutorial"},
+                {from: ".*", to: "app.api.overview"}
+            ]
         };
     }
 );

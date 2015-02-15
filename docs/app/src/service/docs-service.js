@@ -51,10 +51,9 @@ docsModule.factory("docsService", ["$promise", "$http", "$action", "appConfig", 
         }
 
         var promise = $http.get(url, options);
-        promise.then(function(response) {
+        return promise.then(function(response) {
             actions.success.trigger(response.data);
-        });
-        promise.catch(function(response) {
+        }, function(response) {
             if (response.canceled) {
                 actions.cancel.trigger(response);
             }
@@ -62,8 +61,6 @@ docsModule.factory("docsService", ["$promise", "$http", "$action", "appConfig", 
                 actions.error.trigger(response);
             }
         });
-
-        return promise;
     }
 
     return {

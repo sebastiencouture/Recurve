@@ -7,12 +7,12 @@ docsModule.factory("versionStore", ["$store", "docsService"], function($store, d
     var actions = docsService.actions.metadata.version;
     store.onAction(actions.success, function(data) {
         metadata = data;
-        store.changed();
+        store.changed.trigger();
     }, null, store);
 
     store.onAction(actions.error, function() {
         metadata = null;
-        store.changed();
+        store.changed.trigger();
     });
 
     return recurve.extend(store, {

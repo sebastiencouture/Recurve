@@ -8,12 +8,12 @@ docsModule.factory("contentStore", ["$store", "docsService"], function($store, d
         var actions = docsService.actions.metadata.content;
         store.onAction(actions.success, function(data) {
             metadata = parser(data);
-            store.changed();
+            store.changed.trigger();
         });
 
         store.onAction(actions.error, function() {
             metadata = null;
-            store.changed();
+            store.changed.trigger();
         });
 
         return recurve.extend(store, {
