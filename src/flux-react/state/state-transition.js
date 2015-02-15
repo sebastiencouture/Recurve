@@ -36,15 +36,7 @@ function addStateTransitionService(module) {
                     return;
                 }
 
-                // TODO TBD we probably should throw error for before and after resolve calls
-                try {
-                    state.beforeResolve(triggerRedirect);
-                }
-                catch (error) {
-                    errorHandler(error);
-                    return;
-                }
-
+                state.beforeResolve(triggerRedirect);
                 if (canceled) {
                     return;
                 }
@@ -55,25 +47,25 @@ function addStateTransitionService(module) {
                 }
 
                 state.resolve().then(function() {
-                    if (canceled) {
-                        return;
-                    }
-
-                    state.afterResolve(triggerRedirect);
-                    if (canceled) {
-                        return;
-                    }
-
-                    state.loading = false;
-                    state.resolved = true;
-
-                    // don't want any errors that happen due to the change to get catched, only want
+                    // don't want any errors that happen due triggering the change and afterResolve to get catched, only want
                     // to catch data resolve errors, everything else should throw
                     $async(function() {
+                        if (canceled) {
+                            return;
+                        }
+
+                        state.afterResolve(triggerRedirect);
+                        if (canceled) {
+                            return;
+                        }
+
+                        state.loading = false;
+                        state.resolved = true;
+
                         triggerChange();
                         transitionToChild();
-                    });
-                }, errorHandler).then(null, errorHandler);
+                    }, 0);
+                }, errorHandler);
 
                 function errorHandler(error) {
                     if (canceled) {

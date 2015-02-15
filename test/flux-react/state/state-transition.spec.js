@@ -143,15 +143,15 @@ describe("$stateTransition", function() {
             expect(called).toEqual(true);
         });
 
-        it("should error if beforeResolve throws an error", function() {
+        it("should throw error if beforeResolve throws an error", function() {
             var error = new Error("oops!");
             setupParent(function() {
                 throw error;
             });
-            transition([parentConfig]);
 
-            expect(getParentState().error).toBe(error);
-            expect(getParentState().loading).toEqual(false);
+            expect(function() {
+                transition([parentConfig]);
+            }).toThrow(error);
         });
 
         it("should stop transition if beforeResolve redirects", function() {
@@ -191,15 +191,15 @@ describe("$stateTransition", function() {
             expect(called).toEqual(true);
         });
 
-        it("should error if afterResolve throws an error", function() {
+        it("should throw error if afterResolve throws an error", function() {
             var error = new Error("oops!");
             setupParent(null, function() {
                 throw error;
             });
-            transition([parentConfig]);
 
-            expect(getParentState().error).toBe(error);
-            expect(getParentState().loading).toEqual(false);
+            expect(function() {
+                transition([parentConfig]);
+            }).toThrow(error);
         });
 
         // TODO TBD not sure if should or shouldn't set to resolved?
@@ -252,7 +252,7 @@ describe("$stateTransition", function() {
 
         it("should not attempt to resolve anymore states if one errors", function() {
             var error = new Error("oops!");
-            setupParent(null, function() {
+            setupParent(null, null, function() {
                 throw error;
             });
 
@@ -293,23 +293,25 @@ describe("$stateTransition", function() {
             it("should resolve a state that was not resolved in the previous state set", function() {
                 var callback = jasmine.createSpy("callback");
                 var throwError = true;
-                setupParent(function() {
+                setupParent(null, null, function() {
                     if (throwError) {
                         throwError = false;
                         throw new Error("ooops!");
                     }
                     throwError = false;
-                }, null, callback);
+                });
                 transition([parentConfig]);
 
                 var prevStates = stateTransition.getStates();
                 clearTransition();
                 callback.calls.reset();
 
+                expect(getParentState().resolved).toEqual(false);
+
                 setupChild();
                 transition([parentConfig, childConfig], prevStates);
 
-                expect(callback).toHaveBeenCalled();
+                expect(getParentState().resolved).toEqual(true);
             });
 
             it("should not call beforeResolve for a state that is already resolved", function() {
@@ -394,18 +396,6 @@ describe("$stateTransition", function() {
             callback = jasmine.createSpy("callback");
         });
 
-        it("should trigger if beforeResolve throws an error", function() {
-            var error = new Error("oops!");
-            setupParent(function() {
-                throw new Error("oops!");
-            });
-
-            var callback = jasmine.createSpy("callback");
-            transition([parentConfig], null, null, callback);
-
-            expect(callback).toHaveBeenCalled();
-        });
-
         it("should not trigger after redirecting during beforeResolve", function() {
             setupParent(function(redirect) {
                 redirect("c");
@@ -482,16 +472,6 @@ describe("$stateTransition", function() {
             setupParent();
 
             var callback = jasmine.createSpy("callback");
-            transition([parentConfig], null, null, callback);
-
-            expect(callback.calls.count()).toEqual(2);
-        });
-
-        it("should trigger if afterResolve throws an error", function() {
-            var error = new Error("oops!");
-            setupParent(null, function() {
-                throw error;
-            }, null);
             transition([parentConfig], null, null, callback);
 
             expect(callback.calls.count()).toEqual(2);
