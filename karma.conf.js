@@ -24,7 +24,6 @@ module.exports = function(karma) {
         files.recurveModules.mock,
         files.recurveModules.flux,
         files.recurveModules.fluxRest,
-        files.recurveModules.fluxState,
         files.recurveModules.fluxReact,
         files.test),
 

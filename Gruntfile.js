@@ -61,7 +61,6 @@ module.exports = function(grunt) {
                     "<%= buildDir %>/<%= pkg.name %>-mock.js": files.recurveModules.mock,
                     "<%= buildDir %>/<%= pkg.name %>-flux.js": files.recurveModules.flux,
                     "<%= buildDir %>/<%= pkg.name %>-flux-rest.js": files.recurveModules.fluxRest,
-                    "<%= buildDir %>/<%= pkg.name %>-flux-state.js": files.recurveModules.fluxState,
                     "<%= buildDir %>/<%= pkg.name %>-flux-react.js": files.recurveModules.fluxReact
                 }
             },
@@ -262,7 +261,6 @@ module.exports = function(grunt) {
             recurveMock: files.recurveModules.mock,
             recurveFlux: files.recurveModules.flux,
             recurveFluxRest: files.recurveModules.fluxRest,
-            recurveFluxState: files.recurveModules.fluxState,
             recurveFluxReact: files.recurveModules.fluxReact,
             docs: files.docs.js.concat(files.docs.tasks),
             test: files.test

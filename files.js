@@ -51,11 +51,7 @@ var recurveFiles = {
         ],
 
         "fluxRest": [
-            "src/flux-rest/flux-rest.js",
-        ],
-
-        "fluxState": [
-            "src/flux-state/flux-state.js"
+            "src/flux-rest/flux-rest.js"
         ],
 
         "fluxReact": [
