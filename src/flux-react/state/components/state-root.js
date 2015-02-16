@@ -1,19 +1,19 @@
 "use strict";
 
 function addStateRootComponentService(module) {
-    module.factory("$StateRoot", ["$stateStore", "$stateRenderMixin"], function($stateStore, $stateRenderMixin) {
+    module.factory("$StateRoot", ["$stateStore", "$stateMixin"], function($stateStore, $stateMixin) {
 
-        function getStateFromStore(depth) {
-            return $stateStore.getAtDepth(depth) || {};
+        function getStateFromStore() {
+            return $stateStore.getAtDepth(0) || {};
         }
 
         return React.createClass({
             displayName: "$StateRoot",
 
-            mixins: [$stateRenderMixin],
+            mixins: [$stateMixin],
 
             getInitialState: function() {
-                return getStateFromStore(0);
+                return getStateFromStore();
             },
 
             componentWillMount: function() {
@@ -24,29 +24,16 @@ function addStateRootComponentService(module) {
                 $stateStore.changed.off(this._changeHandler, this);
             },
 
-            contextTypes: {
-                $depth: React.PropTypes.number,
-                $state: React.PropTypes.object
-            },
-
-            childContextTypes: {
-                $depth: React.PropTypes.number.isRequired,
-                $state: React.PropTypes.object.isRequired
-            },
-
             getChildContext: function() {
-                return {
-                    $depth: 1,
-                    $state: getStateFromStore(1)
-                };
+                return this.createChildContext(0);
             },
 
             render: function() {
-                return this.renderComponent(this.state);
+                return this.renderComponent(this.state, 0);
             },
 
             _changeHandler: function() {
-                this.setState(getStateFromStore(0));
+                this.setState(getStateFromStore());
             }
         });
     });

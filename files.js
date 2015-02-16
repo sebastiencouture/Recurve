@@ -66,7 +66,6 @@ var recurveFiles = {
             "src/flux-react/state/state-store.js",
             "src/flux-react/state/state-transition.js",
             "src/flux-react/state/state-mixin.js",
-            "src/flux-react/state/state-render-mixin.js",
             "src/flux-react/state/state-navigation-mixin.js",
             "src/flux-react/state/state-scroll-mixin.js",
             "src/flux-react/state/components/state.js",

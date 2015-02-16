@@ -3,6 +3,7 @@
 "use strict";
 
 docsModule.factory("Api", ["apiStore", "$State", "SideBar"], function(apiStore, State, SideBar) {
+
     return React.createClass({
         render: function() {
             var Grid = ReactBootstrap.Grid;

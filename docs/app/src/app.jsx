@@ -2,7 +2,8 @@
 
 "use strict";
 
-docsModule.factory("App", ["$window", "$document", "$router", "$State", "NavBar"], function($window, $document, $router, State, NavBar) {
+docsModule.factory("App", ["$window", "$document", "$router", "$State", "NavBar"],
+    function($window, $document, $router, State, NavBar) {
 
     // TODO TBD find better spot for this
     function setupInternalLinkHandling() {
