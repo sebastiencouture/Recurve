@@ -5,8 +5,10 @@
  addStateStoreService,
  addStateTransitionService,
  addStateComponentService,
- addStateLinkService,
+ addStateRootComponentService,
+ addStateLinkComponentService,
  addStateMixinService,
+ addStateRenderMixinService,
  addStateNavigationMixinService,
  addStateScrollMixinService
  */
@@ -24,8 +26,10 @@
     addStateStoreService(module);
     addStateTransitionService(module);
     addStateComponentService(module);
-    addStateLinkService(module);
+    addStateRootComponentService(module);
+    addStateLinkComponentService(module);
     addStateMixinService(module);
+    addStateRenderMixinService(module);
     addStateNavigationMixinService(module);
     addStateScrollMixinService(module);
 
@@ -43,6 +47,6 @@
         return module;
     };
 
-    module.exports(["$stateRouter", "$stateStore", "$State", "$StateLink",
+    module.exports(["$stateRouter", "$stateStore", "$StateRoot", "$State", "$StateLink",
         "$stateMixin", "$stateNavigationMixin", "$stateScrollMixin"]);
 })();

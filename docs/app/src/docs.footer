@@ -4,8 +4,8 @@
         recurve.flux.react.$module,
         docsModule]);
 
-    container.invoke(["$document", "$stateRouter", "$State"], function($document, $stateRouter, $State) {
-        React.render(React.createElement($State, null), $document.body);
+    container.invoke(["$document", "$stateRouter", "$StateRoot"], function($document, $stateRouter, $StateRoot) {
+        React.render(React.createElement($StateRoot, null), $document.body);
         $stateRouter.start();
     });
 

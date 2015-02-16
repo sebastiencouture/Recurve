@@ -8,19 +8,19 @@ function addStateMixinService(module) {
 
         return {
             contextTypes: {
-                depth: React.PropTypes.number,
-                state: React.PropTypes.object
+                $depth: React.PropTypes.number,
+                $state: React.PropTypes.object
             },
 
             childContextTypes: {
-                depth: React.PropTypes.number.isRequired,
-                state: React.PropTypes.object.isRequired
+                $depth: React.PropTypes.number.isRequired,
+                $state: React.PropTypes.object.isRequired
             },
 
             getChildContext: function() {
                 return {
-                    depth: this.context.depth,
-                    state: getStateFromStore(this.context.depth)
+                    $depth: this.context.$depth,
+                    $state: getStateFromStore(this.context.$depth)
                 };
             }
         };

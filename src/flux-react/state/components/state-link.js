@@ -1,6 +1,6 @@
 "use strict";
 
-function addStateLinkService(module) {
+function addStateLinkComponentService(module) {
     module.factory("$StateLink", ["$stateRouter"], function($stateRouter) {
 
         function ignoreClick(event) {
