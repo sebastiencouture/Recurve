@@ -28,7 +28,7 @@ function addStateRenderMixinService(module) {
                     error: state.error,
                     params: state.params,
                     data: state.data
-                }
+                };
 
                 return React.createElement(Component, props);
             }
