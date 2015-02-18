@@ -118,7 +118,7 @@ describe("$state", function() {
             expect(state.data).toEqual({a: "b"});
         });
 
-        it("should support data to be returned with method call", function() {
+        it("should support data to be returned without method call", function() {
             setup({
                 resolve: {
                     a: "b"
@@ -241,7 +241,7 @@ describe("$state", function() {
                 $async.flush();
             }
 
-            it("should pass in resolve parent data to child resolve methods", function() {
+            it("should pass in resolved parent data to child resolve methods", function() {
                 // not using spy on resolver since it seems to be async? its returning the data with
                 // the child resolved value?
                 setupWithParent({
@@ -273,6 +273,30 @@ describe("$state", function() {
                 });
 
                 expect(state.data).toEqual({a: "c", b: "cd"});
+            });
+
+            it("should inherit parent resolved data if child resolves no data", function() {
+                setupWithParent({
+                    resolve: {
+                        a: returnLater("c", 100)
+                    }
+                }, {});
+
+                expect(state.data).toEqual({a: "c"});
+            });
+
+            it("it should inherit parent resolved data if child only has static data", function() {
+                setupWithParent({
+                    resolve: {
+                        a: returnLater("c", 100)
+                    }
+                }, {
+                    resolve: {
+                        b: "d"
+                    }
+                });
+
+                expect(state.data).toEqual({a: "c", b: "d"});
             });
 
             it("should overwrite parent resolved data", function() {

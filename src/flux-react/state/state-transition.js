@@ -33,6 +33,7 @@ function addStateTransitionService(module) {
 
                 var state = states[currentStateIndex];
                 if (state.resolved) {
+                    state.syncDataWithParent();
                     transitionToChild();
                     return;
                 }

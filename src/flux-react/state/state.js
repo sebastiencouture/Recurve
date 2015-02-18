@@ -19,7 +19,7 @@ function addStateService(module) {
                 config: config,
                 params: params,
                 history: history,
-                data: data,
+                data: parent ? recurve.extend(data, parent.data) : data,
                 loading: false,
                 resolved: recurve.isUndefined(resolver.resolve),
                 error: null,
@@ -82,6 +82,12 @@ function addStateService(module) {
 
                 shouldTriggerChangeAction: function() {
                     return !resolver.shouldTriggerChangeAction || resolver.shouldTriggerChangeAction(this);
+                },
+
+                syncDataWithParent: function() {
+                    if (parent) {
+                        recurve.extend(state.data, parent.data);
+                    }
                 }
             };
 

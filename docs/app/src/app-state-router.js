@@ -17,15 +17,15 @@ docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialSt
                     path: "",
                     resolver: {
                         resolve: {
-                            apiMetadata: function() {
+                            bootstrapApiMetadata: function() {
                                 return docsService.getApiMetadata();
                             },
 
-                            contentMetadata: function() {
+                            bootstrapContentMetadata: function() {
                                 return docsService.getContentMetadata();
                             },
 
-                            versionMetadata: function() {
+                            bootstrapVersionMetadata: function() {
                                 return docsService.getVersionMetadata();
                             }
                         },
@@ -36,14 +36,6 @@ docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialSt
                 "app.api": {
                     path: "api",
                     resolver: {
-                        resolve: {
-                            content: function() {
-                                var metadata = apiStore.getIndexContentMetadata();
-                                recurve.assert(metadata, "content metadata does not exist");
-
-                                return docsService.getApiContent(metadata);
-                            }
-                        },
                         components: componentsConfig("Api")
                     }
                 },
@@ -93,6 +85,16 @@ docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialSt
                 "app.api.overview": {
                     "default": true,
                     resolver: {
+                        resolve: {
+                            content: function() {
+                                var metadata = apiStore.getIndexContentMetadata();
+                                recurve.assert(metadata, "content metadata does not exist");
+
+                                return docsService.getApiContent(metadata).then(function() {
+                                    return apiStore.getMetadata();
+                                });
+                            }
+                        },
                         components: componentsConfig("ApiOverview")
                     }
                 },
