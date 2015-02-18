@@ -37,8 +37,8 @@ function addStateLinkComponentService(module) {
             propTypes: {
                 to: React.PropTypes.string.isRequired,
                 params: React.PropTypes.object,
-                activeClassName: PropTypes.string.isRequired,
-                activeStyle: PropTypes.object,
+                activeClassName: React.PropTypes.string.isRequired,
+                activeStyle: React.PropTypes.object,
                 onClick: React.PropTypes.func
             },
 
