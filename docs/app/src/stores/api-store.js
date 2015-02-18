@@ -34,13 +34,13 @@ docsModule.factory("apiStore", ["contentStore", "docsService"], function(content
                 return metadataModule;
             }
 
-            var metadataType = metadataModule[type];
+            var metadataType = metadataModule[type].children;
             if (!name) {
                 return metadataType;
             }
 
             var found = null;
-            recurve.forEach(metadataType, function(resource) {
+            recurve.forEach(metadataType.children, function(resource) {
                 if (resource.name === name) {
                     found = resource;
                     return false;

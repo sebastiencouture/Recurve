@@ -24,26 +24,87 @@ function processFile(filePath, content, metadata, options) {
 }
 
 function addCommentToMetadata(comment, metadata, filePath, options) {
-    var module = comment.module;
-    // only care about top level comments
-    if (!module) {
+    // only care about module comments
+    if (!getModuleNameFromComment(comment)) {
         return;
     }
 
-    var isIndex = module === comment.name;
-    var url = options.api.baseUrl + utils.getRelativePathNoExtension(filePath, options.api.input) + ".json";
+    var module = addModuleToMetadata(comment, metadata, options);
+    var type = addTypeToModule(comment, module, options);
+    addResourceToType(comment, type, filePath, options);
+}
 
+function addModuleToMetadata(comment, metadata, options) {
+    var moduleName = getModuleNameFromComment(comment);
+    if (metadata[moduleName]) {
+        return;
+    }
+
+    metadata[moduleName] = {
+        path: getAppPath(moduleName, null, null, options),
+        children: {}
+    };
+
+    return metadata[moduleName];
+}
+
+function addTypeToModule(comment, module, options) {
+    var moduleName = getModuleNameFromComment(comment);
+    var typeName = getTypeNameFromComment(comment);
+    if (module.children[typeName]) {
+        return;
+    }
+
+    module.children[typeName] = {
+        path: getAppPath(moduleName, typeName, null, options),
+        children: []
+    };
+
+    return module.children[typeName];
+}
+
+function addResourceToType(comment, type, filePath, options) {
+    var moduleName = getModuleNameFromComment(comment);
+    var typeName = getTypeNameFromComment(comment);
+    var resourceName = comment.name;
+    var path = getAppPath(moduleName, typeName, resourceName, options);
+
+    var isIndex = moduleName === comment.name;
+
+    var url = options.api.baseUrl + utils.getRelativePathNoExtension(filePath, options.api.input) + ".json";
     assert(url, "unable to determine url for api comment", comment);
 
-    metadata[module] = metadata[module] || {};
-    metadata[module][comment.rdoc] = metadata[module][comment.rdoc] || [];
-
-    metadata[module][comment.rdoc].push({
-        name: comment.name,
+   type.children.push({
+        name: resourceName,
         description: comment.description,
         isIndex: isIndex,
-        url: url
+        url: url,
+        path: path
     });
+}
+
+function getModuleNameFromComment(comment) {
+    return comment.module;
+}
+
+function getTypeNameFromComment(comment) {
+    return comment.rdoc;
+}
+
+function getAppPath(moduleName, typeName, serviceName, options) {
+    var path = options.api.baseAppPath;
+
+    if (moduleName) {
+        path += "/" + moduleName;
+    }
+    if (typeName) {
+        path += "/" + typeName;
+    }
+    if (serviceName) {
+        path += "/" + serviceName;
+    }
+
+    return path;
 }
 
 function getOutputPath(filePath, options) {

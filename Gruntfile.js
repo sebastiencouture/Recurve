@@ -346,7 +346,8 @@ module.exports = function(grunt) {
                     output: "<%= buildDocsDataDir %>/api",
                     metadataOutput: "<%= buildDocsDataDir %>/api.json",
                     examples: "docs/content/api/examples",
-                    baseUrl: "/data/api"
+                    baseUrl: "/data/api",
+                    baseAppPath: "/api"
                 },
 
                 rdoc: {
