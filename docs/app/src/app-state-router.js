@@ -3,10 +3,17 @@
 docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialStore", "docsService"],
     function(apiStore, guideStore, tutorialStore, docsService) {
 
-        function componentsConfig(readyComponentName) {
+        function componentsConfig(readyName) {
             return {
                 loading: "Loading",
-                ready: readyComponentName,
+                ready: readyName,
+                error: "Error"
+            };
+        }
+
+        function componentsConfigNoLoading(readyName) {
+            return {
+                ready: readyName,
                 error: "Error"
             };
         }
@@ -36,7 +43,7 @@ docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialSt
                 "app.api": {
                     path: "api",
                     resolver: {
-                        components: componentsConfig("Api")
+                        components: componentsConfigNoLoading("Api")
                     }
                 },
 
@@ -63,7 +70,7 @@ docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialSt
                                 return apiStore.getResourceMetadata(params.module, params.type);
                             }
                         },
-                        components: componentsConfig("ApiModuleType")
+                        components: componentsConfigNoLoading("ApiModuleType")
                     }
                 },
 
@@ -157,15 +164,7 @@ docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialSt
                         },
                         components: componentsConfig("Guide")
                     }
-                },
-
-                /* TODO TBD */
-                /*"notFound": {
-                    notFound: true,
-                    resolver: {
-                        components: componentsConfig("Error")
-                    }
-                }*/
+                }
             },
 
             redirects: [
