@@ -41,7 +41,7 @@ function addModuleToMetadata(comment, metadata, options) {
     }
 
     metadata[moduleName] = {
-        path: getAppPath(moduleName, null, null, options),
+        href: getAppHref(moduleName, null, null, options),
         children: {}
     };
 
@@ -56,7 +56,7 @@ function addTypeToModule(comment, module, options) {
     }
 
     module.children[typeName] = {
-        path: getAppPath(moduleName, typeName, null, options),
+        href: getAppHref(moduleName, typeName, null, options),
         children: []
     };
 
@@ -67,7 +67,7 @@ function addResourceToType(comment, type, filePath, options) {
     var moduleName = getModuleNameFromComment(comment);
     var typeName = getTypeNameFromComment(comment);
     var resourceName = comment.name;
-    var path = getAppPath(moduleName, typeName, resourceName, options);
+    var href = getAppHref(moduleName, typeName, resourceName, options);
 
     var isIndex = moduleName === comment.name;
 
@@ -79,7 +79,7 @@ function addResourceToType(comment, type, filePath, options) {
         description: comment.description,
         isIndex: isIndex,
         url: url,
-        path: path
+        href: href
     });
 }
 
@@ -91,20 +91,20 @@ function getTypeNameFromComment(comment) {
     return comment.rdoc;
 }
 
-function getAppPath(moduleName, typeName, serviceName, options) {
-    var path = options.api.baseAppPath;
+function getAppHref(moduleName, typeName, serviceName, options) {
+    var href = options.api.baseHref;
 
     if (moduleName) {
-        path += "/" + moduleName;
+        href += "/" + moduleName;
     }
     if (typeName) {
-        path += "/" + typeName;
+        href += "/" + typeName;
     }
     if (serviceName) {
-        path += "/" + serviceName;
+        href += "/" + serviceName;
     }
 
-    return path;
+    return href;
 }
 
 function getOutputPath(filePath, options) {
