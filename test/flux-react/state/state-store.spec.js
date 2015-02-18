@@ -70,14 +70,41 @@ describe("$stateStore", function() {
         });
     });
 
-    describe("getMaxDepth", function() {
-        it("should return the max depth", function() {
-            triggerStateChange();
-            expect($stateStore.getMaxDepth()).toEqual(2);
+    describe("getErrorState", function() {
+        it("should return the state that errors", function() {
+            var errorState = {name: "b", error: new Error("oops!")};
+            states = [];
+            states.push({name: "a"});
+            states.push(errorState);
+            states.push({name: "c"});
+
+            $stateRouter.changeAction.trigger(states);
+
+            expect($stateStore.getErrorState()).toEqual(errorState);
         });
 
-        it("should return -1 for no states", function() {
-            expect($stateStore.getMaxDepth()).toEqual(-1);
+        it("should return null if no errors", function() {
+            triggerStateChange();
+            expect($stateStore.getErrorState()).toEqual(null);
+        });
+    });
+
+    describe("getError", function() {
+        it("should return the error", function() {
+            var error = new Error("oops!");
+            states = [];
+            states.push({name: "a"});
+            states.push({name: "b", error: error});
+            states.push({name: "c"});
+
+            $stateRouter.changeAction.trigger(states);
+
+            expect($stateStore.getError()).toEqual(error);
+        });
+
+        it("should return null if no errors", function() {
+            triggerStateChange();
+            expect($stateStore.getError()).toEqual(null);
         });
     });
 

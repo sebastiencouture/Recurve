@@ -2,8 +2,22 @@
 
 "use strict";
 
-docsModule.factory("App", ["$window", "$document", "$router", "$State", "NavBar"],
-    function($window, $document, $router, State, NavBar) {
+docsModule.factory("App", ["$window", "$document", "$log", "$router", "$stateStore", "$State", "NavBar"],
+    function($window, $document, $log, $router, $stateStore, State, NavBar) {
+
+    function setup() {
+        setupStateRouterLogging();
+        setupInternalLinkHandling();
+    }
+
+    function setupStateRouterLogging() {
+        $stateStore.changed.on(function() {
+            var errorState = $stateStore.getErrorState();
+            if (errorState) {
+                $log.error("state router error", errorState.error, errorState);
+            }
+        })
+    }
 
     // TODO TBD find better spot for this
     function setupInternalLinkHandling() {
@@ -33,7 +47,7 @@ docsModule.factory("App", ["$window", "$document", "$router", "$State", "NavBar"
 
     return React.createClass({
         componentWillMount: function() {
-            setupInternalLinkHandling();
+            setup();
         },
 
         render: function() {

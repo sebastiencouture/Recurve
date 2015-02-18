@@ -17,8 +17,16 @@ docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialSt
                     path: "",
                     resolver: {
                         resolve: {
-                            bootstrap: function() {
-                                return docsService.getStartupData();
+                            apiMetadata: function() {
+                                return docsService.getApiMetadata();
+                            },
+
+                            contentMetadata: function() {
+                                return docsService.getContentMetadata();
+                            },
+
+                            versionMetadata: function() {
+                                return docsService.getVersionMetadata();
                             }
                         },
                         components: componentsConfig("App")
@@ -83,7 +91,7 @@ docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialSt
                 },
 
                 "app.api.overview": {
-                    default: true,
+                    "default": true,
                     resolver: {
                         components: componentsConfig("ApiOverview")
                     }

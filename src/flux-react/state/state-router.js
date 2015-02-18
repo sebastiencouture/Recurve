@@ -19,8 +19,8 @@ function addStateRouterService(module) {
                     validateStateConfig(name, config);
 
                     var stateConfig = collection.add(name, config);
-                    $router.on(stateConfig.path, function(params) {
-                        transitionToState(stateConfig, params);
+                    $router.on(stateConfig.path, function(params, history) {
+                        transitionToState(stateConfig, params, history);
                     });
                 });
             }
@@ -32,9 +32,9 @@ function addStateRouterService(module) {
                 recurve.assert(config.resolver.components, "state resolver components must be set for path '{0}'", config.path);
             }
 
-            function transitionToState(stateConfig, params) {
+            function transitionToState(stateConfig, params, history) {
                 cancelCurrentTransition();
-                currentTransition = createTransition(stateConfig, params);
+                currentTransition = createTransition(stateConfig, params, history);
 
                 currentTransition.changed.on(function(states) {
                     $stateRouter.changeAction.trigger(states);
@@ -56,14 +56,14 @@ function addStateRouterService(module) {
                 currentTransition.redirected.off();
             }
 
-            function createTransition(stateConfig, params) {
+            function createTransition(stateConfig, params, history) {
                 var prevStates = [];
                 if (currentTransition) {
                     prevStates = currentTransition.getStates();
                 }
 
                 var activeStateConfigs = stateConfig.getAncestors().reverse().concat(stateConfig);
-                return $stateTransition(activeStateConfigs, prevStates, params);
+                return $stateTransition(activeStateConfigs, prevStates, params, history);
             }
 
             function setupRedirects() {

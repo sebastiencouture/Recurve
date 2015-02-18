@@ -2,7 +2,7 @@
 
 function addStateService(module) {
     module.factory("$state", ["$promise"], function($promise) {
-        return function(config, parent, params) {
+        return function(config, parent, params, history) {
             var resolver = config.resolver;
             var data = {};
 
@@ -11,13 +11,14 @@ function addStateService(module) {
                     return;
                 }
 
-                method(onRedirect);
+                method(onRedirect, state);
             }
 
-            return {
+            var state = {
                 name: config.name,
                 config: config,
                 params: params,
+                history: history,
                 data: data,
                 loading: false,
                 resolved: recurve.isUndefined(resolver.resolve),
@@ -83,6 +84,8 @@ function addStateService(module) {
                     return !resolver.shouldTriggerChangeAction || resolver.shouldTriggerChangeAction(this);
                 }
             };
+
+            return state;
         };
     });
 }

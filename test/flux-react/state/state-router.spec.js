@@ -244,7 +244,7 @@ describe("$stateRouter", function() {
                 expect(state.params).toEqual({id: "1", name: "sebastien"});
             });
 
-            it("should default from path to '.*' if not defined", function() {
+            it("should default 'from' path to '.*' if not defined", function() {
                 var state = redirect({
                     test: {
                         path: "a"
@@ -254,7 +254,7 @@ describe("$stateRouter", function() {
                 expect(state.name).toEqual("test");
             });
 
-            it("should throw an error if redirect path corresponds to a defined state during config", function() {
+            it("should throw an error if redirect path is a state path", function() {
                 expect(function() {
                     setupNoSpies({
                         test: {
@@ -264,7 +264,7 @@ describe("$stateRouter", function() {
                 }).toThrowError("state 'test' is defined for redirect path 'a'");
             });
 
-            it("should throw an error if the 'to' state does not exist during config", function() {
+            it("should throw an error if the 'to' state does not exist", function() {
                 expect(function() {
                     setupNoSpies({
                         test: {
@@ -274,7 +274,7 @@ describe("$stateRouter", function() {
                 }).toThrowError("state 'test1' does not exist for redirect path 'b'");
             });
 
-            it("should throw an error if the 'to' state is not defined during config", function() {
+            it("should throw an error if 'to' is not defined", function() {
                 expect(function() {
                     setupNoSpies({
                         test: {
@@ -305,7 +305,7 @@ describe("$stateRouter", function() {
             expect($stateRouter.nameToPath("parent.child")).toEqual("a/b");
         });
 
-        it("should not include forward slash for empty string parent path", function() {
+        it("should not include a forward slash for empty string parent path", function() {
             setup({
                 "parent" : {
                     path: ""
@@ -377,7 +377,7 @@ describe("$stateRouter", function() {
     });
 
     describe("nameToHref", function() {
-        it("should include forward slash at the beginning", function() {
+        it("should include a forward slash at the beginning", function() {
             setup({test: {path: "a"}});
             expect($stateRouter.nameToHref("test")).toEqual("/a");
         });
@@ -452,7 +452,7 @@ describe("$stateRouter", function() {
             expect($router.navigate.calls.mostRecent().args[1]).toEqual("state!");
         });
 
-        it("should force reload if same path for options.reload=true", function() {
+        it("should force reload if same path with options.reload=true", function() {
             setup({
                 test: {
                     path: "a"
@@ -469,7 +469,7 @@ describe("$stateRouter", function() {
             expect($router.reload).toHaveBeenCalled();
         });
 
-        it("should not force a reload if different path for options.reload=true", function() {
+        it("should not force a reload if different path with options.reload=true", function() {
             setup({
                 test: {
                     path: "a"
@@ -486,7 +486,7 @@ describe("$stateRouter", function() {
             expect($router.reload).not.toHaveBeenCalled();
         });
 
-        it("should throw error for state that does not exist", function() {
+        it("should throw error for a state that does not exist", function() {
             expect(function() {
                 $stateRouter.navigate("test");
             }).toThrowError("state 'test' does not exist");

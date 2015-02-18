@@ -167,6 +167,16 @@ describe("$stateTransition", function() {
             expect(afterResolve).not.toHaveBeenCalled();
         });
 
+        it("should include the state as second param to beforeResolve", function() {
+            var beforeResolve = jasmine.createSpy("beforeResolve");
+            setupParent(beforeResolve, null, function() {
+                return "a";
+            });
+            transition([parentConfig]);
+
+            expect(beforeResolve.calls.argsFor(0)[1]).toEqual(getParentState());
+        });
+
         it("should error if resolve throws an error", function() {
             var error = new Error("oops!");
             setupParent(null, null, function() {
@@ -191,6 +201,17 @@ describe("$stateTransition", function() {
             expect(called).toEqual(true);
         });
 
+        it("should call afterResolve if resolving throws an error", function() {
+            var error = new Error("oops!");
+            var afterResolve = jasmine.createSpy("afterResolve");
+            setupParent(null, afterResolve, function() {
+                throw error;
+            });
+            transition([parentConfig]);
+
+            expect(afterResolve).toHaveBeenCalled();
+        });
+
         it("should throw error if afterResolve throws an error", function() {
             var error = new Error("oops!");
             setupParent(null, function() {
@@ -202,7 +223,7 @@ describe("$stateTransition", function() {
             }).toThrow(error);
         });
 
-        // TODO TBD not sure if should or shouldn't set to resolved?
+        // TODO TBD not sure if should or shouldn't set to resolved? doesn't matter though?
         it("should not alter the state if afterResolve redirects", function() {
             setupParent(null, function(redirect) {
                 redirect("c");
@@ -227,6 +248,16 @@ describe("$stateTransition", function() {
             transition([parentConfig, childConfig]);
 
             expect(callback).not.toHaveBeenCalled();
+        });
+
+        it("should include the state as second param to afterResolve", function() {
+            var afterResolve = jasmine.createSpy("afterResolve");
+            setupParent(null, afterResolve, function() {
+                return "a";
+            });
+            transition([parentConfig]);
+
+            expect(afterResolve.calls.argsFor(0)[1]).toEqual(getParentState());
         });
 
         it("should set the state to resolved after resolving", function() {

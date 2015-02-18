@@ -51,6 +51,7 @@ function addStateMixinService(module) {
                     loading: state.loading,
                     error: state.error,
                     params: state.params,
+                    history: state.history,
                     data: state.data
                 };
 

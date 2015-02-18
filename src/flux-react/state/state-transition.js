@@ -1,8 +1,8 @@
 "use strict";
 
 function addStateTransitionService(module) {
-    module.factory("$stateTransition", ["$signal", "$async", "$log", "$state"], function($signal, $async, $log, $state) {
-        return function(stateConfigs, prevStates, params) {
+    module.factory("$stateTransition", ["$signal", "$async", "$state"], function($signal, $async, $state) {
+        return function(stateConfigs, prevStates, params, history) {
             var states = [];
             var changed = $signal();
             var redirected = $signal();
@@ -16,11 +16,12 @@ function addStateTransitionService(module) {
                     var found = recurve.find(prevStates, "config", config);
                     if (found) {
                         found.params = params;
+                        found.history = history;
                         states.push(found);
                     }
                     else {
                         var parentState = states[states.length - 1];
-                        states.push($state(config, parentState, params));
+                        states.push($state(config, parentState, params, history));
                     }
                 });
             }
@@ -44,7 +45,10 @@ function addStateTransitionService(module) {
                 state.loading = true;
                 triggerChangeIfNeeded(state);
 
-                state.resolve().then(function() {
+                var calledAfterResolve = false;
+                state.resolve().then(successHandler, errorHandler);
+
+                function successHandler() {
                     // don't want any errors that happen due triggering the change and afterResolve to get catched,
                     // only want to catch data resolve errors, everything else should throw
                     $async(function() {
@@ -52,6 +56,7 @@ function addStateTransitionService(module) {
                             return;
                         }
 
+                        calledAfterResolve = true;
                         state.afterResolve(triggerRedirect);
                         if (canceled) {
                             return;
@@ -63,18 +68,26 @@ function addStateTransitionService(module) {
                         triggerChangeIfNeeded(state);
                         transitionToChild();
                     }, 0);
-                }, errorHandler);
+                }
 
                 function errorHandler(error) {
-                    if (canceled) {
-                        return;
-                    }
+                    $async(function() {
+                        if (canceled) {
+                            return;
+                        }
 
-                    $log.error("error resolving state", error, state);
+                        state.loading = false;
+                        state.error = error;
 
-                    state.loading = false;
-                    state.error = error;
-                    triggerChangeIfNeeded(state);
+                        if (!calledAfterResolve) {
+                            state.afterResolve(triggerRedirect);
+                            if (canceled) {
+                                return;
+                            }
+                        }
+
+                        triggerChangeIfNeeded(state);
+                    }, 0);
                 }
             }
 

@@ -31,12 +31,21 @@ function addStateStoreService(module) {
                 return states[depth];
             },
 
-            getMaxDepth: function() {
-                return states.length - 1;
-            },
-
             getName: function() {
                 return name;
+            },
+
+            getErrorState: function() {
+                var errorStates = states.filter(function(state) {
+                    return state.error;
+                });
+
+                return 0 < errorStates.length ? errorStates[0] : null;
+            },
+
+            getError: function() {
+                var errorState = this.getErrorState();
+                return errorState ? errorState.error : null;
             }
         });
     });
