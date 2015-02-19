@@ -1,17 +1,88 @@
 "use strict";
 
 function addStateService(module) {
-    module.factory("$state", ["$promise"], function($promise) {
+    module.factory("$state", ["$async", "$promise", "$signal"], function($async, $promise, $signal) {
         return function(config, parent, params, history) {
             var resolver = config.resolver;
+            var canceled = false;
             var data = {};
 
-            function beforeAfterResolve(method, onRedirect) {
+            function updateDataBeforeResolve() {
+                if (parent) {
+                    recurve.extend(state.data, parent.data);
+                }
+                recurve.extend(state.data, resolver.data);
+            }
+
+            function beforeResolve() {
+                beforeAfterResolve(resolver.beforeResolve);
+            }
+
+            function afterResolve() {
+                beforeAfterResolve(resolver.afterResolve);
+            }
+
+            function beforeAfterResolve(method) {
                 if (!recurve.isFunction(method)) {
                     return;
                 }
 
-                method(onRedirect, state);
+                method(function() {
+                    canceled = true;
+                    state.redirected.trigger.apply(state.redirected, arguments);
+                }, state);
+            }
+
+            function resolveData() {
+                var promises = [];
+                var error;
+
+                recurve.forEach(resolver.resolve, function(factory, key) {
+                    if (recurve.isFunction(factory)) {
+                        var value;
+                        try {
+                            value = factory(params, data);
+                        }
+                        catch (e) {
+                            error = e;
+                            return false;
+                        }
+
+                        if (value && recurve.isFunction(value.then)) {
+                            value.then(function(result) {
+                                data[key] = result;
+                            });
+
+                            promises.push(value);
+                        }
+                        else {
+                            data[key] = value;
+                        }
+                    }
+                    else {
+                        data[key] = factory;
+                    }
+                });
+
+                var promise;
+                if (error) {
+                    promise = $promise.reject(error);
+                }
+                else {
+                    promise = $promise.all(promises);
+                }
+
+                return promise;
+            }
+
+            function anyDataToResolve() {
+                return !recurve.isUndefined(resolver.resolve)
+            }
+
+            function triggerChangeIfNeeded() {
+                if (!resolver.shouldTriggerChangeAction || resolver.shouldTriggerChangeAction(state)) {
+                    state.changed.trigger();
+                }
             }
 
             var state = {
@@ -19,75 +90,77 @@ function addStateService(module) {
                 config: config,
                 params: params,
                 history: history,
-                data: parent ? recurve.extend(data, parent.data) : data,
+                data: data,
                 loading: false,
-                resolved: recurve.isUndefined(resolver.resolve),
+                resolved: false,
                 error: null,
                 components: resolver.components,
 
-                beforeResolve: function(onRedirect) {
-                    beforeAfterResolve(resolver.beforeResolve, onRedirect);
-                },
+                changed: $signal(),
+                redirected: $signal(),
 
                 resolve: function() {
-                    var promises = [];
-                    var error;
+                    canceled = false;
+                    updateDataBeforeResolve();
 
-                    if (parent) {
-                        recurve.extend(data, parent.data);
+                    if (state.resolved || !anyDataToResolve()) {
+                        state.resolved = true;
+                        return $promise.resolve();
                     }
-                    recurve.extend(data, resolver.data);
 
-                    recurve.forEach(resolver.resolve, function(factory, key) {
-                        if (recurve.isFunction(factory)) {
-                            var value;
-                            try {
-                                value = factory(params, data);
-                            }
-                            catch (e) {
-                                error = e;
-                                return false;
-                            }
-
-                            if (value && recurve.isFunction(value.then)) {
-                                value.then(function(result) {
-                                    data[key] = result;
-                                });
-
-                                promises.push(value);
-                            }
-                            else {
-                                data[key] = value;
-                            }
-                        }
-                        else {
-                            data[key] = factory;
-                        }
-                    });
-
-                    var promise;
-                    if (error) {
-                        promise = $promise.reject(error);
+                    beforeResolve();
+                    if (canceled) {
+                        return $promise.reject();
                     }
                     else {
-                        promise = $promise.all(promises);
+                        state.loading = true;
+                        triggerChangeIfNeeded();
                     }
 
-                    return promise;
-                },
+                    var deferred = $promise.defer();
+                    resolveData().then(successHandler, errorHandler);
 
-                afterResolve: function(onRedirect) {
-                    beforeAfterResolve(resolver.afterResolve, onRedirect);
-                },
+                    function successHandler() {
+                        $async(function() {
+                            if (canceled) {
+                                deferred.reject();
+                            }
+                            else {
+                                state.resolved = true;
+                                state.loading = false;
 
-                shouldTriggerChangeAction: function() {
-                    return !resolver.shouldTriggerChangeAction || resolver.shouldTriggerChangeAction(this);
-                },
-
-                syncDataWithParent: function() {
-                    if (parent) {
-                        recurve.extend(state.data, parent.data);
+                                afterResolve();
+                                if (canceled) {
+                                    deferred.reject();
+                                }
+                                else {
+                                    triggerChangeIfNeeded();
+                                    deferred.resolve();
+                                }
+                            }
+                        }, 0);
                     }
+
+                    function errorHandler(error) {
+                        $async(function() {
+                            if (!canceled) {
+                                state.error = error;
+                                state.loading = false;
+
+                                afterResolve();
+                                if (!canceled) {
+                                    triggerChangeIfNeeded();
+                                }
+                            }
+                            deferred.reject(error);
+                        }, 0);
+                    }
+
+                    return deferred.promise;
+                },
+
+                cancelResolve: function() {
+                    canceled = true;
                 }
             };
 

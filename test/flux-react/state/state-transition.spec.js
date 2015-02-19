@@ -223,20 +223,6 @@ describe("$stateTransition", function() {
             }).toThrow(error);
         });
 
-        // TODO TBD not sure if should or shouldn't set to resolved? doesn't matter though?
-        it("should not alter the state if afterResolve redirects", function() {
-            setupParent(null, function(redirect) {
-                redirect("c");
-            }, null);
-
-            transition([parentConfig]);
-
-            var state = getParentState();
-            expect(state.resolved).toEqual(false);
-            expect(state.loading).toEqual(true);
-            expect(state.error).toEqual(null);
-        });
-
         it("should not resolve anymore states if afterResolve redirects", function() {
             setupParent(null, function(redirect) {
                 redirect("c");

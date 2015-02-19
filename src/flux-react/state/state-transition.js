@@ -8,7 +8,9 @@ function addStateTransitionService(module) {
             var redirected = $signal();
             var canceled = false;
             var started = false;
+            var triggeredChange = false;
             var currentStateIndex = 0;
+            var currentState;
 
             function createStates() {
                 states = [];
@@ -27,69 +29,35 @@ function addStateTransitionService(module) {
             }
 
             function transition() {
-                if (canceled || states.length - 1 < currentStateIndex) {
-                    return;
-                }
-
-                var state = states[currentStateIndex];
-                if (state.resolved) {
-                    state.syncDataWithParent();
-                    transitionToChild();
-                    return;
-                }
-
-                state.beforeResolve(triggerRedirect);
                 if (canceled) {
                     return;
                 }
 
-                state.loading = true;
-                triggerChangeIfNeeded(state);
+                if (states.length - 1 < currentStateIndex) {
+                    // ensure we trigger a change at least once, all states could already be resolved if there is no
+                    // data to resolve
+                    if (!triggeredChange) {
+                        triggerChange();
+                    }
+                    return;
+                }
 
-                var calledAfterResolve = false;
-                state.resolve().then(successHandler, errorHandler);
+                currentState = states[currentStateIndex];
 
-                function successHandler() {
-                    // don't want any errors that happen due triggering the change and afterResolve to get catched,
-                    // only want to catch data resolve errors, everything else should throw
+                currentState.changed.on(triggerChange);
+                currentState.redirected.on(triggerRedirect);
+
+                currentState.resolve().then(function() {
+                    currentState.changed.off();
+                    currentState.redirected.off();
                     $async(function() {
-                        if (canceled) {
-                            return;
-                        }
-
-                        calledAfterResolve = true;
-                        state.afterResolve(triggerRedirect);
-                        if (canceled) {
-                            return;
-                        }
-
-                        state.loading = false;
-                        state.resolved = true;
-
-                        triggerChangeIfNeeded(state);
                         transitionToChild();
-                    }, 0);
-                }
-
-                function errorHandler(error) {
-                    $async(function() {
-                        if (canceled) {
-                            return;
-                        }
-
-                        state.loading = false;
-                        state.error = error;
-
-                        if (!calledAfterResolve) {
-                            state.afterResolve(triggerRedirect);
-                            if (canceled) {
-                                return;
-                            }
-                        }
-
-                        triggerChangeIfNeeded(state);
-                    }, 0);
-                }
+                    });
+                }, function() {
+                    currentState.changed.off();
+                    currentState.redirected.off();
+                    canceled = true;
+                });
             }
 
             function transitionToChild() {
@@ -97,29 +65,20 @@ function addStateTransitionService(module) {
                 transition();
             }
 
-            function areAllResolved() {
-                var allResolved;
-                recurve.forEach(states, function(state) {
-                    allResolved = state.resolved;
-                    if (!allResolved) {
-                        return false;
-                    }
-                });
-
-                return allResolved;
-            }
-
-            function triggerChangeIfNeeded(state) {
-                if (state.shouldTriggerChangeAction()) {
-                    triggerChange();
-                }
-            }
-
             function triggerChange() {
+                if (canceled) {
+                    return;
+                }
+
+                triggeredChange = true;
                 changed.trigger(states);
             }
 
             function triggerRedirect() {
+                if (canceled) {
+                    return;
+                }
+
                 canceled = true;
                 redirected.trigger.apply(redirected, arguments);
             }
@@ -137,19 +96,14 @@ function addStateTransitionService(module) {
 
                     started = true;
                     createStates();
-
-                    // ensure we trigger a change at least once, all states could already be resolved if there is no
-                    // data to resolve
-                    if (areAllResolved()) {
-                        triggerChange();
-                    }
-                    else {
-                        transition();
-                    }
+                    transition();
                 },
 
                 cancel: function() {
                     canceled = true;
+                    if (currentState) {
+                        currentState.cancelResolve();
+                    }
                 },
 
                 getStates: function() {

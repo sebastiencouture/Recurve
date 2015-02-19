@@ -24,31 +24,6 @@ describe("$state", function() {
         expect(isFunction($state)).toEqual(true);
     });
 
-    describe("beforeResolve/afterResolve", function() {
-        function test(method) {
-            function beforeAfterResolve(redirect) {
-                redirect("b", "c", "d", "e");
-            }
-
-            var resolver = {path: "a"};
-            resolver[method] = beforeAfterResolve;
-            var config = $stateConfig("a", {path: "a", resolver: resolver});
-            var state = $state(config);
-
-            var redirectSpy = jasmine.createSpy("redirectSpy");
-            state[method](redirectSpy);
-            expect(redirectSpy).toHaveBeenCalledWith("b", "c", "d", "e");
-        }
-
-        it("should call beforeResolve onRedirect callback if invoked", function() {
-            test("beforeResolve");
-        });
-
-        it("should call afterResolve onRedirect callback if invoked", function() {
-            test("afterResolve");
-        });
-    });
-
     describe("resolve", function() {
         var state;
         var callback;
@@ -215,6 +190,19 @@ describe("$state", function() {
             expect(callback).toHaveBeenCalledWith("b");
         });
 
+        it("should reject promise if resolve is canceled during resolve", function() {
+            setup({
+                resolve: {
+                    a: function() {
+                        state.cancelResolve();
+                        return "b";
+                    }
+                }
+            }, null, null, null, callback);
+
+            expect(callback).toHaveBeenCalled();
+        });
+
         it("should pass in route params to resolve methods", function() {
             // not using spy since it seems to be async? its returning the data with
             // the child resolved value?
@@ -225,6 +213,138 @@ describe("$state", function() {
                     }
                 }
             }, null, {id: "b"});
+        });
+
+        it("should call beforeResolve before resolving", function() {
+            var calledResolve = false;
+            setup({
+                beforeResolve: callback,
+                resolve: {
+                    a: function() {
+                        calledResolve = true;
+                        expect(callback).toHaveBeenCalled();
+                    }
+                }
+            });
+
+            expect(calledResolve).toEqual(true);
+        });
+
+        it("should reject the promise if beforeResolve redirects", function() {
+            setup({
+                beforeResolve: function(redirect) {
+                    redirect("a");
+                },
+                resolve: {}
+            }, null, null, null, callback);
+
+            expect(callback).toHaveBeenCalled();
+        });
+
+        it("should reject promise if resolve is canceled during beforeResolve", function() {
+            setup({
+                beforeResolve: function() {
+                    state.cancelResolve();
+                },
+                resolve: {}
+            }, null, null, null, callback);
+
+            expect(callback).toHaveBeenCalled();
+        });
+
+        it("should throw error if beforeResolve throws an error", function() {
+            var error = new Error("oops!");
+            expect(function() {
+                setup({
+                    beforeResolve: function() {
+                        throw error;
+                    },
+                    resolve: {}
+                })
+            }).toThrow(error);
+        });
+
+        it("should not call beforeResolve if nothing to resolve", function() {
+            setup({
+                beforeResolve: callback
+            });
+
+            expect(callback).not.toHaveBeenCalled();
+        });
+
+        it("should call afterResolve after resolving", function() {
+            var calledResolve = false;
+            setup({
+                afterResolve: callback,
+                resolve: {
+                    a: function() {
+                        calledResolve = true;
+                        expect(callback).not.toHaveBeenCalled();
+                    }
+                }
+            });
+
+            expect(calledResolve).toEqual(true);
+            expect(callback).toHaveBeenCalled();
+        });
+
+        it("should reject the promise if afterResolve redirects", function() {
+            setup({
+                afterResolve: function(redirect) {
+                    redirect("a");
+                },
+                resolve: {
+                    a: "b"
+                }
+            }, null, null, null, callback);
+
+            expect(callback).toHaveBeenCalled();
+        });
+
+        it("should reject promise if resolve is canceled during afterResolve", function() {
+            setup({
+                afterResolve: function() {
+                    state.cancelResolve();
+                },
+                resolve: {
+                    a: "b"
+                }
+            }, null, null, null, callback);
+
+            expect(callback).toHaveBeenCalled();
+        });
+
+        it("should throw error if afterResolve throws an error", function() {
+            var error = new Error("oops!");
+            expect(function() {
+                setup({
+                    afterResolve: function() {
+                        throw error;
+                    },
+                    resolve: {}
+                })
+            }).toThrow(error);
+        });
+
+        it("should call afterResolve it resolve throws an error", function() {
+            setup({
+                afterResolve: callback,
+                resolve: {
+                    a: function() {
+                        throw new Error("oops!");
+                    }
+                }
+            });
+
+            expect(callback).toHaveBeenCalled();
+        });
+
+        it("should not call afterResolve if nothing to resolve", function() {
+            setup({
+                beforeResolve: callback
+            });
+
+            expect(callback).not.toHaveBeenCalled();
         });
 
         describe("parent data", function() {
@@ -334,6 +454,7 @@ describe("$state", function() {
             child = $state(childConfig, parent);
 
             parent.resolve();
+            $async.flush();
             child.resolve();
             $async.flush();
         });
@@ -348,6 +469,190 @@ describe("$state", function() {
 
         it("should not invoke methods", function() {
             expect(callback).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("actions", function() {
+        var state;
+        var callback;
+
+        function setup(resolver, onChanged, onRedirected) {
+            var config = $stateConfig("a", {path: "a", resolver: resolver});
+            state = $state(config);
+            if (onChanged) {
+                state.changed.on(onChanged);
+            }
+            if (onRedirected) {
+                state.redirected.on(onRedirected);
+            }
+
+            state.resolve();
+            $async.flush();
+        }
+
+        beforeEach(function() {
+            callback = jasmine.createSpy("callback");
+        });
+
+        describe("changed", function() {
+            it("should call after setting the state to loading", function() {
+                var callCount = 0;
+                setup({
+                    resolve: {
+                        a: "b"
+                    }
+                }, function() {
+                    callCount++;
+                    if (1 === callCount) {
+                        expect(state.loading).toEqual(true);
+                        expect(state.resolved).toEqual(false);
+                        expect(state.error).toEqual(null);
+                    }
+                });
+
+                expect(callCount).toEqual(2);
+            });
+
+            it("should call after resolving the state", function() {
+                var callCount = 0;
+                setup({
+                    resolve: {
+                        a: "b"
+                    }
+                }, function() {
+                    callCount++;
+                    if (2 === callCount) {
+                        expect(state.resolved).toEqual(true);
+                        expect(state.loading).toEqual(false);
+                        expect(state.error).toEqual(null);
+                    }
+                });
+
+                expect(callCount).toEqual(2);
+            });
+
+            it("should call after setting the state to error", function() {
+                var callCount = 0;
+                var error = new Error("oops!");
+                setup({
+                    resolve: {
+                        a: function() {
+                            throw error;
+                        }
+                    }
+                }, function() {
+                    callCount++;
+                    if (2 === callCount) {
+                        expect(state.error).toEqual(error);
+                        expect(state.resolved).toEqual(false);
+                        expect(state.loading).toEqual(false);
+                    }
+                });
+
+                expect(callCount).toEqual(2);
+            });
+
+            it("should not call if canceled in beforeResolve", function() {
+                setup({
+                    beforeResolve: function() {
+                        state.cancelResolve();
+                    },
+                    resolve: {}
+                }, callback);
+
+                expect(callback).not.toHaveBeenCalled();
+            });
+
+            it("should not call if canceled in resolve", function() {
+                setup({
+                    resolve: {
+                        a: function() {
+                            state.cancelResolve();
+                        }
+                    }
+                }, callback);
+
+                // called once for loading
+                expect(callback.calls.count()).toEqual(1);
+            });
+
+            it("should not call if canceled in afterResolve", function() {
+                setup({
+                    afterResolve: function() {
+                        state.cancelResolve();
+                    },
+                    resolve: {
+                        a: "b"
+                    }
+                }, callback);
+
+                expect(callback.calls.count()).toEqual(1);
+            });
+        });
+
+        describe("redirected", function() {
+            it("should call on redirect in beforeResolve", function() {
+                setup({
+                    beforeResolve: function(redirect) {
+                        redirect();
+                    },
+                    resolve: {}
+                }, null, callback);
+
+                expect(callback).toHaveBeenCalled();
+            });
+
+            it("should call on redirect in afterResolve", function() {
+                setup({
+                    afterResolve: function(redirect) {
+                        redirect();
+                    },
+                    resolve: {
+                        a: "b"
+                    }
+                }, null, callback);
+
+                expect(callback).toHaveBeenCalled();
+            });
+
+            it("should pass through redirect arguments in beforeResolve", function() {
+                setup({
+                    beforeResolve: function(redirect) {
+                        redirect("a", "b", "c", "d", "e");
+                    },
+                    resolve: {}
+                }, null, callback);
+
+                expect(callback).toHaveBeenCalledWith("a", "b", "c", "d", "e");
+            });
+
+            it("should pass through redirect arguments in afterResolve", function() {
+                setup({
+                    afterResolve: function(redirect) {
+                        redirect("a", "b", "c", "d", "e");
+                    },
+                    resolve: {
+                        a: "b"
+                    }
+                }, null, callback);
+
+                expect(callback).toHaveBeenCalledWith("a", "b", "c", "d", "e");
+            });
+
+            it("should not call if canceled", function() {
+                setup({
+                    afterResolve: function(redirect) {
+                        redirect();
+                    },
+                    resolve: {
+                        a: function() {
+                            state.cancelResolve();
+                        }
+                    }
+                }, null, callback);
+
+                expect(callback).not.toHaveBeenCalled();
+            });
         });
     });
 });
