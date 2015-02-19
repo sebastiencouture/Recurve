@@ -11,7 +11,7 @@ docsModule.factory("SideBar", ["utils"], function(utils) {
         if (recurve.isArray(items)) {
             renderables = items.map(function(item) {
                 return (
-                    <li>
+                    <li key={name}>
                         <a href={item.href}>{item.name}</a>
                     </li>
                 );
@@ -24,9 +24,9 @@ docsModule.factory("SideBar", ["utils"], function(utils) {
                 var id = "list-section-" + name;
 
                 renderables.push(
-                    <li>
+                    <li key={name}>
                         <a href={item.href}>{name}</a>
-                        <Glyphicon className="pull-left" data-toggle="collapse" data-target={"#" + id}></Glyphicon>
+                        <Glyphicon className="pull-left" data-toggle="collapse" data-target={"#" + id} glyph="chevron-down"></Glyphicon>
                         <ul id={id} className="list-unstyled collapse in">
                             {renderItems(item.children)}
                         </ul>
