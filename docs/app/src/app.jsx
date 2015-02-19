@@ -11,9 +11,15 @@ docsModule.factory("App", ["$window", "$document", "$log", "$router", "$stateSto
     }
 
     function setupStateRouterLogging() {
+        var lastLoggedError;
         $stateStore.changed.on(function() {
             var errorState = $stateStore.getErrorState();
             if (errorState) {
+                if (errorState.error === lastLoggedError) {
+                    return;
+                }
+
+                lastLoggedError = errorState.error;
                 $log.error("state router error", errorState.error, errorState);
             }
         })
