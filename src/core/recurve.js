@@ -20,6 +20,16 @@
  addHttpService,
  addRouterService
  */
+
+/**
+ * @rdoc module
+ * @name core
+ * @module core
+ * @description
+ * #wow
+ * ##wow2
+ */
+
 "use strict";
 
 function createApi(recurve, version) {

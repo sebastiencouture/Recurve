@@ -24,51 +24,32 @@ docsModule.factory("apiStore", ["contentStore", "docsService"], function(content
             return metadata;
         },
 
-        getResourceMetadata: function(module, type, name) {
+        getModuleMetadata: function(moduleName) {
             if (!metadata) {
                 return null;
             }
 
-            var metadataModule = metadata[module];
-            if (!metadataModule || !type) {
-                return metadataModule;
-            }
-
-            var metadataType = metadataModule[type].children;
-            if (!name) {
-                return metadataType;
-            }
-
-            var found = null;
-            recurve.forEach(metadataType.children, function(resource) {
-                if (resource.name === name) {
-                    found = resource;
-                    return false;
-                }
-            });
-
-            return found;
+            var moduleMetadata = metadata[moduleName];
+            return moduleMetadata ? moduleMetadata : null;
         },
 
-        getIndexResourceMetadata: function(moduleName) {
-            if (!metadata) {
+        getTypeMetadata: function(moduleName, typeName) {
+            var moduleMetadata = this.getModuleMetadata(moduleName);
+            if (!moduleMetadata) {
                 return null;
             }
 
-            var metadataModule = metadata[moduleName];
-            if (!metadataModule) {
+            var typeMetadata = moduleMetadata.children[typeName];
+            return typeMetadata ? typeMetadata : null;
+        },
+
+        getResourceMetadata: function(moduleName, typeName, resourceName) {
+            var typeMetadata = this.getTypeMetadata(moduleName, typeName);
+            if (!typeMetadata) {
                 return null;
             }
 
-            var found = null;
-            recurve.forEach(metadataModule, function(resource) {
-                if (resource.isIndex) {
-                    found = resource;
-                    return false;
-                }
-            });
-
-            return found;
+            return recurve.find(typeMetadata.children, "name", resourceName);
         }
     });
 });

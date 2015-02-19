@@ -39,5 +39,17 @@ module.exports = {
                 // do nothing - ignore the file
             }
         }, this);
+    },
+
+    extend: function(dest, src) {
+        if (!dest || !src) {
+            return dest;
+        }
+
+        for (var key in src) {
+            dest[key] = src[key];
+        }
+
+        return dest;
     }
 };

@@ -41,7 +41,7 @@ docsModule.factory("docsService", ["$promise", "$http", "$action", "appConfig", 
     function createContentGetMethod(actions) {
         return function(metadata) {
             var url = metadata ? metadata.url : null;
-            send(url, actions, {dataType: "html"});
+            return send(url, actions, {dataType: "html"});
         };
     }
 

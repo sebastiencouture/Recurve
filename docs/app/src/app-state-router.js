@@ -51,9 +51,9 @@ docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialSt
                     path: ":module",
                     resolver: {
                         resolve: {
-                            resource: function(params) {
-                                var metadata = apiStore.getIndexResourceMetadata(params.module);
-                                recurve.assert(metadata, "module metadata does not exists", params);
+                            moduleResource: function(params) {
+                                var metadata = apiStore.getModuleMetadata(params.module);
+                                recurve.assert(metadata, "api module metadata does not exists", params);
 
                                 return docsService.getApiResource(metadata);
                             }
@@ -62,25 +62,25 @@ docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialSt
                     }
                 },
 
-                "app.api.module.type": {
-                    path: ":type",
+                "app.api.type": {
+                    path: ":module/:type",
                     resolver: {
                         resolve: {
-                            metadata: function(params) {
-                                return apiStore.getResourceMetadata(params.module, params.type);
+                            typeMetadata: function(params) {
+                                return apiStore.getTypeMetadata(params.module, params.type);
                             }
                         },
                         components: componentsConfigNoLoading("ApiModuleType")
                     }
                 },
 
-                "app.api.module.type.resource": {
-                    path: ":type",
+                "app.api.resource": {
+                    path: ":module/:type/:resource",
                     resolver: {
                         resolve: {
                             resource: function(params) {
-                                var metadata = apiStore.getResourceMetadata(params.module, params.type, params.name);
-                                recurve.assert("module resource metadata does not exist", params);
+                                var metadata = apiStore.getResourceMetadata(params.module, params.type, params.resource);
+                                recurve.assert(metadata, "api resource metadata does not exist", params);
 
                                 return docsService.getApiResource(metadata);
                             }
@@ -95,7 +95,7 @@ docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialSt
                         resolve: {
                             content: function() {
                                 var metadata = apiStore.getIndexContentMetadata();
-                                recurve.assert(metadata, "content metadata does not exist");
+                                recurve.assert(metadata, "api content metadata does not exist");
 
                                 return docsService.getApiContent(metadata).then(function() {
                                     return apiStore.getMetadata();

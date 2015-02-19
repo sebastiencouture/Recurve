@@ -30,35 +30,49 @@ function addCommentToMetadata(comment, metadata, filePath, options) {
     }
 
     var module = addModuleToMetadata(comment, metadata, options);
-    var type = addTypeToModule(comment, module, options);
-    addResourceToType(comment, type, filePath, options);
+    var typeName = getTypeNameFromComment(comment);
+    if ("module" === typeName) {
+        addModuleMetadata(comment, module, filePath, options);
+    }
+    else {
+        var type = addTypeToModule(comment, module, options);
+        addResourceToType(comment, type, filePath, options);
+    }
 }
 
 function addModuleToMetadata(comment, metadata, options) {
     var moduleName = getModuleNameFromComment(comment);
-    if (metadata[moduleName]) {
-        return;
+
+    if (!metadata[moduleName]) {
+        metadata[moduleName] = {
+            href: getAppHref(moduleName, null, null, options),
+            children: {}
+        };
     }
 
-    metadata[moduleName] = {
-        href: getAppHref(moduleName, null, null, options),
-        children: {}
-    };
-
     return metadata[moduleName];
+}
+
+function addModuleMetadata(comment, module, filePath, options) {
+    var url = getUrl(filePath, options);
+    assert(url, "unable to determine url for api comment", comment);
+
+    utils.extend(module, {
+        description: comment.description,
+        url: url
+    });
 }
 
 function addTypeToModule(comment, module, options) {
     var moduleName = getModuleNameFromComment(comment);
     var typeName = getTypeNameFromComment(comment);
-    if (module.children[typeName]) {
-        return;
-    }
 
-    module.children[typeName] = {
-        href: getAppHref(moduleName, typeName, null, options),
-        children: []
-    };
+    if (!module.children[typeName]) {
+        module.children[typeName] = {
+            href: getAppHref(moduleName, typeName, null, options),
+            children: []
+        };
+    }
 
     return module.children[typeName];
 }
@@ -69,15 +83,12 @@ function addResourceToType(comment, type, filePath, options) {
     var resourceName = comment.name;
     var href = getAppHref(moduleName, typeName, resourceName, options);
 
-    var isIndex = moduleName === comment.name;
-
-    var url = options.api.baseUrl + utils.getRelativePathNoExtension(filePath, options.api.input) + ".json";
+    var url = getUrl(filePath, options);
     assert(url, "unable to determine url for api comment", comment);
 
-   type.children.push({
+    type.children.push({
         name: resourceName,
         description: comment.description,
-        isIndex: isIndex,
         url: url,
         href: href
     });
@@ -105,6 +116,10 @@ function getAppHref(moduleName, typeName, serviceName, options) {
     }
 
     return href;
+}
+
+function getUrl(filePath, options) {
+    return options.api.baseUrl + utils.getRelativePathNoExtension(filePath, options.api.input) + ".json";
 }
 
 function getOutputPath(filePath, options) {
