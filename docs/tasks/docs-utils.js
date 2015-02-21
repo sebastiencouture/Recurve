@@ -51,5 +51,14 @@ module.exports = {
         }
 
         return dest;
+    },
+
+    getFirstLine: function(str) {
+        var firstLine = str ? str.match(/^.*$/m)[0] : str;
+        if (firstLine) {
+            firstLine = firstLine.trim();
+        }
+
+        return firstLine;
     }
 };

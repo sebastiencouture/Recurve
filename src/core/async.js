@@ -9,8 +9,7 @@
  * @require something
  * @require something2
  * @description
- * #wow
- * ##wow2
+ * this is the description for $async!!
  * [inline link](www.google.com)
  * @require something 3
  */
@@ -44,6 +43,18 @@ function addAsyncService(module) {
             cancel: function(id) {
                 window.clearTimeout(id);
             }
+
+            /**
+             * @rdoc config
+             * @name $async#something
+             * @description blah
+             */
+
+            /**
+             * @rdoc property
+             * @name $async#something
+             * @description wee
+             */
         });
     });
 }

@@ -3,17 +3,29 @@
 docsModule.factory("apiStore", ["contentStore", "docsService"], function(contentStore, docsService) {
     var store = contentStore(contentParser);
     var metadata;
+    var resources = {};
 
-    var apiActions = docsService.actions.metadata.api;
-    store.onAction(apiActions.success, function(data) {
+    var metadataActions = docsService.actions.metadata.api;
+    store.onAction(metadataActions.success, function(data) {
         metadata = data;
         store.changed.trigger();
     });
 
-    store.onAction(apiActions.error, function() {
+    store.onAction(metadataActions.error, function() {
         metadata = null;
         store.changed.trigger();
     });
+
+    var resourceActions = docsService.actions.resource.api;
+    store.onAction(resourceActions.success, function(data) {
+        var name = getResourceUniqueName(data.module, data.rdoc, data.name);
+        resources[name] = data;
+        store.changed.trigger();
+    });
+
+    function getResourceUniqueName(moduleName, typeName, resourceName) {
+        return moduleName + typeName + resourceName;
+    }
 
     function contentParser(data) {
         return data.api;
@@ -50,6 +62,12 @@ docsModule.factory("apiStore", ["contentStore", "docsService"], function(content
             }
 
             return recurve.find(typeMetadata.children, "name", resourceName);
+        },
+
+        getResource: function(moduleName, typeName, resourceName) {
+            var name = getResourceUniqueName(moduleName, typeName, resourceName);
+            var resource = resources[name];
+            return resource ? resource : null;
         }
     });
 });

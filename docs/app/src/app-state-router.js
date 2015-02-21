@@ -70,7 +70,7 @@ docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialSt
                                 return apiStore.getTypeMetadata(params.module, params.type);
                             }
                         },
-                        components: componentsConfigNoLoading("ApiModuleType")
+                        components: componentsConfigNoLoading("ApiType")
                     }
                 },
 
@@ -82,10 +82,12 @@ docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialSt
                                 var metadata = apiStore.getResourceMetadata(params.module, params.type, params.resource);
                                 recurve.assert(metadata, "api resource metadata does not exist", params);
 
-                                return docsService.getApiResource(metadata);
+                                return docsService.getApiResource(metadata).then(function() {
+                                    return apiStore.getResource(params.module, params.type, params.resource);
+                                });
                             }
                         },
-                        components: componentsConfig("ApiModuleResource")
+                        components: componentsConfig("ApiResource")
                     }
                 },
 

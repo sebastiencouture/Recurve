@@ -105,6 +105,7 @@ function addStateService(module) {
 
                     if (state.resolved || !anyDataToResolve()) {
                         state.resolved = true;
+                        state.loading = false;
                         return $promise.resolve();
                     }
 

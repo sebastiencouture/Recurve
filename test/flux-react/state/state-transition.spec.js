@@ -143,6 +143,17 @@ describe("$stateTransition", function() {
             expect(called).toEqual(true);
         });
 
+        it("should set all unresolved states to loading before resolving", function() {
+            setupParent(function() {
+                expect(stateTransition.getStates()[0].loading).toEqual(true);
+                expect(stateTransition.getStates()[1].loading).toEqual(true);
+            });
+
+            setupChild();
+
+            transition([parentConfig, childConfig]);
+        })
+
         it("should throw error if beforeResolve throws an error", function() {
             var error = new Error("oops!");
             setupParent(function() {

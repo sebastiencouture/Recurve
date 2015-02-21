@@ -2,7 +2,7 @@
 
 "use strict";
 
-docsModule.factory("ApiModuleType", null, function() {
+docsModule.factory("ApiType", null, function() {
 
     return React.createClass({
         render: function() {

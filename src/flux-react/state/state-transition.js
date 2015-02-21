@@ -28,6 +28,14 @@ function addStateTransitionService(module) {
                 });
             }
 
+            function setAllUnResolvedStatesToLoading() {
+                recurve.forEach(states, function(state) {
+                    if (!state.resolved) {
+                        state.loading = true;
+                    }
+                });
+            }
+
             function transition() {
                 if (canceled) {
                     return;
@@ -96,6 +104,7 @@ function addStateTransitionService(module) {
 
                     started = true;
                     createStates();
+                    setAllUnResolvedStatesToLoading();
                     transition();
                 },
 

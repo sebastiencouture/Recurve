@@ -2,7 +2,7 @@
 
 var fileStream = require("fs-extra");
 var markdown = require("marked");
-
+var utils = require("./docs-utils");
 
 function getExamplePath(examplePath, filePath, options) {
     var noRoot = filePath.split(options.input)[1];
@@ -57,6 +57,7 @@ module.exports = {
                     });
                     break;
                 case "description":
+                    processedComment.shortDescription = utils.getFirstLine(tag.string);
                     processedComment.description = markdown(tag.string);
                     processedComment.description = this.processInternalLinks(processedComment.description, baseUrl);
                     break;
