@@ -71,17 +71,8 @@ function cleanupResource(resource) {
         resource.types.methods.forEach(function(method) {
             method.nameWithParams = createResourceMethodNameWithParams(method);
 
-            if (method.params) {
-                method.params.forEach(function(param) {
-                    if (param.types) {
-                        param.types = param.types.map(function(type) {
-                            return utils.capitalizeFirstCharacter(type);
-                        });
-                    }
-                });
-            }
             if (method.throws) {
-                method.throws.type = utils.capitalizeFirstCharacter(method.throws.types[0]);
+                method.throws.type = method.throws.types[0];
                 method.throws.types = undefined;
             }
         });
@@ -89,13 +80,13 @@ function cleanupResource(resource) {
 
     if (resource.types.properties) {
         resource.types.properties.forEach(function(property) {
-            property.type = utils.capitalizeFirstCharacter(property.type[0]);
+            property.type = property.type[0];
         });
     }
 
     if (resource.types.config) {
         resource.types.config.forEach(function(config) {
-            config.type = utils.capitalizeFirstCharacter(config.type[0]);
+            config.type = config.type[0];
         });
     }
 
@@ -103,7 +94,7 @@ function cleanupResource(resource) {
     Object.keys(resource.types).forEach(function(key) {
         resource.types[key].forEach(function(type) {
             if (type.returns) {
-                type.returns.type = utils.capitalizeFirstCharacter(type.returns.types[0]);
+                type.returns.type = type.returns.types[0];
                 type.returns.types = undefined;
             }
         });

@@ -30,7 +30,7 @@ function addAsyncService(module) {
              * @name cancel
              *
              * @param {String} id this is a value :)
-             * @param {object} test not here!
+             * @param {Object} test not here!
              * @return {String} some value [inline link](www.google.com) @{core.$promise#all promise something}
              * @throws {Error} nothing!
              * @private
@@ -46,14 +46,14 @@ function addAsyncService(module) {
              * @rdoc config
              * @name something
              * @description blah
-             * @type {string}
+             * @type {String}
              */
 
             /**
              * @rdoc property
              * @name something
              * @description wee
-             * @type {string}
+             * @type {String}
              */
         });
     });
