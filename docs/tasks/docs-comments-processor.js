@@ -38,7 +38,7 @@ module.exports = {
                 case "name":
                 case "module":
                 case "kind":
-                    processedComment[tag.type] = tag.string;
+                    processedComment[tag.type] = tag.string.trim();
                     break;
                 case "type":
                     processedComment[tag.type] = tag.types;
@@ -70,7 +70,7 @@ module.exports = {
                 case "param":
                     processedComment.params = processedComment.params || [];
                     processedComment.params.push({
-                        name: tag.name,
+                        name: tag.name.trim(),
                         description: this.processInternalLinks(tag.description, baseUrl),
                         types: tag.types
                     });
@@ -95,7 +95,7 @@ module.exports = {
                     processedComment.tags = processedComment.tags || [];
                     processedComment.tags.push({
                         type: tag.type,
-                        name: tag.name,
+                        name: tag.name.trim(),
                         description: this.processInternalLinks(tag.description, baseUrl),
                         types: tag.types
                     });

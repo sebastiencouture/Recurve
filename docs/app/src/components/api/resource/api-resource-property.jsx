@@ -2,7 +2,7 @@
 
 "use strict";
 
-docsModule.factory("ApiResourceProperty", ["utils", "ApiResourceName"], function(utils, ApiResourceName) {
+docsModule.factory("ApiResourceProperty", ["ApiResourceName"], function(ApiResourceName) {
 
     return React.createClass({
         displayName: "ApiResourceProperty",
@@ -15,7 +15,7 @@ docsModule.factory("ApiResourceProperty", ["utils", "ApiResourceName"], function
             var property = this.props.property;
             return (
                 <div id="property" className="property">
-                    <ApiResourceName name={property.name} type={property.type[0]} />
+                    <ApiResourceName name={property.name} type={property.type} />
                     <p dangerouslySetInnerHTML={{__html: property.description.full}} />
                 </div>
             );

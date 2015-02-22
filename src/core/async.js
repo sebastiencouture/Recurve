@@ -28,7 +28,6 @@ function addAsyncService(module) {
             /**
              * @rdoc method
              * @name cancel
-             * @kind function
              *
              * @param {String} id this is a value :)
              * @param {object} test not here!

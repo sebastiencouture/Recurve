@@ -28,7 +28,7 @@ docsModule.factory("ApiResourceHeader", ["utils"], function(utils) {
                     <h2>{resource.name}</h2>
                     <p>{resource.description.summary} <a href="#detailed-description">more...</a></p>
                     <strong>Module: </strong>{utils.capitalizeFirstCharacter(resource.module)}
-                                {renderDependencies(resource)}
+                    {renderDependencies(resource)}
                     <strong>Source: </strong><a href="http://www.github.com">GitHub</a>
                 </div>
             );

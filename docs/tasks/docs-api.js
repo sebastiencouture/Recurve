@@ -36,6 +36,7 @@ function generateResourceFromComments(comments) {
         }
         else {
             var typeName = getTypeNameFromComment(comment);
+            typeName = pluralizeResourceTypesName(typeName);
             // TODO TBD disabling validation for now since everything will fail until start writing
             //validateResourceComment(comment);
             output.types[typeName] = output[typeName] || [];
@@ -43,7 +44,81 @@ function generateResourceFromComments(comments) {
         }
     });
 
+    cleanupResource(output);
+
     return output;
+}
+
+function pluralizeResourceTypesName(name) {
+    if ("method" === name) {
+        name = "methods";
+    }
+    else if ("property" === name) {
+        name = "properties"
+    }
+    else if ("config" === name) {
+        // do nothing
+    }
+    else {
+       // assert(false, "un-expected resource types name", name);
+    }
+
+    return name;
+}
+
+function cleanupResource(resource) {
+    if (resource.types.methods) {
+        resource.types.methods.forEach(function(method) {
+            method.nameWithParams = createResourceMethodNameWithParams(method);
+
+            if (method.params) {
+                method.params.forEach(function(param) {
+                    if (param.types) {
+                        param.types = param.types.map(function(type) {
+                            return utils.capitalizeFirstCharacter(type);
+                        });
+                    }
+                });
+            }
+            if (method.throws) {
+                method.throws.type = utils.capitalizeFirstCharacter(method.throws.types[0]);
+                method.throws.types = undefined;
+            }
+        });
+    }
+
+    if (resource.types.properties) {
+        resource.types.properties.forEach(function(property) {
+            property.type = utils.capitalizeFirstCharacter(property.type[0]);
+        });
+    }
+
+    if (resource.types.config) {
+        resource.types.config.forEach(function(config) {
+            config.type = utils.capitalizeFirstCharacter(config.type[0]);
+        });
+    }
+
+    // Will only have one return type
+    Object.keys(resource.types).forEach(function(key) {
+        resource.types[key].forEach(function(type) {
+            if (type.returns) {
+                type.returns.type = utils.capitalizeFirstCharacter(type.returns.types[0]);
+                type.returns.types = undefined;
+            }
+        });
+    });
+}
+
+function createResourceMethodNameWithParams(method) {
+    var params = "";
+    if (method.params) {
+        params = method.params.map(function(param) {
+            return param.name;
+        }).join(", ");
+    }
+
+    return method.name + "(" + params + ")";
 }
 
 function validateResourceComment(comment) {

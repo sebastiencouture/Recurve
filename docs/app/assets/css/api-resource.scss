@@ -3,6 +3,16 @@
     margin-top: 30px;
   }
 
+  .methods-short, .properties-short {
+    dt {
+      font-weight: normal;
+      color: #98978b;
+    }
+    dd {
+      font-weight: bold;
+    }
+  }
+
   .method, .property {
     h3 {
       background-color: #f8f5f0;
