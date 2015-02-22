@@ -2,18 +2,18 @@
 
 "use strict";
 
-docsModule.factory("ApiResourceDetailedConfig", ["ApiResourceProperty"], function(ApiResourceProperty) {
+docsModule.factory("ApiServiceDetailedConfig", ["ApiServiceProperty"], function(ApiServiceProperty) {
 
     function renderConfig(config) {
         var index = 0;
         return config.map(function(property) {
             index++;
-            return <ApiResourceProperty key={index} property={property} />
+            return <ApiServiceProperty key={index} property={property} />
         });
     }
 
     return React.createClass({
-        displayName: "ApiResourceDetailedConfig",
+        displayName: "ApiServiceDetailedConfig",
 
         propTypes: {
             config: React.PropTypes.array.isRequired

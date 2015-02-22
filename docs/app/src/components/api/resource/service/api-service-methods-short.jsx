@@ -2,7 +2,7 @@
 
 "use strict";
 
-docsModule.factory("ApiResourceMethodsShort", null, function() {
+docsModule.factory("ApiServiceMethodsShort", null, function() {
 
     function renderMethods(methods) {
         return methods.map(function(method) {
@@ -18,7 +18,7 @@ docsModule.factory("ApiResourceMethodsShort", null, function() {
     }
 
     return React.createClass({
-        displayName: "ApiResourceMethodsShort",
+        displayName: "ApiServiceMethodsShort",
 
         propTypes: {
             methods: React.PropTypes.array.isRequired

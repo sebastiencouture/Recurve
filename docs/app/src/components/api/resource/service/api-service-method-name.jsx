@@ -2,10 +2,10 @@
 
 "use strict";
 
-docsModule.factory("ApiResourceMethodName", ["ApiResourceName"], function(ApiResourceName) {
+docsModule.factory("ApiServiceMethodName", ["ApiServiceName"], function(ApiServiceName) {
 
     return React.createClass({
-        displayName: "ApiResourceMethodName",
+        displayName: "ApiServiceMethodName",
 
         propTypes: {
             method: React.PropTypes.object.isRequired,
@@ -16,7 +16,7 @@ docsModule.factory("ApiResourceMethodName", ["ApiResourceName"], function(ApiRes
             var method = this.props.method;
             var returns = method.returns ? method.returns.type : null;
             return (
-                <ApiResourceName name={method.nameWithParams} type={returns} />
+                <ApiServiceName name={method.nameWithParams} type={returns} />
             );
         }
     });

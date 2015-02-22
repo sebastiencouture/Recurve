@@ -2,10 +2,10 @@
 
 "use strict";
 
-docsModule.factory("ApiResourceName", ["utils"], function(utils) {
+docsModule.factory("ApiServiceName", ["utils"], function(utils) {
 
     return React.createClass({
-        displayName: "ApiResourceName",
+        displayName: "ApiServiceName",
 
         propTypes: {
             name: React.PropTypes.string.isRequired,
@@ -13,10 +13,9 @@ docsModule.factory("ApiResourceName", ["utils"], function(utils) {
         },
 
         render: function() {
-            var type = utils.capitalizeFirstCharacter(this.props.type);
             return (
                 <div className="name">
-                    <h3>{this.props.name} <small>{type}</small></h3>
+                    <h3>{this.props.name} <small>{this.props.type}</small></h3>
                 </div>
             );
         }

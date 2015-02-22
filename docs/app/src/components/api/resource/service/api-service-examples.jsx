@@ -2,14 +2,14 @@
 
 "use strict";
 
-docsModule.factory("ApiResourceExamples", null, function() {
+docsModule.factory("ApiServiceExamples", null, function() {
 
     function renderExamples(config) {
 
     }
 
     return React.createClass({
-        displayName: "ApiResourceExamples",
+        displayName: "ApiServiceExamples",
 
         propTypes: {
             examples: React.PropTypes.array.isRequired

@@ -2,7 +2,7 @@
 
 "use strict";
 
-docsModule.factory("ApiResourcePropertiesShort", null, function() {
+docsModule.factory("ApiServicePropertiesShort", null, function() {
 
     function renderProperties(properties) {
         return properties.map(function(property) {
@@ -17,7 +17,7 @@ docsModule.factory("ApiResourcePropertiesShort", null, function() {
     }
 
     return React.createClass({
-        displayName: "ApiResourcePropertiesShort",
+        displayName: "ApiServicePropertiesShort",
 
         propTypes: {
             header: React.PropTypes.string.isRequired,

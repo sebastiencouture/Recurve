@@ -2,7 +2,7 @@
 
 "use strict";
 
-docsModule.factory("ApiResourceHeader", ["utils"], function(utils) {
+docsModule.factory("ApiServiceHeader", ["utils"], function(utils) {
 
     function renderDependencies(resource) {
         var names = resource.requires ? resource.requires.join(", ") : "none";
@@ -14,7 +14,7 @@ docsModule.factory("ApiResourceHeader", ["utils"], function(utils) {
     }
 
     return React.createClass({
-        displayName: "ApiResourceHeader",
+        displayName: "ApiServiceHeader",
 
         propTypes: {
             resource: React.PropTypes.object.isRequired

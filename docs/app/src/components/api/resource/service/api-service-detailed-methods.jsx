@@ -2,18 +2,18 @@
 
 "use strict";
 
-docsModule.factory("ApiResourceDetailedMethods", ["ApiResourceMethod"], function(ApiResourceMethod) {
+docsModule.factory("ApiServiceDetailedMethods", ["ApiServiceMethod"], function(ApiServiceMethod) {
 
     function renderMethods(methods) {
         var index = 0;
         return methods.map(function(method) {
             index++;
-            return <ApiResourceMethod key={index} method={method} />
+            return <ApiServiceMethod key={index} method={method} />
         });
     }
 
     return React.createClass({
-        displayName: "ApiResourceDetailedMethods",
+        displayName: "ApiServiceDetailedMethods",
 
         propTypes: {
             methods: React.PropTypes.array.isRequired

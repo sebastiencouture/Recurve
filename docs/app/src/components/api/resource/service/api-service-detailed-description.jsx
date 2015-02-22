@@ -2,10 +2,10 @@
 
 "use strict";
 
-docsModule.factory("ApiResourceDetailedDescription", null, function() {
+docsModule.factory("ApiServiceDetailedDescription", null, function() {
 
     return React.createClass({
-        displayName: "ApiResourceDetailedDescription",
+        displayName: "ApiServiceDetailedDescription",
 
         propTypes: {
             description: React.PropTypes.object.isRequired

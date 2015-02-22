@@ -33,7 +33,6 @@ docsModule.factory("App", ["$window", "$document", "$log", "$router", "$stateSto
             if( "a" === target.nodeName.toLowerCase()) {
                 // scrolling to section on the current page, let the browser take care of these
                 if (recurve.contains(target.href, "#")) {
-                    debugger
                     return;
                 }
 
