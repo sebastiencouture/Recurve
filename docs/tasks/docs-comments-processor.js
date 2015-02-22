@@ -40,6 +40,9 @@ module.exports = {
                 case "kind":
                     processedComment[tag.type] = tag.string;
                     break;
+                case "type":
+                    processedComment[tag.type] = tag.types;
+                    break;
                 case "sort":
                     processedComment[tag.type] = parseInt(tag.string);
                     break;
@@ -57,9 +60,12 @@ module.exports = {
                     });
                     break;
                 case "description":
-                    processedComment.shortDescription = utils.getFirstLine(tag.string);
-                    processedComment.description = markdown(tag.string);
-                    processedComment.description = this.processInternalLinks(processedComment.description, baseUrl);
+                    var fullDescription = markdown(tag.string);
+                    fullDescription = this.processInternalLinks(fullDescription, baseUrl);
+                    processedComment.description = {
+                        full: fullDescription,
+                        summary: utils.getFirstLine(tag.string)
+                    };
                     break;
                 case "param":
                     processedComment.params = processedComment.params || [];

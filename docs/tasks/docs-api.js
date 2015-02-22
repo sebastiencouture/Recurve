@@ -36,7 +36,6 @@ function generateResourceFromComments(comments) {
         }
         else {
             var typeName = getTypeNameFromComment(comment);
-            sanitizeResourceComment(comment);
             // TODO TBD disabling validation for now since everything will fail until start writing
             //validateResourceComment(comment);
             output.types[typeName] = output[typeName] || [];
@@ -45,13 +44,6 @@ function generateResourceFromComments(comments) {
     });
 
     return output;
-}
-
-function sanitizeResourceComment(comment) {
-    // name in the comments will be type#resource
-    if (comment.name) {
-        comment.name = comment.name.split("#")[1];
-    }
 }
 
 function validateResourceComment(comment) {

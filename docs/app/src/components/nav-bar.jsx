@@ -4,6 +4,8 @@
 
 docsModule.factory("NavBar", ["$stateRouter"], function($stateRouter) {
     return React.createClass({
+        displayName: "NavBar",
+
         render: function() {
             var Navbar = ReactBootstrap.Navbar;
             var Nav = ReactBootstrap.Nav;

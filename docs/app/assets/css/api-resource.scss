@@ -1,8 +1,12 @@
-.resource-header {
-  dt {
-    width: 100px;
+.resource {
+  h3 {
+    margin-top: 30px;
   }
-  dd {
-    margin-left: 120px;
+
+  .method, .property {
+    h3 {
+      background-color: #f8f5f0;
+      padding: 5px;
+    }
   }
 }

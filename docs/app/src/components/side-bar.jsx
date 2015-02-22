@@ -25,7 +25,7 @@ docsModule.factory("SideBar", ["utils"], function(utils) {
 
                 renderables.push(
                     <li key={name}>
-                        <a href={item.href}>{name}</a>
+                        <a href={item.href}><strong>{name}</strong></a>
                         <Glyphicon className="pull-left" data-toggle="collapse" data-target={"#" + id} glyph="chevron-down"></Glyphicon>
                         <ul id={id} className="list-unstyled collapse in">
                             {renderItems(item.children)}
@@ -42,6 +42,8 @@ docsModule.factory("SideBar", ["utils"], function(utils) {
     }
 
     return React.createClass({
+        displayName: "SideBar",
+
         render: function() {
             var Panel = ReactBootstrap.Panel;
 

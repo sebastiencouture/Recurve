@@ -27,7 +27,7 @@ function addAsyncService(module) {
         return extend($async, {
             /**
              * @rdoc method
-             * @name $async#cancel
+             * @name cancel
              * @kind function
              *
              * @param {String} id this is a value :)
@@ -46,14 +46,16 @@ function addAsyncService(module) {
 
             /**
              * @rdoc config
-             * @name $async#something
+             * @name something
              * @description blah
+             * @type {string}
              */
 
             /**
              * @rdoc property
-             * @name $async#something
+             * @name something
              * @description wee
+             * @type {string}
              */
         });
     });

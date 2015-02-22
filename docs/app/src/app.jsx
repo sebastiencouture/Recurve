@@ -31,13 +31,15 @@ docsModule.factory("App", ["$window", "$document", "$log", "$router", "$stateSto
             var target = event ? event.target : $window.event.srcElement;
 
             if( "a" === target.nodeName.toLowerCase()) {
-                // Some bootstrap components depend on href="#", so let these pass through
-                if (/#$/.test(target.href)) {
+                // scrolling to section on the current page, let the browser take care of these
+                if (recurve.contains(target.href, "#")) {
+                    debugger
                     return;
                 }
 
                 var origin = $window.location.origin;
                 var index = target.href.indexOf(origin);
+                // different site, let the browser take care of these
                 if (-1 === index) {
                     return;
                 }
@@ -52,6 +54,8 @@ docsModule.factory("App", ["$window", "$document", "$log", "$router", "$stateSto
     }
 
     return React.createClass({
+        displayName: "App",
+
         componentWillMount: function() {
             setup();
         },

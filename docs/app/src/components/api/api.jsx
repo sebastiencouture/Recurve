@@ -5,6 +5,8 @@
 docsModule.factory("Api", ["apiStore", "$State", "SideBar"], function(apiStore, State, SideBar) {
 
     return React.createClass({
+        displayName: "Api",
+
         render: function() {
             var Grid = ReactBootstrap.Grid;
             var Row = ReactBootstrap.Row;

@@ -4,27 +4,32 @@
 
 docsModule.factory("ApiResourceShortType", null, function() {
 
-    function renderMethods(methods) {
-        return methods.map(function(method) {
-            var href = "#" + method.name;
+    function renderTypes(types) {
+        return types.map(function(type) {
+            var href = "#" + type.name;
             return (
-                <div key={method.name}>
-                    <dt><a href={href}>{method.name}</a></dt>
-                    <dd dangerouslySetInnerHTML={{__html: method.shortDescription}} />
+                <div key={type.name}>
+                    <dt><a href={href}>{type.name}</a></dt>
+                    <dd dangerouslySetInnerHTML={{__html: type.description.summary}} />
                 </div>
             );
         });
     }
 
     return React.createClass({
-        render: function() {
-            var methods = this.props.methods;
+        displayName: "ApiResourceShortType",
 
+        propTypes: {
+            header: React.PropTypes.string.isRequired,
+            types: React.PropTypes.array.isRequired
+        },
+
+        render: function() {
             return (
-                <div className="resource-methods">
+                <div className="types">
                     <h3>{this.props.header}</h3>
                     <dl className="dl-horizontal">
-                        {renderMethods(methods)}
+                        {renderTypes(this.props.types)}
                     </dl>
                 </div>
             );

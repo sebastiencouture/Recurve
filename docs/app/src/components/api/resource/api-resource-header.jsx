@@ -2,31 +2,34 @@
 
 "use strict";
 
-docsModule.factory("ApiResourceHeader", null, function() {
+docsModule.factory("ApiResourceHeader", ["utils"], function(utils) {
 
     function renderDependencies(resource) {
         var names = resource.requires ? resource.requires.join(", ") : "none";
         return (
             <div>
-                <dt>Dependencies</dt>
-                <dd>{names}</dd>
+                <strong>Dependencies: </strong>{names}
             </div>
         );
     }
 
     return React.createClass({
+        displayName: "ApiResourceHeader",
+
+        propTypes: {
+            resource: React.PropTypes.object.isRequired
+        },
+
         render: function() {
-            var PageHeader = ReactBootstrap.PageHeader;
             var resource = this.props.resource;
 
             return (
-                <div className="resource-header">
-                    <PageHeader>{resource.name}</PageHeader>
-                    <dl className="dl-horizontal">
-                        <dt>Module</dt>
-                        <dd>{resource.module}</dd>
-                        {renderDependencies(resource)}
-                    </dl>
+                <div id="header" className="header">
+                    <h2>{resource.name}</h2>
+                    <p>{resource.description.summary} <a href="#detailed-description">more...</a></p>
+                    <strong>Module: </strong>{utils.capitalizeFirstCharacter(resource.module)}
+                                {renderDependencies(resource)}
+                    <strong>Source: </strong><a href="http://www.github.com">GitHub</a>
                 </div>
             );
         }
