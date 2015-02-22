@@ -38,7 +38,6 @@ function addAsyncService(module) {
              * @description test
              *
              * description
-             * #wow
              */
             cancel: function(id) {
                 window.clearTimeout(id);

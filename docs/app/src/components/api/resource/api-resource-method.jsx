@@ -2,7 +2,7 @@
 
 "use strict";
 
-docsModule.factory("ApiResourceMethod", null, function() {
+docsModule.factory("ApiResourceMethod", ["ApiResourceName"], function(ApiResourceName) {
 
     return React.createClass({
         displayName: "ApiResourceMethod",
@@ -13,16 +13,14 @@ docsModule.factory("ApiResourceMethod", null, function() {
 
         render: function() {
             var method = this.props.method;
-
+            var returns = method.returns ? method.returns.types[0] : null;
             return (
                 <div id="method" className="method">
-                    <h3>{method.name}</h3>
-                    <p>{method.description.summary}</p>
+                    <ApiResourceName name={method.name} type={returns} />
+                    <p dangerouslySetInnerHTML={{__html: method.description.full}} />
                     <h4>Parameters</h4>
                     <h4>Returns</h4>
                     <h4>Throws</h4>
-                    <h4>Detailed Description</h4>
-                    <h4>Examples</h4>
                 </div>
             );
         }
