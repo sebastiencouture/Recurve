@@ -34,6 +34,14 @@
 
 function createApi(recurve, version) {
     var versionSplit = version.split(".");
+
+    /**
+     * @rdoc object
+     * @name version
+     * @module core
+     * @description blah blah
+     * @type {{full: *, major: *, minor: *, patch: *}}
+     */
     recurve.version = {
         full: version,
         major: versionSplit[0],

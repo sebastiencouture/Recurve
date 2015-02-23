@@ -99,6 +99,15 @@ function cleanupResource(resource) {
             }
         });
     });
+
+    // module level methods
+    if ("method" === resource.rdoc) {
+        resource.nameWithParams = createResourceMethodNameWithParams(resource);
+        if (resource.returns) {
+            resource.returns.type = resource.returns.types[0];
+            resource.returns.types = undefined;
+        }
+    }
 }
 
 function createResourceMethodNameWithParams(method) {

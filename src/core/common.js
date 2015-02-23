@@ -47,6 +47,16 @@
 
 "use strict";
 
+/**
+ * @rdoc method
+ * @module core
+ * @name forEach
+ * @description blah blah
+ * @param {Object} obj
+ * @param {Callback} iterator
+ * @param {Object} context
+ * @returns {Object} obj
+ */
 function forEach(obj, iterator, context) {
     if (!obj) {
         return obj;

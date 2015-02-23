@@ -2,7 +2,7 @@
 
 "use strict";
 
-docsModule.factory("ApiResource", ["ApiService"], function(ApiService) {
+docsModule.factory("ApiResource", ["ApiService", "ApiMethod", "ApiObject"], function(ApiService, ApiMethod, ApiObject) {
     function renderResource(resource) {
         var Component;
         switch (resource.rdoc) {
@@ -10,8 +10,10 @@ docsModule.factory("ApiResource", ["ApiService"], function(ApiService) {
                 Component = ApiService;
                 break;
             case "method":
+                Component = ApiMethod;
                 break;
             case "object":
+                Component = ApiObject;
                 break;
             default:
                 recurve.assert(false, "un-expected resource type", resource.rdoc);
