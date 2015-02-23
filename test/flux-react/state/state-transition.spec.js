@@ -116,7 +116,63 @@ describe("$stateTransition", function() {
                 expect(states[2].config).toBe(stateConfigs[2]);
             });
 
-            it("should not re-create states for configs that exist in the set of previous states", function() {
+            it("should not re-create states for configs that exist in the set of previous states if they have the same params", function() {
+                prevStates = [];
+                stateConfigs = [];
+
+                var stateConfig = $stateConfig(name, {path: ":id", resolver: {}});
+                stateConfigs.push(stateConfig);
+
+                var state = $state(stateConfig, null, {id: 1});
+                prevStates.push(state);
+
+                var transition = $stateTransition(stateConfigs, prevStates, {id: 1});
+                transition.start();
+                states = transition.getStates();
+
+                expect(states[0]).toBe(prevStates[0]);
+            });
+
+            it("should re-create states for configs that exist in the set of previous states but with different params", function() {
+                prevStates = [];
+                stateConfigs = [];
+
+                var stateConfig = $stateConfig(name, {path: ":id", resolver: {}});
+                stateConfigs.push(stateConfig);
+
+                var state = $state(stateConfig, null, {id: 1});
+                prevStates.push(state);
+
+                var transition = $stateTransition(stateConfigs, prevStates, {id: 2});
+                transition.start();
+                states = transition.getStates();
+
+                expect(states[0]).not.toBe(prevStates[0]);
+            });
+
+            it("should not re-create states for configs that exist in the set of previous states but the params don't affect the state", function() {
+                prevStates = [];
+                stateConfigs = [];
+
+                var stateConfig = $stateConfig(name, {path: ":test", resolver: {}});
+                stateConfigs.push(stateConfig);
+
+                var state = $state(stateConfig, null, {id: 1});
+                prevStates.push(state);
+
+                var transition = $stateTransition(stateConfigs, prevStates, {id: 2});
+                transition.start();
+                states = transition.getStates();
+
+                expect(states[0]).toBe(prevStates[0]);
+            });
+
+            it("should not re-create states for configs that exist in the set of previous states with no params", function() {
+                expect(states[0]).toBe(prevStates[0]);
+                expect(states[1]).toBe(prevStates[1]);
+            });
+
+            it("should not re-create states for configs that exist in the set of previous states but with same params", function() {
                 expect(states[0]).toBe(prevStates[0]);
                 expect(states[1]).toBe(prevStates[1]);
             });
@@ -126,8 +182,21 @@ describe("$stateTransition", function() {
             });
 
             it("should update the route params on previous states", function() {
-                expect(states[0].params).toBe(routeParams);
-                expect(states[1].params).toBe(routeParams);
+                prevStates = [];
+                stateConfigs = [];
+
+                var stateConfig = $stateConfig(name, {path: ":test", resolver: {}});
+                stateConfigs.push(stateConfig);
+
+                var state = $state(stateConfig, null, {id: 1});
+                prevStates.push(state);
+
+                var updatedParams = {id: 2};
+                var transition = $stateTransition(stateConfigs, prevStates, updatedParams);
+                transition.start();
+                states = transition.getStates();
+
+                expect(states[0].params).toBe(updatedParams);
             });
         });
 

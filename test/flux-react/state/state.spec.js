@@ -655,4 +655,35 @@ describe("$state", function() {
             });
         });
     });
+
+    describe("isSame", function() {
+        it("should return false for different config", function() {
+            var config = $stateConfig("a", {path: "a", resolver: {}});
+            var configB = $stateConfig("b", {path: "b", resolver: {}});
+            var state = $state(config);
+
+            expect(state.isSame(configB)).toEqual(false);
+        });
+
+        it("should return true if the set of params that affect the state are the same", function() {
+            var config = $stateConfig(":id", {path: "a", resolver: {}});
+            var state = $state(config, null, {id: 1});
+
+            expect(state.isSame(config, {id: 1})).toEqual(true);
+        });
+
+        it("should return false if the set of params that affect the state are different", function() {
+            var config = $stateConfig(":id", {path: "a", resolver: {}});
+            var state = $state(config, null, {id: 1});
+
+            expect(state.isSame(config, {id: 2})).toEqual(true);
+        });
+
+        it("should return true if only params that don't affect the state are different", function() {
+            var config = $stateConfig(":id", {path: "a", resolver: {}});
+            var state = $state(config, null, {id: 1, test: 2});
+
+            expect(state.isSame(config, {id: 1, test: 3})).toEqual(true);
+        });
+    });
 });

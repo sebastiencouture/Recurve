@@ -85,6 +85,15 @@ function addStateService(module) {
                 }
             }
 
+            function createPathWithParams(path, params) {
+                var pathWithParams = path;
+                recurve.forEach(params, function(value, key) {
+                    pathWithParams = pathWithParams.replace(":" + key, value)
+                });
+
+                return pathWithParams;
+            }
+
             var state = {
                 name: config.name,
                 config: config,
@@ -162,6 +171,17 @@ function addStateService(module) {
 
                 cancelResolve: function() {
                     canceled = true;
+                },
+
+                isSame: function(config, params) {
+                    if (config !== this.config) {
+                        return false;
+                    }
+
+                    var prevPathWithParams = createPathWithParams(this.config.path, this.params);
+                    var newPathWithParams = createPathWithParams(config.path, params);
+
+                    return prevPathWithParams === newPathWithParams;
                 }
             };
 

@@ -16,7 +16,7 @@ function addStateTransitionService(module) {
                 states = [];
                 recurve.forEach(stateConfigs, function(config) {
                     var found = recurve.find(prevStates, "config", config);
-                    if (found) {
+                    if (found && found.isSame(config, params)) {
                         found.params = params;
                         found.history = history;
                         states.push(found);
