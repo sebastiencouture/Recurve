@@ -18,6 +18,9 @@ docsModule.factory("ApiObject", ["utils"], function(utils) {
                     <div id="header" className="header">
                         <h2>{resource.name}</h2>
                         <strong>Module: </strong>{utils.capitalizeFirstCharacter(resource.module)}
+                        <div>
+                            <strong>Source: </strong><a href="http://www.github.com">GitHub</a>
+                        </div>
                     </div>
                     <div className="object">
                         <p dangerouslySetInnerHTML={{__html: resource.description.full}} />

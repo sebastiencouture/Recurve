@@ -9,9 +9,9 @@ docsModule.factory("ApiParameters", null, function() {
         return parameters.map(function(parameter) {
             var types = parameter.types ? parameter.types.join("|") : null;
             return (
-                <div key={key}>
-                    <strong>{parameter.name}</strong> {types}
-                    <p dangerouslySetInnerHTML={{__html: parameter.description}} />
+                <div key={key} className="parameter">
+                    <strong>{parameter.name}</strong> <small className="types">{types}</small>
+                    <div className="description" dangerouslySetInnerHTML={{__html: parameter.description}} />
                 </div>
             );
         });

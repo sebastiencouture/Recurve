@@ -2,7 +2,8 @@
 
 "use strict";
 
-docsModule.factory("ApiMethod", ["utils", "ApiParameters"], function(utils, ApiParameters) {
+docsModule.factory("ApiMethod", ["utils", "ApiParameters", "ApiReturns", "ApiThrows"],
+    function(utils, ApiParameters, ApiReturns, ApiThrows) {
 
     return React.createClass({
         displayName: "ApiMethod",
@@ -19,12 +20,15 @@ docsModule.factory("ApiMethod", ["utils", "ApiParameters"], function(utils, ApiP
                     <div id="header" className="header">
                         <h2>{resource.nameWithParams} <small>{returns}</small></h2>
                         <strong>Module: </strong>{utils.capitalizeFirstCharacter(resource.module)}
+                        <div>
+                            <strong>Source: </strong><a href="http://www.github.com">GitHub</a>
+                        </div>
                     </div>
                     <div className="method">
                         <p dangerouslySetInnerHTML={{__html: resource.description.full}} />
                         <ApiParameters parameters={resource.params} />
-                        <h4>Returns</h4>
-                        <h4>Throws</h4>
+                        <ApiReturns returns={resource.returns} />
+                        <ApiThrows throws={resource.throws} />
                     </div>
                 </div>
             );

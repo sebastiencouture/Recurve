@@ -2,8 +2,8 @@
 
 "use strict";
 
-docsModule.factory("ApiServiceMethod", ["ApiServiceMethodName", "ApiParameters"],
-    function(ApiServiceMethodName, ApiParameters) {
+docsModule.factory("ApiServiceMethod", ["ApiServiceMethodName", "ApiParameters", "ApiReturns", "ApiThrows"],
+    function(ApiServiceMethodName, ApiParameters, ApiReturns, ApiThrows) {
 
     return React.createClass({
         displayName: "ApiServiceMethod",
@@ -19,8 +19,8 @@ docsModule.factory("ApiServiceMethod", ["ApiServiceMethodName", "ApiParameters"]
                     <ApiServiceMethodName method={method} />
                     <p dangerouslySetInnerHTML={{__html: method.description.full}} />
                     <ApiParameters parameters={method.params} />
-                    <h4>Returns</h4>
-                    <h4>Throws</h4>
+                    <ApiReturns returns={method.returns} />
+                    <ApiThrows throws={method.throws} />
                 </div>
             );
         }
