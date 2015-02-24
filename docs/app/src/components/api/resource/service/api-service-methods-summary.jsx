@@ -21,15 +21,20 @@ docsModule.factory("ApiServiceMethodsSummary", null, function() {
         displayName: "ApiServiceMethodsSummary",
 
         propTypes: {
-            methods: React.PropTypes.array.isRequired
+            methods: React.PropTypes.array
         },
 
         render: function() {
+            var methods = this.props.methods;
+            if (!methods || !methods.length) {
+                return null;
+            }
+
             return (
-                <div className="methods-summary">
+                <div className="summary-methods">
                     <h3>Methods</h3>
                     <dl className="dl-horizontal">
-                        {renderMethods(this.props.methods)}
+                        {renderMethods(methods)}
                     </dl>
                 </div>
             );

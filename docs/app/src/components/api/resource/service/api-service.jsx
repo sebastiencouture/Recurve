@@ -7,15 +7,6 @@ docsModule.factory("ApiService", ["ApiServiceHeader", "ApiServicePropertiesSumma
     function(ApiServiceHeader, ApiServicePropertiesSummary, ApiServiceMethodsSummary, ApiServiceDetailedDescription,
              ApiServiceDetailedMethods, ApiServiceDetailedProperties, ApiServiceDetailedConfig, ApiServiceExamples) {
 
-    function renderPropertiesSummary(header, id, properties) {
-        var renderable = null;
-        if (properties) {
-            renderable = <ApiServicePropertiesSummary id={id} header={header} properties={properties}/>;
-        }
-
-        return renderable;
-    }
-
     return React.createClass({
         displayName: "ApiService",
 
@@ -29,8 +20,8 @@ docsModule.factory("ApiService", ["ApiServiceHeader", "ApiServicePropertiesSumma
                 <div className="resource-service">
                     <ApiServiceHeader resource={resource}/>
                     <ApiServiceMethodsSummary methods={resource.types.method} />
-                    {renderPropertiesSummary("Properties", "properties", resource.types.property)}
-                    {renderPropertiesSummary("Config", "config", resource.types.config)}
+                    <ApiServicePropertiesSummary id="properties" header="Properties" properties={resource.types.property}/>
+                    <ApiServicePropertiesSummary id="config" header="Config" properties={resource.types.config}/>
                     <ApiServiceDetailedDescription description={resource.description} />
                     <ApiServiceDetailedMethods methods={resource.types.method} />
                     <ApiServiceDetailedProperties properties={resource.types.property} />

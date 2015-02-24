@@ -21,15 +21,20 @@ docsModule.factory("ApiServicePropertiesSummary", null, function() {
 
         propTypes: {
             header: React.PropTypes.string.isRequired,
-            properties: React.PropTypes.array.isRequired
+            properties: React.PropTypes.array
         },
 
         render: function() {
+            var properties = this.props.properties;
+            if (!properties || !properties.length) {
+                return null;
+            }
+
             return (
-                <div className="properties-summary">
+                <div className="summary-properties">
                     <h3>{this.props.header}</h3>
                     <dl className="dl-horizontal">
-                        {renderProperties(this.props.properties)}
+                        {renderProperties(properties)}
                     </dl>
                 </div>
             );
