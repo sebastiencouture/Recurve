@@ -34,7 +34,7 @@ docsModule.factory("docsService", ["$promise", "$http", "$action", "appConfig", 
     function createResourceGetMethod(actions) {
         return function(metadata) {
             var url = metadata ? metadata.url : null;
-            return send(url, actions);
+            return send(url, actions, null, metadata);
         };
     }
 
@@ -45,20 +45,20 @@ docsModule.factory("docsService", ["$promise", "$http", "$action", "appConfig", 
         };
     }
 
-    function send(url, actions, options) {
+    function send(url, actions, options, actionParams) {
         if (!url) {
             return $promise.reject("url does not exist");
         }
 
         var promise = $http.get(url, options);
         return promise.then(function(response) {
-            actions.success.trigger(response.data);
+            actions.success.trigger(response.data, actionParams);
         }, function(response) {
             if (response.canceled) {
-                actions.cancel.trigger(response);
+                actions.cancel.trigger(response, actionParams);
             }
             else {
-                actions.error.trigger(response);
+                actions.error.trigger(response, actionParams);
             }
         });
     }

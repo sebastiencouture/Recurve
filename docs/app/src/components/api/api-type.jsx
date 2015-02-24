@@ -2,14 +2,30 @@
 
 "use strict";
 
-docsModule.factory("ApiType", null, function() {
+docsModule.factory("ApiType", ["utils", "ApiTypeSummary"], function(utils, ApiTypeSummary) {
 
     return React.createClass({
         displayName: "ApiType",
 
+        propTypes: {
+            $state: React.PropTypes.object.isRequired
+        },
+
         render: function() {
+            var moduleName = this.props.$state.params.module;
+            var typeName = this.props.$state.params.type;
+            var metadata = this.props.$state.data.metadata;
+
             return (
-                <div>api type</div>
+                <div>
+                    <h2>{utils.capitalizeFirstCharacter(typeName)}s</h2>
+                    <strong>Module: </strong>{utils.capitalizeFirstCharacter(moduleName)}
+                    <p>
+                        <dl className="dl-horizontal">
+                            <ApiTypeSummary metadata={metadata} />
+                        </dl>
+                    </p>
+                </div>
             );
         }
     });

@@ -37,7 +37,7 @@ function createApi(recurve, version) {
 
     /**
      * @rdoc object
-     * @name version
+     * @name recurve.version
      * @module core
      * @description blah blah
      * @type {{full: *, major: *, minor: *, patch: *}}

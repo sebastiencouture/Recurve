@@ -29,27 +29,42 @@ docsModule.factory("App", ["$window", "$document", "$log", "$router", "$stateSto
     function setupInternalLinkHandling() {
         $document.body.onclick = function(event) {
             var target = event ? event.target : $window.event.srcElement;
+            var anchor = getAnchorNode(target);
 
-            if( "a" === target.nodeName.toLowerCase()) {
-                // scrolling to section on the current page, let the browser take care of these
-                if (recurve.contains(target.href, "#")) {
-                    return;
-                }
-
-                var origin = $window.location.origin;
-                var index = target.href.indexOf(origin);
-                // different site, let the browser take care of these
-                if (-1 === index) {
-                    return;
-                }
-
-                event.stopPropagation();
-                event.preventDefault();
-
-                var path = target.href.substring(origin.length);
-                $router.navigate(path);
+            if (!anchor) {
+                return;
             }
+
+            // scrolling to section on the current page, let the browser take care of these
+            if (recurve.contains(anchor.href, "#")) {
+                return;
+            }
+
+            var origin = $window.location.origin;
+            var index = anchor.href.indexOf(origin);
+            // different site, let the browser take care of these
+            if (-1 === index) {
+                return;
+            }
+
+            event.stopPropagation();
+            event.preventDefault();
+
+            var path = anchor.href.substring(origin.length);
+            $router.navigate(path);
         };
+    }
+
+    function getAnchorNode(target) {
+        if (!target) {
+            return null;
+        }
+
+        if ("a" === target.nodeName.toLowerCase()){
+            return target;
+        }
+
+        return getAnchorNode(target.parentNode);
     }
 
     return React.createClass({

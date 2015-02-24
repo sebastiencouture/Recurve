@@ -1,17 +1,36 @@
 $typeColor: #98978b;
 
 .resource {
-  h3 {
-    margin-top: 30px;
+
+  .header {
+    margin-bottom: 10px;
   }
 
-  .methods-short, .properties-short {
-    dt {
-      font-weight: normal;
-      color: $typeColor;
+  .resource-service {
+    .description-summary {
+      margin-top: 10px;
+
+      p:first-child, div:first-child {
+        float: left;
+      }
+
+      .more {
+        margin-left: 5px;
+      }
     }
-    dd {
-      font-weight: bold;
+
+   /* h3 {
+      margin-top: 30px;
+    }*/
+
+    .methods-short, .properties-short {
+      dt {
+        font-weight: normal;
+        color: $typeColor;
+      }
+      dd {
+        font-weight: bold;
+      }
     }
   }
 

@@ -50,7 +50,7 @@
 /**
  * @rdoc method
  * @module core
- * @name forEach
+ * @name recurve.forEach
  * @description blah blah
  * @param {Object} obj
  * @param {Callback} iterator
@@ -87,6 +87,16 @@ function forEach(obj, iterator, context) {
     return obj;
 }
 
+/**
+ * @rdoc method
+ * @module core
+ * @name recurve.find
+ * @description blah blah
+ * @param {Object} obj
+ * @param {String} property
+ * @param {Something} value
+ * @returns {Value}
+ */
 function find(obj, property, value) {
     if (!obj) {
         return null;

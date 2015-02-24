@@ -22,14 +22,14 @@ docsModule.factory("ApiServiceHeader", ["utils"], function(utils) {
 
         render: function() {
             var resource = this.props.resource;
-
+            var description = resource.description.summary + "<a class='more' href='#detailed-description'>more...</a>";
             return (
                 <div id="header" className="header">
                     <h2>{resource.name}</h2>
-                    <p>{resource.description.summary} <a href="#detailed-description">more...</a></p>
                     <strong>Module: </strong>{utils.capitalizeFirstCharacter(resource.module)}
                     {renderDependencies(resource)}
                     <strong>Source: </strong><a href="http://www.github.com">GitHub</a>
+                    <div className="description-summary" dangerouslySetInnerHTML={{__html: description}} />
                 </div>
             );
         }

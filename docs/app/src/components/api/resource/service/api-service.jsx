@@ -26,14 +26,14 @@ docsModule.factory("ApiService", ["ApiServiceHeader", "ApiServicePropertiesShort
         render: function() {
             var resource = this.props.resource;
             return (
-                <div className="service">
+                <div className="resource-service">
                     <ApiServiceHeader resource={resource}/>
-                    <ApiServiceMethodsShort methods={resource.types.methods} />
-                    {renderPropertiesShort("Properties", "properties", resource.types.properties)}
+                    <ApiServiceMethodsShort methods={resource.types.method} />
+                    {renderPropertiesShort("Properties", "properties", resource.types.property)}
                     {renderPropertiesShort("Config", "config", resource.types.config)}
                     <ApiServiceDetailedDescription description={resource.description} />
-                    <ApiServiceDetailedMethods methods={resource.types.methods} />
-                    <ApiServiceDetailedProperties properties={resource.types.properties} />
+                    <ApiServiceDetailedMethods methods={resource.types.method} />
+                    <ApiServiceDetailedProperties properties={resource.types.property} />
                     <ApiServiceDetailedConfig config={resource.types.config} />
                     <ApiServiceExamples examples={resource.examples} />
                 </div>

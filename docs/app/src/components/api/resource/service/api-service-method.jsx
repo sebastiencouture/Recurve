@@ -17,7 +17,7 @@ docsModule.factory("ApiServiceMethod", ["ApiServiceMethodName", "ApiParameters",
             return (
                 <div id="method" className="method">
                     <ApiServiceMethodName method={method} />
-                    <p dangerouslySetInnerHTML={{__html: method.description.full}} />
+                    <div className="description-detailed" dangerouslySetInnerHTML={{__html: method.description.full}} />
                     <ApiParameters parameters={method.params} />
                     <ApiReturns returns={method.returns} />
                     <ApiThrows throws={method.throws} />

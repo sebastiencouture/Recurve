@@ -16,7 +16,7 @@ docsModule.factory("ApiServiceProperty", ["ApiServiceName"], function(ApiService
             return (
                 <div id="property" className="property">
                     <ApiServiceName name={property.name} type={property.type} />
-                    <p dangerouslySetInnerHTML={{__html: property.description.full}} />
+                    <div className="description-detailed" dangerouslySetInnerHTML={{__html: property.description.full}} />
                 </div>
             );
         }

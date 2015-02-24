@@ -11,7 +11,7 @@ docsModule.factory("SideBar", ["utils"], function(utils) {
         if (recurve.isArray(items)) {
             renderables = items.map(function(item) {
                 return (
-                    <li key={name}>
+                    <li key={item.name}>
                         <a href={item.href}>{item.name}</a>
                     </li>
                 );

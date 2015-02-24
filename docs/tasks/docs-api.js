@@ -30,16 +30,14 @@ function generateResourceFromComments(comments) {
     };
 
     comments.forEach(function(comment) {
-        var moduleName = getModuleNameFromComment(comment);
-        if (moduleName) {
+        var typeName = getTypeNameFromComment(comment);
+        if ("module" === typeName || "service" === typeName) {
             utils.extend(output, comment);
         }
         else {
-            var typeName = getTypeNameFromComment(comment);
-            typeName = pluralizeResourceTypesName(typeName);
             // TODO TBD disabling validation for now since everything will fail until start writing
             //validateResourceComment(comment);
-            output.types[typeName] = output[typeName] || [];
+            output.types[typeName] = output.types[typeName] || [];
             output.types[typeName].push(comment);
         }
     });
@@ -49,26 +47,9 @@ function generateResourceFromComments(comments) {
     return output;
 }
 
-function pluralizeResourceTypesName(name) {
-    if ("method" === name) {
-        name = "methods";
-    }
-    else if ("property" === name) {
-        name = "properties"
-    }
-    else if ("config" === name) {
-        // do nothing
-    }
-    else {
-       // assert(false, "un-expected resource types name", name);
-    }
-
-    return name;
-}
-
 function cleanupResource(resource) {
-    if (resource.types.methods) {
-        resource.types.methods.forEach(function(method) {
+    if (resource.types.method) {
+        resource.types.method.forEach(function(method) {
             method.nameWithParams = createResourceMethodNameWithParams(method);
 
             if (method.throws) {
@@ -78,8 +59,8 @@ function cleanupResource(resource) {
         });
     }
 
-    if (resource.types.properties) {
-        resource.types.properties.forEach(function(property) {
+    if (resource.types.property) {
+        resource.types.property.forEach(function(property) {
             property.type = property.type[0];
         });
     }
@@ -87,6 +68,12 @@ function cleanupResource(resource) {
     if (resource.types.config) {
         resource.types.config.forEach(function(config) {
             config.type = config.type[0];
+        });
+    }
+
+    if (resource.types.object) {
+        resource.types.object.forEach(function(object) {
+            object.type = object.type[0];
         });
     }
 

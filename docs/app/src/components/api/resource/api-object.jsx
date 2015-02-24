@@ -14,7 +14,7 @@ docsModule.factory("ApiObject", ["utils"], function(utils) {
         render: function() {
             var resource = this.props.resource;
             return (
-                <div>
+                <div className="resource-object">
                     <div id="header" className="header">
                         <h2>{resource.name}</h2>
                         <strong>Module: </strong>{utils.capitalizeFirstCharacter(resource.module)}
@@ -22,9 +22,7 @@ docsModule.factory("ApiObject", ["utils"], function(utils) {
                             <strong>Source: </strong><a href="http://www.github.com">GitHub</a>
                         </div>
                     </div>
-                    <div className="object">
-                        <p dangerouslySetInnerHTML={{__html: resource.description.full}} />
-                    </div>
+                    <div className="description-detailed" dangerouslySetInnerHTML={{__html: resource.description.full}} />
                 </div>
             );
         }

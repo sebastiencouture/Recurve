@@ -51,11 +51,16 @@ docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialSt
                     path: ":module",
                     resolver: {
                         resolve: {
-                            moduleResource: function(params) {
+                            metadata: function(params) {
+                                return apiStore.getModuleMetadata(params.module);
+                            },
+                            resource: function(params) {
                                 var metadata = apiStore.getModuleMetadata(params.module);
                                 recurve.assert(metadata, "api module metadata does not exists", params);
 
-                                return docsService.getApiResource(metadata);
+                                return docsService.getApiResource(metadata).then(function() {
+                                    return apiStore.getModuleResource(params.module, metadata);
+                                });
                             }
                         },
                         components: componentsConfig("ApiModule")
@@ -66,11 +71,11 @@ docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialSt
                     path: ":module/:type",
                     resolver: {
                         resolve: {
-                            typeMetadata: function(params) {
-                                return apiStore.getTypeMetadata(params.module, params.type);
+                            metadata: function(params) {
+                                return apiStore.getTypeMetadata(params.type, params.module);
                             }
                         },
-                        components: componentsConfigNoLoading("ApiType")
+                        components: componentsConfig("ApiType")
                     }
                 },
 
@@ -79,11 +84,11 @@ docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialSt
                     resolver: {
                         resolve: {
                             resource: function(params) {
-                                var metadata = apiStore.getResourceMetadata(params.module, params.type, params.resource);
+                                var metadata = apiStore.getResourceMetadata(params.resource, params.type, params.module);
                                 recurve.assert(metadata, "api resource metadata does not exist", params);
 
                                 return docsService.getApiResource(metadata).then(function() {
-                                    return apiStore.getResource(params.module, params.type, params.resource);
+                                    return apiStore.getResource(params.resource, params.type, metadata);
                                 });
                             }
                         },
