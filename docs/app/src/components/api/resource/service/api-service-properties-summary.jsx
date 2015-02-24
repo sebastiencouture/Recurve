@@ -2,7 +2,7 @@
 
 "use strict";
 
-docsModule.factory("ApiServicePropertiesShort", null, function() {
+docsModule.factory("ApiServicePropertiesSummary", null, function() {
 
     function renderProperties(properties) {
         return properties.map(function(property) {
@@ -17,7 +17,7 @@ docsModule.factory("ApiServicePropertiesShort", null, function() {
     }
 
     return React.createClass({
-        displayName: "ApiServicePropertiesShort",
+        displayName: "ApiServicePropertiesSummary",
 
         propTypes: {
             header: React.PropTypes.string.isRequired,
@@ -26,7 +26,7 @@ docsModule.factory("ApiServicePropertiesShort", null, function() {
 
         render: function() {
             return (
-                <div className="properties-short">
+                <div className="properties-summary">
                     <h3>{this.props.header}</h3>
                     <dl className="dl-horizontal">
                         {renderProperties(this.props.properties)}

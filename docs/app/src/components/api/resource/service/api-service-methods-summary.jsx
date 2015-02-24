@@ -2,7 +2,7 @@
 
 "use strict";
 
-docsModule.factory("ApiServiceMethodsShort", null, function() {
+docsModule.factory("ApiServiceMethodsSummary", null, function() {
 
     function renderMethods(methods) {
         return methods.map(function(method) {
@@ -18,7 +18,7 @@ docsModule.factory("ApiServiceMethodsShort", null, function() {
     }
 
     return React.createClass({
-        displayName: "ApiServiceMethodsShort",
+        displayName: "ApiServiceMethodsSummary",
 
         propTypes: {
             methods: React.PropTypes.array.isRequired
@@ -26,7 +26,7 @@ docsModule.factory("ApiServiceMethodsShort", null, function() {
 
         render: function() {
             return (
-                <div className="methods-short">
+                <div className="methods-summary">
                     <h3>Methods</h3>
                     <dl className="dl-horizontal">
                         {renderMethods(this.props.methods)}

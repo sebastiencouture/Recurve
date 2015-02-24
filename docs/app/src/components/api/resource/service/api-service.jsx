@@ -2,15 +2,15 @@
 
 "use strict";
 
-docsModule.factory("ApiService", ["ApiServiceHeader", "ApiServicePropertiesShort", "ApiServiceMethodsShort", "ApiServiceDetailedDescription",
+docsModule.factory("ApiService", ["ApiServiceHeader", "ApiServicePropertiesSummary", "ApiServiceMethodsSummary", "ApiServiceDetailedDescription",
     "ApiServiceDetailedMethods", "ApiServiceDetailedProperties", "ApiServiceDetailedConfig", "ApiServiceExamples"],
-    function(ApiServiceHeader, ApiServicePropertiesShort, ApiServiceMethodsShort, ApiServiceDetailedDescription,
+    function(ApiServiceHeader, ApiServicePropertiesSummary, ApiServiceMethodsSummary, ApiServiceDetailedDescription,
              ApiServiceDetailedMethods, ApiServiceDetailedProperties, ApiServiceDetailedConfig, ApiServiceExamples) {
 
-    function renderPropertiesShort(header, id, properties) {
+    function renderPropertiesSummary(header, id, properties) {
         var renderable = null;
         if (properties) {
-            renderable = <ApiServicePropertiesShort id={id} header={header} properties={properties}/>;
+            renderable = <ApiServicePropertiesSummary id={id} header={header} properties={properties}/>;
         }
 
         return renderable;
@@ -28,9 +28,9 @@ docsModule.factory("ApiService", ["ApiServiceHeader", "ApiServicePropertiesShort
             return (
                 <div className="resource-service">
                     <ApiServiceHeader resource={resource}/>
-                    <ApiServiceMethodsShort methods={resource.types.method} />
-                    {renderPropertiesShort("Properties", "properties", resource.types.property)}
-                    {renderPropertiesShort("Config", "config", resource.types.config)}
+                    <ApiServiceMethodsSummary methods={resource.types.method} />
+                    {renderPropertiesSummary("Properties", "properties", resource.types.property)}
+                    {renderPropertiesSummary("Config", "config", resource.types.config)}
                     <ApiServiceDetailedDescription description={resource.description} />
                     <ApiServiceDetailedMethods methods={resource.types.method} />
                     <ApiServiceDetailedProperties properties={resource.types.property} />
