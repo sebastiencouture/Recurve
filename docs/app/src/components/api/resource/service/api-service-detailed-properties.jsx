@@ -26,7 +26,7 @@ docsModule.factory("ApiServiceDetailedProperties", ["ApiServiceProperty"], funct
             }
 
             return (
-                <div id="detailed-properties" className="detailed-properties">
+                <div id="detailed-properties">
                     <h3>Detailed Properties</h3>
                     {renderProperties(properties)}
                 </div>

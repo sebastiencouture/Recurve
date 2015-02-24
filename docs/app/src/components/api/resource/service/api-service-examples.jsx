@@ -22,7 +22,7 @@ docsModule.factory("ApiServiceExamples", null, function() {
             }
 
             return (
-                <div id="examples" className="examples">
+                <div id="examples">
                     <h3>Examples</h3>
                     {renderExamples(examples)}
                 </div>

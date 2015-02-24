@@ -31,7 +31,7 @@ docsModule.factory("ApiServicePropertiesSummary", null, function() {
             }
 
             return (
-                <div className="summary-properties">
+                <div className="properties-summary">
                     <h3>{this.props.header}</h3>
                     <dl className="dl-horizontal">
                         {renderProperties(properties)}

@@ -31,7 +31,7 @@ docsModule.factory("ApiServiceMethodsSummary", null, function() {
             }
 
             return (
-                <div className="summary-methods">
+                <div className="methods-summary">
                     <h3>Methods</h3>
                     <dl className="dl-horizontal">
                         {renderMethods(methods)}

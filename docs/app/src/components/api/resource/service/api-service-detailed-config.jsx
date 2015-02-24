@@ -26,7 +26,7 @@ docsModule.factory("ApiServiceDetailedConfig", ["ApiServiceProperty"], function(
             }
 
             return (
-                <div id="detailed-config" className="detailed-config">
+                <div id="detailed-config">
                     <h3>Detailed Config</h3>
                     {renderConfig(config)}
                 </div>

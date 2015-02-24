@@ -13,7 +13,7 @@ docsModule.factory("ApiServiceDetailedDescription", null, function() {
 
         render: function() {
             return (
-                <div id="detailed-description" className="detailed-description">
+                <div id="detailed-description">
                     <h3>Detailed Description</h3>
                     <div dangerouslySetInnerHTML={{__html: this.props.description.full}} />
                 </div>

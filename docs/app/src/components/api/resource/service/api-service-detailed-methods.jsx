@@ -26,7 +26,7 @@ docsModule.factory("ApiServiceDetailedMethods", ["ApiServiceMethod"], function(A
             }
 
             return (
-                <div id="detailed-methods" className="detailed-methods">
+                <div id="detailed-methods">
                     <h3>Detailed Methods</h3>
                     {renderMethods(methods)}
                 </div>
