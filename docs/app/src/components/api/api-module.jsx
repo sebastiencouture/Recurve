@@ -23,7 +23,7 @@ docsModule.factory("ApiModule", ["utils", "ApiTypeSummary"], function(utils, Api
         }
 
         return (
-            <div>
+            <div key={name}>
                 <h3>{utils.capitalizeFirstCharacter(name)}s</h3>
                 <ApiTypeSummary metadata={typeMetadata} />
             </div>

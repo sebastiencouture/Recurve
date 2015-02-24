@@ -5,10 +5,10 @@
 docsModule.factory("ApiThrows", null, function() {
 
     return React.createClass({
-        displayName: "ApiReturns",
+        displayName: "ApiThrows",
 
         propTypes: {
-            throws: React.PropTypes.object.isRequired
+            throws: React.PropTypes.object
         },
 
         render: function() {

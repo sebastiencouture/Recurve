@@ -8,7 +8,7 @@ docsModule.factory("ApiReturns", null, function() {
         displayName: "ApiReturns",
 
         propTypes: {
-            returns: React.PropTypes.object.isRequired
+            returns: React.PropTypes.object
         },
 
         render: function() {

@@ -8,6 +8,7 @@ docsModule.factory("ApiParameters", null, function() {
         var key = 0;
         return parameters.map(function(parameter) {
             var types = parameter.types ? parameter.types.join("|") : null;
+            key++;
             return (
                 <div key={key} className="parameter">
                     <strong>{parameter.name}</strong> <small className="types">{types}</small>
@@ -21,7 +22,7 @@ docsModule.factory("ApiParameters", null, function() {
         displayName: "ApiParameters",
 
         propTypes: {
-            parameters: React.PropTypes.array.isRequired
+            parameters: React.PropTypes.array
         },
 
         render: function() {

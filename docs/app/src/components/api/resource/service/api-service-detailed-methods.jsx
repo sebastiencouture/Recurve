@@ -16,7 +16,7 @@ docsModule.factory("ApiServiceDetailedMethods", ["ApiServiceMethod"], function(A
         displayName: "ApiServiceDetailedMethods",
 
         propTypes: {
-            methods: React.PropTypes.array.isRequired
+            methods: React.PropTypes.array
         },
 
         render: function() {

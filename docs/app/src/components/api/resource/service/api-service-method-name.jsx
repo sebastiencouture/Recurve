@@ -8,8 +8,7 @@ docsModule.factory("ApiServiceMethodName", ["ApiServiceName"], function(ApiServi
         displayName: "ApiServiceMethodName",
 
         propTypes: {
-            method: React.PropTypes.object.isRequired,
-            type: React.PropTypes.string.isRequired
+            method: React.PropTypes.object.isRequired
         },
 
         render: function() {

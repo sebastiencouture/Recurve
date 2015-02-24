@@ -12,7 +12,7 @@ docsModule.factory("ApiServiceExamples", null, function() {
         displayName: "ApiServiceExamples",
 
         propTypes: {
-            examples: React.PropTypes.array.isRequired
+            examples: React.PropTypes.array
         },
 
         render: function() {
