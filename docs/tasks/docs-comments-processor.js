@@ -64,7 +64,7 @@ module.exports = {
                     fullDescription = this.processInternalLinks(fullDescription, baseUrl);
                     processedComment.description = {
                         full: fullDescription,
-                        summary: utils.getFirstLine(tag.string)
+                        summary: markdown(utils.getFirstLine(tag.string))
                     };
                     break;
                 case "param":

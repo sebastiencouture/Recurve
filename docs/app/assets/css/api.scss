@@ -1,0 +1,64 @@
+$typeColor: #98978b;
+
+.api {
+  .resource {
+    .header {
+      margin-bottom: 10px;
+    }
+
+    .resource-service {
+      .description-summary {
+        margin-top: 10px;
+
+        p:first-child, div:first-child {
+          float: left;
+        }
+
+        .more {
+          margin-left: 5px;
+        }
+      }
+
+      /* h3 {
+         margin-top: 30px;
+       }*/
+
+      .methods-summary, .properties-summary {
+        dt {
+          font-weight: normal;
+          color: $typeColor;
+        }
+        dd {
+          font-weight: bold;
+        }
+      }
+    }
+
+    .method, .property {
+      h3 {
+        background-color: #f8f5f0;
+        padding: 5px;
+      }
+
+      .parameter, .returns, .throws {
+        margin-left: 15px;
+
+        .types {
+          color: $typeColor;
+        }
+
+        .description {
+          margin-left: 10px;
+        }
+      }
+    }
+  }
+
+  .module, .type {
+    .description-summary {
+      p:first-child, div:first-child {
+        margin: 0;
+      }
+    }
+  }
+}

@@ -17,7 +17,7 @@ docsModule.factory("ApiType", ["utils", "ApiTypeSummary"], function(utils, ApiTy
             var metadata = this.props.$state.data.metadata;
 
             return (
-                <div>
+                <div className="type">
                     <h2>{utils.capitalizeFirstCharacter(typeName)}s</h2>
                     <strong>Module: </strong>{utils.capitalizeFirstCharacter(moduleName)}
                     <p>

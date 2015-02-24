@@ -13,7 +13,7 @@ docsModule.factory("Api", ["apiStore", "$State", "SideBar"], function(apiStore, 
             var Col = ReactBootstrap.Col;
 
             return (
-                <div className="container">
+                <div className="container api">
                     <Grid>
                         <Row>
                             <Col xs={6} md={3}>

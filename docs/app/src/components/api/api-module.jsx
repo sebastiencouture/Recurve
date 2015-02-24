@@ -43,9 +43,9 @@ docsModule.factory("ApiModule", ["utils", "ApiTypeSummary"], function(utils, Api
             var resource = this.props.$state.data.resource;
 
             return (
-                <div>
+                <div className="module">
                     <h2>{utils.capitalizeFirstCharacter(moduleName)}</h2>
-                    <p dangerouslySetInnerHTML={{__html: resource.description.full}} />
+                    <div dangerouslySetInnerHTML={{__html: resource.description.full}} />
                     <hr />
                     {renderMetadata(metadata)}
                 </div>

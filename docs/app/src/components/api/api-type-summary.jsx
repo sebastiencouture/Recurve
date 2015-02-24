@@ -14,7 +14,7 @@ docsModule.factory("ApiTypeSummary", null, function() {
             return (
                 <div key={resource.name}>
                     <dt><a href={href}>{resource.name}</a></dt>
-                    <dd dangerouslySetInnerHTML={{__html: resource.description.summary}} />
+                    <dd className="description-summary" dangerouslySetInnerHTML={{__html: resource.description.summary}} />
                 </div>
             );
         });
