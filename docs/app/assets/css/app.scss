@@ -6,6 +6,23 @@ a {
   }
 }
 
+pre.prettyprint {
+  border: 1px solid #dfd7ca;
+  background-color: #f8f5f0;
+  border-radius: 0;
+
+  /* ensure prettify line numbers show up */
+  li {
+    &.L0, &.L1, &.L2, &.L3, &.L4, &.L5, &.L6, &.L7, &.L8 {
+      list-style-type: decimal !important;
+    }
+
+    &.L1, &.L3, &.L5, &.L7 {
+      background-color: #fcf9f5; //#efebe5;
+    }
+  }
+}
+
 .panel {
   border-radius: 0;
 }

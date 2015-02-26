@@ -2,14 +2,14 @@
 
 "use strict";
 
-docsModule.factory("ApiServicePropertiesSummary", null, function() {
+docsModule.factory("ApiServicePropertiesSummary", ["utils"], function(utils) {
 
     function renderProperties(properties) {
         return properties.map(function(property) {
             var href = "#" + property.name;
             return (
                 <div key={property.name}>
-                    <dt><small>{property.type}</small></dt>
+                    <dt><small>{utils.join(property.type)}</small></dt>
                     <dd><a href={href}>{property.name}</a></dd>
                 </div>
             );

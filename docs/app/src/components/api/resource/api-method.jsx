@@ -2,33 +2,36 @@
 
 "use strict";
 
-docsModule.factory("ApiMethod", ["utils", "ApiParameters", "ApiReturns", "ApiThrows"],
-    function(utils, ApiParameters, ApiReturns, ApiThrows) {
+docsModule.factory("ApiMethod", ["$window", "utils", "ApiParameters", "ApiReturns", "ApiThrows"],
+    function($window, utils, ApiParameters, ApiReturns, ApiThrows) {
 
     return React.createClass({
         displayName: "ApiMethod",
 
         propTypes: {
-            resource: React.PropTypes.object.isRequired
+            method: React.PropTypes.object.isRequired
+        },
+
+        componentDidMount: function() {
+            $window.prettyPrint();
         },
 
         render: function() {
-            var resource = this.props.resource;
-            var returns = resource.returns ? resource.returns.type : null;
+            var method = this.props.method;
             return (
                 <div className="resource-method">
                     <div id="header" className="header">
-                        <h2>{resource.nameWithParams} <small>{returns}</small></h2>
-                        <strong>Module: </strong>{utils.capitalizeFirstCharacter(resource.module)}
+                        <h2>{utils.methodNameWithParams(method)} <small>{utils.join(method.returns.types)}</small></h2>
+                        <strong>Module: </strong>{utils.capitalizeFirstCharacter(method.module)}
                         <div>
                             <strong>Source: </strong><a href="http://www.github.com">GitHub</a>
                         </div>
                     </div>
-                    <div className="description-detailed" dangerouslySetInnerHTML={{__html: resource.description.full}} />
+                    <div className="description-detailed" dangerouslySetInnerHTML={{__html: method.description.full}} />
                     <div className="method">
-                        <ApiParameters parameters={resource.params} />
-                        <ApiReturns returns={resource.returns} />
-                        <ApiThrows throws={resource.throws} />
+                        <ApiParameters parameters={method.params} />
+                        <ApiReturns returns={method.returns} />
+                        <ApiThrows throws={method.throws} />
                     </div>
                 </div>
             );

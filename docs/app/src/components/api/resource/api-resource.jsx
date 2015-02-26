@@ -3,23 +3,23 @@
 "use strict";
 
 docsModule.factory("ApiResource", ["ApiService", "ApiMethod", "ApiObject"], function(ApiService, ApiMethod, ApiObject) {
-    function renderResource(resource) {
+    function renderResource(resource, name, type) {
         var Component;
-        switch (resource.rdoc) {
+        switch (type) {
             case "service":
-                Component = ApiService;
+                Component = <ApiService resource={resource} />;
                 break;
             case "method":
-                Component = ApiMethod;
+                Component = <ApiMethod method={resource.getMethodByName(name)} />;
                 break;
             case "object":
-                Component = ApiObject;
+                Component = <ApiObject object={resource.getObjectByName(name)} />;
                 break;
             default:
                 recurve.assert(false, "un-expected resource type", resource.rdoc);
         }
 
-        return <Component resource={resource}/>;
+        return Component;
     }
 
     return React.createClass({
@@ -31,9 +31,11 @@ docsModule.factory("ApiResource", ["ApiService", "ApiMethod", "ApiObject"], func
 
         render: function() {
             var resource = this.props.$state.data.resource;
+            var name = this.props.$state.params.resource;
+            var type = this.props.$state.params.type;
             return (
                 <div className="resource">
-                    {renderResource(resource)}
+                    {renderResource(resource, name, type)}
                 </div>
             );
         }

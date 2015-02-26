@@ -15,108 +15,33 @@ function processFile(filePath, content, metadata, options) {
         examples: options.api.examples
     });
 
-    var resource = generateResourceFromComments(comments);
-    var outputPath = getResourceOutputPath(filePath, options);
-    fileStream.outputJsonSync(outputPath, resource);
+    validateComments(comments);
+
+    var outputPath = getOutputPath(filePath, options);
+    fileStream.outputJsonSync(outputPath, comments);
 
     comments.forEach(function(comment) {
         addCommentToMetadata(comment, metadata, filePath, options);
     });
 }
 
-function generateResourceFromComments(comments) {
-    var output = {
-        types: {}
-    };
-
-    comments.forEach(function(comment) {
-        var typeName = getTypeNameFromComment(comment);
-        if ("module" === typeName || "service" === typeName) {
-            utils.extend(output, comment);
-        }
-        else {
-            // TODO TBD disabling validation for now since everything will fail until start writing
-            //validateResourceComment(comment);
-            output.types[typeName] = output.types[typeName] || [];
-            output.types[typeName].push(comment);
-        }
-    });
-
-    cleanupResource(output);
-
-    return output;
-}
-
-function cleanupResource(resource) {
-    if (resource.types.method) {
-        resource.types.method.forEach(function(method) {
-            method.nameWithParams = createResourceMethodNameWithParams(method);
-
-            if (method.throws) {
-                method.throws.type = method.throws.types[0];
-                method.throws.types = undefined;
-            }
-        });
-    }
-
-    if (resource.types.property) {
-        resource.types.property.forEach(function(property) {
-            property.type = property.type[0];
-        });
-    }
-
-    if (resource.types.config) {
-        resource.types.config.forEach(function(config) {
-            config.type = config.type[0];
-        });
-    }
-
-    if (resource.types.object) {
-        resource.types.object.forEach(function(object) {
-            object.type = object.type[0];
-        });
-    }
-
-    // Will only have one return type
-    Object.keys(resource.types).forEach(function(key) {
-        resource.types[key].forEach(function(type) {
-            if (type.returns) {
-                type.returns.type = type.returns.types[0];
-                type.returns.types = undefined;
-            }
-        });
-    });
-
-    // module level methods
-    if ("method" === resource.rdoc) {
-        resource.nameWithParams = createResourceMethodNameWithParams(resource);
-        if (resource.returns) {
-            resource.returns.type = resource.returns.types[0];
-            resource.returns.types = undefined;
-        }
-    }
-}
-
-function createResourceMethodNameWithParams(method) {
-    var params = "";
-    if (method.params) {
-        params = method.params.map(function(param) {
-            return param.name;
-        }).join(", ");
-    }
-
-    return method.name + "(" + params + ")";
-}
-
-function validateResourceComment(comment) {
-    assert(comment.name, "each resource comment must have a name", comment);
-    var typeName = getTypeNameFromComment(comment);
-    assert("method" === typeName || "property" === typeName || "config" === typeName, "un-expect resource comment type", typeName);
+function validateComments(comments) {
+    // TODO TBD enable this once have comments setup in all source files
+    /*comments.forEach(function(comment) {
+        assert(comment.module, "expected api comment to have a module", comment);
+        assert(comment.type, "expected api comment to have a type", comment);
+        assert(comment.name, "expected comment to have a name", comment);
+    });*/
 }
 
 function addCommentToMetadata(comment, metadata, filePath, options) {
-    // only care about module level comments for the metadata
-    if (!getModuleNameFromComment(comment)) {
+    // only add comments whose parent is a module, for now that is any comment that doesn't belong to a service
+    if (comment.service) {
+        return;
+    }
+
+    // TODO TBD remove this once enable validation
+    if (!comment.module) {
         return;
     }
 
@@ -145,7 +70,7 @@ function addModuleToMetadata(comment, metadata, options) {
 }
 
 function addModuleMetadata(comment, module, filePath, options) {
-    var url = getResourceUrl(filePath, options);
+    var url = getUrl(filePath, options);
     assert(url, "unable to determine url for api comment", comment);
 
     utils.extend(module, {
@@ -174,7 +99,7 @@ function addResourceToTypeMetadata(comment, type, filePath, options) {
     var resourceName = comment.name;
     var href = getAppHref(moduleName, typeName, resourceName, options);
 
-    var url = getResourceUrl(filePath, options);
+    var url = getUrl(filePath, options);
     assert(url, "unable to determine url for api comment", comment);
 
     type.children.push({
@@ -209,11 +134,11 @@ function getAppHref(moduleName, typeName, serviceName, options) {
     return href;
 }
 
-function getResourceUrl(filePath, options) {
+function getUrl(filePath, options) {
     return options.api.baseUrl + utils.getRelativePathNoExtension(filePath, options.api.input) + ".json";
 }
 
-function getResourceOutputPath(filePath, options) {
+function getOutputPath(filePath, options) {
     return options.api.output + utils.getRelativePathNoExtension(filePath, options.api.input) + ".json";
 }
 

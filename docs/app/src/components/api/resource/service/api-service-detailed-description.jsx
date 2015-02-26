@@ -2,13 +2,17 @@
 
 "use strict";
 
-docsModule.factory("ApiServiceDetailedDescription", null, function() {
+docsModule.factory("ApiServiceDetailedDescription", ["$window"], function($window) {
 
     return React.createClass({
         displayName: "ApiServiceDetailedDescription",
 
         propTypes: {
             description: React.PropTypes.object.isRequired
+        },
+
+        componentDidMount: function() {
+            $window.prettyPrint();
         },
 
         render: function() {

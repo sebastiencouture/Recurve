@@ -38,14 +38,14 @@ docsModule.factory("ApiModule", ["utils", "ApiTypeSummary"], function(utils, Api
         },
 
         render: function() {
-            var moduleName = this.props.$state.params.module;
             var metadata = this.props.$state.data.metadata;
             var resource = this.props.$state.data.resource;
+            var module = resource.getModule();
 
             return (
                 <div className="module">
-                    <h2>{utils.capitalizeFirstCharacter(moduleName)}</h2>
-                    <div dangerouslySetInnerHTML={{__html: resource.description.full}} />
+                    <h2>{utils.capitalizeFirstCharacter(module.name)}</h2>
+                    <div dangerouslySetInnerHTML={{__html: module.description.full}} />
                     <hr />
                     {renderMetadata(metadata)}
                 </div>

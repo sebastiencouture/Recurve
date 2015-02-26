@@ -32,6 +32,7 @@ $typeColor: #98978b;
 
     .method, .property {
       h3 {
+        border: 1px solid #dfd7ca;
         background-color: #f8f5f0;
         padding: 5px;
       }
@@ -46,6 +47,17 @@ $typeColor: #98978b;
         .description {
           margin-left: 10px;
         }
+      }
+    }
+    .example {
+      .description {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: calc(100% - 60px);
+      }
+      .link {
+        margin-top: 7px;
       }
     }
   }

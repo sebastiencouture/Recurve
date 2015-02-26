@@ -2,7 +2,7 @@
 
 "use strict";
 
-docsModule.factory("ApiServiceMethodName", ["ApiServiceName"], function(ApiServiceName) {
+docsModule.factory("ApiServiceMethodName", ["utils", "ApiServiceName"], function(utils, ApiServiceName) {
 
     return React.createClass({
         displayName: "ApiServiceMethodName",
@@ -13,9 +13,8 @@ docsModule.factory("ApiServiceMethodName", ["ApiServiceName"], function(ApiServi
 
         render: function() {
             var method = this.props.method;
-            var returns = method.returns ? method.returns.type : null;
             return (
-                <ApiServiceName name={method.nameWithParams} type={returns} />
+                <ApiServiceName name={utils.methodNameWithParams(method)} type={utils.join(method.returns.types)} />
             );
         }
     });

@@ -2,16 +2,15 @@
 
 "use strict";
 
-docsModule.factory("ApiParameters", null, function() {
+docsModule.factory("ApiParameters", ["utils"], function(utils) {
 
     function renderParameters(parameters) {
         var key = 0;
         return parameters.map(function(parameter) {
-            var types = parameter.types ? parameter.types.join("|") : null;
             key++;
             return (
                 <div key={key} className="parameter">
-                    <strong>{parameter.name}</strong> <small className="types">{types}</small>
+                    <strong>{parameter.name}</strong> <small className="types">{utils.join(parameter.types)}</small>
                     <div className="description" dangerouslySetInnerHTML={{__html: parameter.description}} />
                 </div>
             );

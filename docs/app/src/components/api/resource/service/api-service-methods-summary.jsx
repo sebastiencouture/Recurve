@@ -2,16 +2,15 @@
 
 "use strict";
 
-docsModule.factory("ApiServiceMethodsSummary", null, function() {
+docsModule.factory("ApiServiceMethodsSummary", ["utils"], function(utils) {
 
     function renderMethods(methods) {
         return methods.map(function(method) {
             var href = "#" + method.name;
-            var returns = method.returns ? method.returns.type : null;
             return (
                 <div key={method.name}>
-                    <dt><small>{returns}</small></dt>
-                    <dd><a href={href}>{method.nameWithParams}</a></dd>
+                    <dt><small>{utils.join(method.returns.types)}</small></dt>
+                    <dd><a href={href}>{utils.methodNameWithParams(method)}</a></dd>
                 </div>
             );
         });

@@ -4,12 +4,16 @@
  * @rdoc service
  * @name $async
  * @module core
- * @example async-demo.js
- * @example async-demo-2.js
+ * @example async-demo.js this is example 1 this is example 1 this is example 1 this is example 1 this is example 1 v this is example 1 321321312
+ * @example async-demo-2.js this is example 2
  * @require something
  * @require something2
  * @description
  * this is the description for $async!!
+ ```
+    function test() {
+    };
+ ```
  * [inline link](www.google.com)
  * @require something 3
  */
@@ -27,6 +31,8 @@ function addAsyncService(module) {
         return extend($async, {
             /**
              * @rdoc method
+             * @module core
+             * @service $async
              * @name cancel
              *
              * @param {String} id this is a value :)
@@ -44,14 +50,19 @@ function addAsyncService(module) {
 
             /**
              * @rdoc config
+             * @module core
+             * @service $async
              * @name something
+             *
              * @description blah
              * @type {String}
              */
 
             /**
              * @rdoc property
+             * @service $async
              * @name something
+             *
              * @description wee
              * @type {String}
              */

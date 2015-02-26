@@ -59,7 +59,7 @@ docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialSt
                                 recurve.assert(metadata, "api module metadata does not exists", params);
 
                                 return docsService.getApiResource(metadata).then(function() {
-                                    return apiStore.getModuleResource(params.module, metadata);
+                                    return apiStore.getResource(metadata);
                                 });
                             }
                         },
@@ -88,7 +88,7 @@ docsModule.factory("config.$stateRouter", ["apiStore", "guideStore", "tutorialSt
                                 recurve.assert(metadata, "api resource metadata does not exist", params);
 
                                 return docsService.getApiResource(metadata).then(function() {
-                                    return apiStore.getResource(params.resource, params.type, metadata);
+                                    return apiStore.getResource(metadata);
                                 });
                             }
                         },

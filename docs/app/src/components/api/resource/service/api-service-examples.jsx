@@ -2,10 +2,14 @@
 
 "use strict";
 
-docsModule.factory("ApiServiceExamples", null, function() {
+docsModule.factory("ApiServiceExamples", ["ApiServiceExample"], function(ApiServiceExample) {
 
-    function renderExamples(config) {
-
+    function renderExamples(examples) {
+        return examples.map(function(example) {
+            return (
+                <ApiServiceExample example={example} />
+            );
+        });
     }
 
     return React.createClass({

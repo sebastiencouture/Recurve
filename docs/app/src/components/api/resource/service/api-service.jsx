@@ -16,17 +16,19 @@ docsModule.factory("ApiService", ["ApiServiceHeader", "ApiServicePropertiesSumma
 
         render: function() {
             var resource = this.props.resource;
+            var service = resource.getService();
+
             return (
                 <div className="resource-service">
-                    <ApiServiceHeader resource={resource}/>
-                    <ApiServiceMethodsSummary methods={resource.types.method} />
-                    <ApiServicePropertiesSummary id="properties" header="Properties" properties={resource.types.property}/>
-                    <ApiServicePropertiesSummary id="config" header="Config" properties={resource.types.config}/>
-                    <ApiServiceDetailedDescription description={resource.description} />
-                    <ApiServiceDetailedMethods methods={resource.types.method} />
-                    <ApiServiceDetailedProperties properties={resource.types.property} />
-                    <ApiServiceDetailedConfig config={resource.types.config} />
-                    <ApiServiceExamples examples={resource.examples} />
+                    <ApiServiceHeader resource={resource.getService()}/>
+                    <ApiServiceMethodsSummary methods={resource.getMethods()} />
+                    <ApiServicePropertiesSummary id="properties" header="Properties" properties={resource.getProperties()}/>
+                    <ApiServicePropertiesSummary id="config" header="Config" properties={resource.getConfigs()}/>
+                    <ApiServiceDetailedDescription description={service.description} />
+                    <ApiServiceDetailedMethods methods={resource.getMethods()} />
+                    <ApiServiceDetailedProperties properties={resource.getProperties()} />
+                    <ApiServiceDetailedConfig config={resource.getConfigs()} />
+                    <ApiServiceExamples examples={service.examples} />
                 </div>
             );
         }

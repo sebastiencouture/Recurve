@@ -40,7 +40,6 @@ function createApi(recurve, version) {
      * @name recurve.version
      * @module core
      * @description blah blah
-     * @type {{full: *, major: *, minor: *, patch: *}}
      */
     recurve.version = {
         full: version,

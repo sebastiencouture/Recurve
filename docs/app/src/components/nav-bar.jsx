@@ -12,7 +12,7 @@ docsModule.factory("NavBar", ["$stateRouter"], function($stateRouter) {
             var NavItem = ReactBootstrap.NavItem;
 
             return (
-                <Navbar staticTop={true} brand="Recurve">
+                <Navbar staticTop={true} brand="Recurve.js">
                     <Nav right={true}>
                         <NavItem eventKey={1} href={$stateRouter.nameToHref("app.api")}>API</NavItem>
                         <NavItem eventKey={2} href={$stateRouter.nameToHref("app.tutorial")}>Tutorials</NavItem>

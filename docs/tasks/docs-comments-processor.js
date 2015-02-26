@@ -11,6 +11,13 @@ function getExamplePath(examplePath, filePath, options) {
     return options.examples + noExtension + "/" + examplePath;
 }
 
+function processCodeInDescription(description) {
+    if (!description) {
+        return description;
+    }
+
+    return description.replace("<pre>", "<pre class='prettyprint linenums'");
+}
 
 module.exports = {
     processComments: function(comments, filePath, options) {
@@ -37,6 +44,7 @@ module.exports = {
                 case "rdoc":
                 case "name":
                 case "module":
+                case "service":
                 case "kind":
                     processedComment[tag.type] = tag.string.trim();
                     break;
@@ -52,16 +60,21 @@ module.exports = {
                     break;
                 case "example":
                     processedComment.examples = processedComment.examples || [];
-                    var path = getExamplePath(tag.string, filePath, options);
+                    var split = tag.string.split(" ");
+                    var path = split.shift();
+                    path = getExamplePath(path, filePath, options);
                     var code = fileStream.readFileSync(path, "utf8");
+                    var description = split.join(" ");
                     processedComment.examples.push({
                         path: path,
-                        code: code
+                        code: code,
+                        description: description
                     });
                     break;
                 case "description":
                     var fullDescription = markdown(tag.string);
                     fullDescription = this.processInternalLinks(fullDescription, baseUrl);
+                    fullDescription = processCodeInDescription(fullDescription);
                     processedComment.description = {
                         full: fullDescription,
                         summary: markdown(utils.getFirstLine(tag.string))
