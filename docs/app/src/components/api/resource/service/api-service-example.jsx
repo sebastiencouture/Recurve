@@ -8,7 +8,7 @@ docsModule.factory("ApiServiceExample", ["$window"], function($window) {
         displayName: "ApiServiceExamples",
 
         propTypes: {
-            example: React.PropTypes.array
+            example: React.PropTypes.object
         },
 
         componentDidMount: function() {

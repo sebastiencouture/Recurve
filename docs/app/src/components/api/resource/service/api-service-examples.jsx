@@ -5,9 +5,11 @@
 docsModule.factory("ApiServiceExamples", ["ApiServiceExample"], function(ApiServiceExample) {
 
     function renderExamples(examples) {
+        var key = 0;
         return examples.map(function(example) {
+            key++;
             return (
-                <ApiServiceExample example={example} />
+                <ApiServiceExample key={key} example={example} />
             );
         });
     }
