@@ -2,7 +2,7 @@
 
 "use strict";
 
-docsModule.factory("ApiThrows", ["utils"], function(utils) {
+docsModule.factory("ApiThrows", ["utils", "ApiDescription"], function(utils, ApiDescription) {
 
     return React.createClass({
         displayName: "ApiThrows",
@@ -22,7 +22,7 @@ docsModule.factory("ApiThrows", ["utils"], function(utils) {
                     <h4>Throws</h4>
                     <div className="throws">
                         <strong>{utils.join(throws.types)}</strong>
-                        <div className="description" dangerouslySetInnerHTML={{__html: throws.description}} />
+                        <ApiDescription className="description" description={throws.description} />
                     </div>
                 </div>
             );

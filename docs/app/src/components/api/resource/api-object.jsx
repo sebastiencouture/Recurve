@@ -2,17 +2,13 @@
 
 "use strict";
 
-docsModule.factory("ApiObject", ["$window", "utils"], function($window, utils) {
+docsModule.factory("ApiObject", ["$window", "utils", "ApiDescription"], function($window, utils, ApiDescription) {
 
     return React.createClass({
         displayName: "ApiObject",
 
         propTypes: {
             object: React.PropTypes.object.isRequired
-        },
-
-        componentDidMount: function() {
-            $window.prettyPrint();
         },
 
         render: function() {
@@ -26,7 +22,7 @@ docsModule.factory("ApiObject", ["$window", "utils"], function($window, utils) {
                             <strong>Source: </strong><a href="http://www.github.com">GitHub</a>
                         </div>
                     </div>
-                    <div className="description-detailed" dangerouslySetInnerHTML={{__html: object.description.full}} />
+                    <ApiDescription className="description-detailed" description={object.description.full} />
                 </div>
             );
         }

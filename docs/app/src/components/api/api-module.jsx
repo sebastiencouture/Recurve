@@ -2,7 +2,7 @@
 
 "use strict";
 
-docsModule.factory("ApiModule", ["utils", "ApiTypeSummary"], function(utils, ApiTypeSummary) {
+docsModule.factory("ApiModule", ["utils", "ApiDescription", "ApiTypeSummary"], function(utils, ApiDescription, ApiTypeSummary) {
 
     function renderMetadata(metadata) {
         if (!metadata || !metadata.children) {
@@ -45,7 +45,7 @@ docsModule.factory("ApiModule", ["utils", "ApiTypeSummary"], function(utils, Api
             return (
                 <div className="module">
                     <h2>{utils.capitalizeFirstCharacter(module.name)}</h2>
-                    <div dangerouslySetInnerHTML={{__html: module.description.full}} />
+                    <ApiDescription description={module.description.full} />
                     <hr />
                     {renderMetadata(metadata)}
                 </div>

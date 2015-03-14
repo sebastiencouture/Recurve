@@ -2,18 +2,14 @@
 
 "use strict";
 
-docsModule.factory("ApiMethod", ["$window", "utils", "ApiParameters", "ApiReturns", "ApiThrows"],
-    function($window, utils, ApiParameters, ApiReturns, ApiThrows) {
+docsModule.factory("ApiMethod", ["$window", "utils", "ApiDescription", "ApiParameters", "ApiReturns", "ApiThrows"],
+    function($window, utils, ApiDescription, ApiParameters, ApiReturns, ApiThrows) {
 
     return React.createClass({
         displayName: "ApiMethod",
 
         propTypes: {
             method: React.PropTypes.object.isRequired
-        },
-
-        componentDidMount: function() {
-            $window.prettyPrint();
         },
 
         render: function() {
@@ -27,7 +23,7 @@ docsModule.factory("ApiMethod", ["$window", "utils", "ApiParameters", "ApiReturn
                             <strong>Source: </strong><a href="http://www.github.com">GitHub</a>
                         </div>
                     </div>
-                    <div className="description-detailed" dangerouslySetInnerHTML={{__html: method.description.full}} />
+                    <ApiDescription className="description-detailed" description={method.description.full} />
                     <div className="method">
                         <ApiParameters parameters={method.params} />
                         <ApiReturns returns={method.returns} />

@@ -2,7 +2,7 @@
 
 "use strict";
 
-docsModule.factory("ApiServiceDetailedDescription", ["$window"], function($window) {
+docsModule.factory("ApiServiceDetailedDescription", ["$window", "ApiDescription"], function($window, ApiDescription) {
 
     return React.createClass({
         displayName: "ApiServiceDetailedDescription",
@@ -11,15 +11,11 @@ docsModule.factory("ApiServiceDetailedDescription", ["$window"], function($windo
             description: React.PropTypes.object.isRequired
         },
 
-        componentDidMount: function() {
-            $window.prettyPrint();
-        },
-
         render: function() {
             return (
                 <div id="detailed-description">
                     <h3>Detailed Description</h3>
-                    <div dangerouslySetInnerHTML={{__html: this.props.description.full}} />
+                    <ApiDescription description={this.props.description.full} />
                 </div>
             );
         }
