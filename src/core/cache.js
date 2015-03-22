@@ -11,10 +11,10 @@ function addCacheService(module) {
                 return caches[name];
             }
 
-            if (isUndefined(countLimit)) {
+            if (isUndefined(countLimit) || null === countLimit) {
                 countLimit = 0;
             }
-            if (isUndefined(totalCostLimit)) {
+            if (isUndefined(totalCostLimit) || null === totalCostLimit) {
                 totalCostLimit = 0;
             }
 
@@ -35,6 +35,10 @@ function addCacheService(module) {
                         cost = 0;
                     }
 
+                    // delete so we don't preserve the previous order for this key
+                    if (cache[key]) {
+                        delete cache[key];
+                    }
                     cache[key] = {value: value, cost: cost};
 
                     if (countLimit || (totalCostLimit && cost)) {
