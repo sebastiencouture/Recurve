@@ -1,7 +1,7 @@
 recurve  [![Build Status](https://secure.travis-ci.org/sebastiencouture/recurve.png?branch=master)](https://travis-ci.org/sebastiencouture/recurve)
 =======
 
-Javascript front-end framework
+Javascript front-end framework for single page applications
 
 Based on similar design to AngularJS with dependency injection for loading modules, services and to facilitate easy
 unit testing. But the core framework does not make any assumptions about the View. Can be used with any view/templating
@@ -12,15 +12,14 @@ services have been released as independent libraries such as [recurve-storage](h
 [recurve-cookies](http://github.com/sebastiencouture/recurve-cookies) instead.
 
 Why won't this be finished? There are too many Javascript front-end frameworks already, and I don't have enough
-spare time to finish and maintain this project. This project was mainly to explore some design ideas and concepts and to gain a better
-understanding some of the uglier parts of various browsers.
+spare time to finish and maintain this project. This project was mainly to explore some design ideas and concepts.
 
 ## Overview
 
 Everything is broken down into modules which are further broken down into services. The goal is to pick and choose modules
 depending on the app.
 
-### Core
+### [Core](src/core)
 
 Core of the framework that offers a set of re-usable services that can be used with any view/templating library to build
 apps.
@@ -44,7 +43,7 @@ apps.
 * [uncaught-error-handler](src/core/uncaught-error-handler.js) - handle uncaught errors
 * [window](src/core/window.js) - wrapper around window to facilitate easy mocking for unit tests
 
-### Mock
+### [Mock](src/mock)
 
 Mocked core services to simplify unit testing
 
@@ -57,7 +56,7 @@ Mocked core services to simplify unit testing
 * [mock-storage](src/mock/mock-storage.js) - stores to memory instead of `window.localStorage`/`window.sessionStorage`
 
 
-### Flux
+### [Flux](src/flux)
 
 Implementation of [Flux](https://facebook.github.io/react/docs/flux-overview.html)
 
@@ -65,7 +64,7 @@ Implementation of [Flux](https://facebook.github.io/react/docs/flux-overview.htm
 * [action-group](src/flux/action-group.js)
 * [store](src/flux/store.js)
 
-### Flux-React
+### [Flux-React](src/flux-react)
 
 Services for React using Flux architecture.
 
@@ -73,11 +72,19 @@ Services for React using Flux architecture.
 * [state-store](src/flux-react/state-store.js) - data store of the current app state
 * [state component](src/flux-react/components/state.js) - React component to render a router state
 
-### Flux-Rest
+### [Flux-Rest](src/flux-rest)
 
 REST implementation for use with the Flux architecture. Builds on the `http` service.
 
 * [rest](src/flux-rest/flux-rest.js)
+
+### [Docs](docs)
+
+The unfinished part...
+
+All documentation would be generated from comments in the code. The code would be run through the `dox` library along with some post processing,
+and then rendered in an app built with the Core and Flux-React modules. *This is an absolutely terrible use case for SPA frameworks*
+Everything is mostly done, except for writing all of the comments in the code :(
 
 ## Running the Tests
 

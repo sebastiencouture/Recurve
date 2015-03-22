@@ -2,7 +2,7 @@
     "name": "recurve",
     "version": "0.1.0",
     "main": "src/recurve.js",
-    "description": "Javascript front-end framework",
+    "description": "Javascript front-end framework for single page applications",
     "dependencies": {
     },
     "devDependencies": {
