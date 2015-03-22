@@ -1139,7 +1139,7 @@ describe("common", function(){
         });
 
         it("should convert date param to ISO", function(){
-            expect(addParamsToUrl("www.test.com", {a:new Date(2014,1,1)})).toEqual("www.test.com?a=2014-02-01T08%3A00%3A00.000Z");
+            expect(addParamsToUrl("www.test.com", {a:new Date(Date.UTC(2014,1,1))})).toEqual("www.test.com?a=2014-02-01T00%3A00%3A00.000Z");
         });
 
         it("should convert object to JSON", function(){

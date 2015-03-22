@@ -355,7 +355,7 @@ describe("$stateRouter", function() {
             });
 
             it("should convert date param to ISO", function() {
-                testQuery({a:new Date(2014,1,1)}, "?a=2014-02-01T08%3A00%3A00.000Z");
+                testQuery({a:new Date(Date.UTC(2014,1,1))}, "?a=2014-02-01T00%3A00%3A00.000Z");
             });
 
             it("should convert object to JSON", function() {
