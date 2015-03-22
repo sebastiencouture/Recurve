@@ -25,9 +25,9 @@ depending on the app.
 Core of the framework that offers set of re-usable services that can be used with any view/templating library to build
 apps.
 
-* [di](src/core/di) - dependency injection framework for containers and modules
+* [di](src/core/di) - dependency injection framework: containers and modules
 * [http](src/core/http) - http request handling, promise based
-* [log](src/core/log) - logging framework with default target to console.log
+* [log](src/core/log) - logging framework with default logging target to `window.console`
 * [async](src/core/async.js) - asynchronous helpers
 * [cache](src/core/cache.js) - generic cost and count based cache
 * [common](src/core/commnon.js) - support/helper methods used by all services
