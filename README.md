@@ -7,7 +7,7 @@ Based on similar design to AngularJS with dependency injection for loading modul
 unit testing. But the core framework does not make any assumptions about the View. Can be used with any view/templating
 library, but designed with React in mind since it is great :)
 
-*Don't use this framework!!!* there is no documentation and never will be, and I won't be maintaining this project. Many of the
+*Don't use this framework!!!* there is no documentation (unless you count the +1500 unit tests as documentation!) and never will be, and I won't be maintaining this project. Many of the
 services have been released as independent libraries such as [recurve-storage](http://github.com/sebastiencouture/recurve-storage),
 [recurve-cookies](http://github.com/sebastiencouture/recurve-cookies).
 
