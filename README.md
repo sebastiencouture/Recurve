@@ -7,9 +7,9 @@ Based on similar design to AngularJS with dependency injection for loading modul
 unit testing. But the core framework does not make any assumptions about the View. Can be used with any view/templating
 library, but designed with React in mind since it is great :)
 
-*Don't use this framework!!!* there is no documentation (unless you count the +1500 unit tests as documentation!) and never will be, and I won't be maintaining this project. Many of the
+*Don't use this framework!!!* there is no documentation (unless you count the +1500 unit tests as documentation) and never will be. I won't be maintaining this project. Many of the
 services have been released as independent libraries such as [recurve-storage](http://github.com/sebastiencouture/recurve-storage),
-[recurve-cookies](http://github.com/sebastiencouture/recurve-cookies).
+[recurve-cookies](http://github.com/sebastiencouture/recurve-cookies) instead.
 
 Why won't this be finished? There are too many Javascript front-end frameworks already, and I don't have enough
 spare time to finish and maintain this project. This project was mainly to explore some design ideas and concepts and to gain a better
@@ -22,7 +22,7 @@ depending on the app.
 
 ### Core
 
-Core of the framework that offers set of re-usable services that can be used with any view/templating library to build
+Core of the framework that offers a set of re-usable services that can be used with any view/templating library to build
 apps.
 
 * [di](src/core/di) - dependency injection framework: containers and modules
@@ -75,7 +75,7 @@ Services for React using Flux architecture.
 
 ### Flux-Rest
 
-REST implementation for use with the Flux architecture, builds on the `http` service.
+REST implementation for use with the Flux architecture. Builds on the `http` service.
 
 * [rest](src/flux-rest/flux-rest.js)
 
