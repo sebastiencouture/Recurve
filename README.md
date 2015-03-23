@@ -84,6 +84,7 @@ The unfinished part...
 
 All documentation would be generated from comments in the code. The code would be run through the `dox` library along with some post processing,
 and then rendered in an app built with the Core and Flux-React modules. *This is an absolutely terrible use case for SPA frameworks*
+
 Everything is mostly done, except for writing all of the comments in the code :(
 
 ## Running the Tests
